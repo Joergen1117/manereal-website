@@ -167,9 +167,11 @@ module.exports = async function handler(req, res) {
     return res.status(422).json({ ok: false, error: 'invalid_input' });
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
-  const to = process.env.MAIL_TO;
-  const from = process.env.MAIL_FROM;
+  // getrimmt, weil beim Einfügen in Vercel leicht ein Leerzeichen oder
+  // ein Zeilenumbruch mitwandert — der Schlüssel wäre dann ungültig
+  const apiKey = (process.env.BREVO_API_KEY || '').trim();
+  const to = (process.env.MAIL_TO || '').trim();
+  const from = (process.env.MAIL_FROM || '').trim();
   if (!apiKey || !to || !from) {
     console.error('Kontaktformular: BREVO_API_KEY, MAIL_TO oder MAIL_FROM fehlt.');
     return res.status(500).json({ ok: false, error: 'not_configured' });
@@ -199,8 +201,16 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      console.error('Brevo antwortete mit', response.status, await response.text());
-      return res.status(502).json({ ok: false, error: 'send_failed' });
+      const detail = await response.text();
+      console.error('Brevo antwortete mit', response.status, detail);
+      const payload = { ok: false, error: 'send_failed' };
+      // Vorübergehend zur Fehlersuche: Mit ?diag=1 wird Brevos Antwort
+      // sichtbar. Besucher der Seite sehen davon nichts.
+      if (req.query && req.query.diag === '1') {
+        payload.brevo_status = response.status;
+        payload.brevo_detail = detail.slice(0, 300);
+      }
+      return res.status(502).json(payload);
     }
   } catch (err) {
     console.error('Versand fehlgeschlagen:', err);
