@@ -237,7 +237,11 @@ footer a:hover{color:var(--teal)}
 }
 
 /* ---- Unterseiten ---- */
-.page-hero{position:relative;color:var(--navy);padding:0 0 var(--s-section)}
+.page-hero{position:relative;color:var(--navy);padding:0}
+/* Nur ein Kopf MIT Bild braucht den Weissraum darunter. Ein reiner
+   Textkopf („Ueber Manereal") kommt mit dem Abstand der naechsten
+   Sektion aus — sonst stehen dort 144 px zwischen Lead und Portraits. */
+.page-hero.with-media{padding-bottom:var(--s-section)}
 .page-hero-media{margin-top:var(--gap-hero);width:100%;height:460px;border-radius:24px;background-image:var(--pg);background-size:cover;background-position:var(--pgpos,center 65%)}
 .page-hero-inner{position:relative;z-index:2;width:100%;
   padding:calc(var(--header-h) + var(--gap-page)) 0 0}
@@ -483,12 +487,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 <div class="splash" aria-hidden="true">
   <span class="splash__half splash__half--top"></span>
   <span class="splash__half splash__half--bottom"></span>
-  <img class="splash__logo" src="assets/images/brand/logo-white.png" alt="" width="1400" height="263">
+  <img class="splash__logo" src="assets/images/brand/logo-white.png?v=2" alt="" width="1400" height="263">
 </div>
 <header id="siteHeader">
   <div class="container nav">
     <a class="logo" href="#start">
-      <img src="assets/images/brand/logo.png" alt="Manereal Hausverwaltung">
+      <img src="assets/images/brand/logo.png?v=2" alt="Manereal Hausverwaltung">
     </a>
     <button class="menu-toggle" onclick="document.getElementById('navlist').classList.toggle('open')">☰</button>
     <ul id="navlist">
@@ -683,7 +687,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 </section>
 
 </div><div class="route" data-route="nachfolge" hidden="">
-<section class="page-hero" style="--pg:url('assets/images/stock/approach-header.jpg');--pgpos:center 28%">
+<section class="page-hero with-media" style="--pg:url('assets/images/stock/approach-header.jpg');--pgpos:center 28%">
   <div class="page-hero-inner">
     <div class="container">
       <span class="eyebrow">Unser Ansatz</span>
@@ -988,7 +992,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <div class="container">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand"><img src="assets/images/brand/logo.png" alt="Manereal Hausverwaltung"></div>
+        <div class="footer-brand"><img src="assets/images/brand/logo.png?v=2" alt="Manereal Hausverwaltung"></div>
         <p>Wir übernehmen Hausverwaltungen in Österreich, führen sie verantwortungsvoll weiter und sichern dabei Kontinuität für Mitarbeiter und Kunden.</p>
       </div>
       <div>
