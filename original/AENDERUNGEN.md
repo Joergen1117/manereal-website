@@ -780,6 +780,35 @@ Handy zeigt jetzt: Hero, Vision-Satz, Angebot, Personen, Abschluss.
 der Seite landet, wurde vorher angeschrieben und weiß, dass er gemeint
 ist. Damit ist der Einwand erledigt.
 
+### Standbild für das Video
+
+Das Video hatte kein `poster`. Solange es nicht lief, stand im Hero eine
+leere Navy-Fläche — genau das passierte auf Julias iPhone im
+Stromsparmodus, der Autoplay grundsätzlich blockiert.
+
+Jetzt hinterlegt: `Bilder_Stock/hero-standbild.jpg`, 1280 × 720 px,
+158 KB. Es ist ein Einzelbild aus dem Video selbst, Sekunde 12, damit
+Standbild und erstes Videobild denselben Blickwinkel zeigen. Gewonnen
+ohne ffmpeg: Video im Browser laden, `currentTime` setzen, auf `seeked`
+warten, Frame auf ein Canvas zeichnen, als JPEG herausschreiben.
+
+Das Standbild gilt für beide Größen. Am Aussehen ändert sich nichts,
+sobald das Video läuft.
+
+### Angebot-Foto verkleinert (nur am Handy)
+
+`iStock-539457550-mobil.jpg`, 1440 × 960 px, **120 KB** statt 8530 × 5687
+und 16,1 MB. Angezeigt wird die Fläche mit 327 × 320 px, bei dreifacher
+Pixeldichte braucht sie 981 × 960 — die kleine Fassung reicht also
+genau. Am Desktop bleibt die Originaldatei, dort ist das Foto 430 × 942
+px groß. Geprüft: Am Handy wird die 16-MB-Datei nicht mehr angefragt.
+
+### Team an Hausverwaltern zentriert
+
+Der Text stand am Handy linksbündig, während Symbol und Überschrift
+darüber zentriert waren. Unter 820 px ist der ganze Block jetzt
+zentriert, am Desktop bleibt er linksbündig neben dem Symbol.
+
 ### Angebot trägt am Handy die Anliegen-Überschrift
 
 Weil „Unser Anliegen" am Handy entfällt, steht dort jetzt dessen
