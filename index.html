@@ -489,6 +489,13 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 @media(min-width:901px){
   .hero{padding-bottom:0}
 }
+
+/* ---- Ueber uns: Abstand vor dem Abschluss-Block ----
+   Auf der Startseite endet vor der Box das graue Band, die weisse Luft
+   ist dort nur der Aussenrand der Box. Hier ist alles weiss, deshalb
+   lagen 72 + 64 px offen. Der Innenabstand entfaellt, die weisse Luft
+   entspricht damit der Startseite. */
+[data-route="ueber-uns"] #kompetenzen{padding-bottom:0}
 </style>
 </head>
 <body>
