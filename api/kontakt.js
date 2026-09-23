@@ -201,16 +201,8 @@ module.exports = async function handler(req, res) {
     });
 
     if (!response.ok) {
-      const detail = await response.text();
-      console.error('Brevo antwortete mit', response.status, detail);
-      const payload = { ok: false, error: 'send_failed' };
-      // Vorübergehend zur Fehlersuche: Mit ?diag=1 wird Brevos Antwort
-      // sichtbar. Besucher der Seite sehen davon nichts.
-      if (req.query && req.query.diag === '1') {
-        payload.brevo_status = response.status;
-        payload.brevo_detail = detail.slice(0, 300);
-      }
-      return res.status(502).json(payload);
+      console.error('Brevo antwortete mit', response.status, await response.text());
+      return res.status(502).json({ ok: false, error: 'send_failed' });
     }
   } catch (err) {
     console.error('Versand fehlgeschlagen:', err);
