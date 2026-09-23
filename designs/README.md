@@ -20,7 +20,7 @@ designs/
 | `DESIGN.md` | Die Design-Tokens: Farbe, Typografie, Raster, Abstände, Motion. Die einzige Quelle für gestalterische Werte dieses Entwurfs. |
 | `.claude/skills/` | Optional. Der Stil-Skill, der nur für diesen Entwurf gelten soll — dadurch ist auch das Werkzeug-Wissen entwurfsspezifisch. |
 | `index.html` | Die Seite. |
-| `assets/` | Nur was dieser Entwurf braucht. Geteiltes liegt in `../../brief/assets/`. |
+| `assets/` | Nur was dieser Entwurf braucht. Geteiltes liegt in `../../content/assets/`. |
 
 ## Neuen Entwurf anlegen
 
@@ -33,7 +33,7 @@ designs/
 ## Vergleichbarkeit
 
 Damit die Entwürfe fair vergleichbar bleiben, gilt für alle: derselbe
-Wortlaut aus [../brief/inhalte.md](../brief/inhalte.md), vollständig und
+Wortlaut aus [../content/inhalte.md](../content/inhalte.md), vollständig und
 unverändert, sowie kein Build-Schritt. Unterschiedlich ist
 ausschließlich die Gestaltung — dazu gehört auch, auf wie viele Seiten
 der Inhalt verteilt wird.

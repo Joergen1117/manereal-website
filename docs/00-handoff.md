@@ -15,7 +15,7 @@
   3. Abdunklung nur hinter dem Text, nicht über dem ganzen Bild
   4. Beide Schaltflächen bleiben vorerst
   5. Bild-Varianten sollen gezeigt werden
-- Rohmaterial gesichtet (`uploads/`, 8 Dateien): `iStock-1436951314.jpg` und
+- Rohmaterial gesichtet (`archive/source-images/`, 8 Dateien): `iStock-1436951314.jpg` und
   `-7ecef730.jpg` sind identisch. Fünf Dateien sind Stock-Klischees (Holzklötzchen
   „SUCCESS"/„TOGETHER EVERYONE ACHIEVES MORE"/„WE ARE BETTER TOGETHER", lachende
   Meeting-Runde, zwei Handschläge) — für die Zielgruppe unbrauchbar.
@@ -25,7 +25,7 @@
 - Fünf Hero-Varianten gebaut und gescreenshottet: `_tmp/hero-varianten.html`
   (A Bestand korrigiert · B gleicher Aufbau mit Karlskirche · C geteilt, Text nie
   auf dem Bild · D ohne Bild · E Bildband). Alle rechtwinklig, Wortlaut wörtlich
-  aus `brief/inhalte.md`.
+  aus `content/inhalte.md`.
 - Empfehlung ausgesprochen: **C**, weil die Lesbarkeit des Leitsatzes dort nicht
   vom Bildmotiv abhängt. Entscheidung steht noch aus.
 - `.gitignore` um `_tmp/` und `.playwright-mcp/` ergänzt.
@@ -52,9 +52,9 @@
 1. Hero-Variante festlegen (Screenshots: `_tmp/var-A.png` bis `_tmp/var-E.png`).
 2. `designs/01-fassade/DESIGN.md` aus `designs/_template/DESIGN.md` anlegen und
    vollständig füllen — inkl. Schriftvorschlag mit Kontrastnachweis.
-3. `brief/assets/` befüllen: Ableitung aus `uploads/iStock-1432923297.jpg`
+3. `content/assets/` befüllen: Ableitung aus `archive/source-images/iStock-1432923297.jpg`
    (max. 2560 px, unter 400 KB, WebP) — Vorschaudatei `_tmp/v-karlskirche.jpg`
-   liegt bei 567 KB und reißt das Budget aus `brief/assets/README.md`.
+   liegt bei 567 KB und reißt das Budget aus `content/assets/README.md`.
 4. `designs/01-fassade/index.html` anlegen, Kopfzeile + Hero bauen.
 5. Weiter mit Abschnitt „Unsere Vision" nach demselben Muster.
 6. Telefonnummer klären — Regel 3 verlangt sie als sichtbaren Text, im Bestand
@@ -75,9 +75,9 @@
 
 ### Referenzen
 - `designs/01-fassade/CLAUDE.md` — Vorgaben 1–8, Verbote, Selbstprüfung
-- `brief/ci.md` — Navy `#0E2A47` (13,6:1), Petrol `#0F6C7C` (5,3:1), Grau `#5B6B7A` (4,7:1);
+- `content/ci.md` — Navy `#0E2A47` (13,6:1), Petrol `#0F6C7C` (5,3:1), Grau `#5B6B7A` (4,7:1);
   nur Navy erreicht das 7:1-Ziel für Fließtext
-- `brief/inhalte.md` Zeilen 60–66 — Hero-Wortlaut, verbindlich
-- `brief/assets/README.md` — Größenbudgets für Ableitungen
+- `content/inhalte.md` Zeilen 60–66 — Hero-Wortlaut, verbindlich
+- `content/assets/README.md` — Größenbudgets für Ableitungen
 - `_tmp/hero-varianten.html` — die fünf Varianten (nicht versioniert)
 - Gelöscht nach Gebrauch: `_grab.html`, `01-hero.png` im Wurzelverzeichnis

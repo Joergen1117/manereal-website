@@ -1,9 +1,76 @@
-# Änderungsprotokoll — Arbeitskopie `original/`
+# Änderungsprotokoll der Website
 
-Diese Kopie ist das entpackte Artifact-Bundle der [index.html](../index.html)
-im Wurzelverzeichnis. Jede Abweichung vom Original wird hier festgehalten,
-damit nachvollziehbar bleibt, was Gestaltung ist und was Inhalt betrifft
-(CLAUDE.md, Regel 6).
+Die Website ist [index.html](../index.html) im Wurzelverzeichnis. Sie ist
+das entpackte Artifact-Bundle des Erstentwurfs, der als
+[archive/erstentwurf.html](../archive/erstentwurf.html) erhalten bleibt.
+Jede Abweichung davon wird hier festgehalten, damit nachvollziehbar
+bleibt, was Gestaltung ist und was Inhalt betrifft (CLAUDE.md, Regel 6).
+
+**Zu den Schritten 0 bis 28:** Die Website lag damals im Ordner
+`original/`, die Bilder in `Bilder_Personen/` und `Bilder_Stock/`. Seit
+Schritt 29 liegt sie im Wurzelverzeichnis. Wo ältere Einträge die alten
+Pfade nennen, sind die neuen gemeint.
+
+---
+
+## 29 — Struktur aufgeräumt (23.09.2026)
+
+Vorher war nicht erkennbar, welche Datei die Website ist: Eine
+`index.html` lag im Wurzelverzeichnis (der 5,4-MB-Erstentwurf), eine
+zweite in `original/`. Dazu 42 MB doppelte Bilddateien und Ordnernamen in
+drei Schreibweisen.
+
+### Neue Struktur
+
+| | |
+|---|---|
+| `index.html` | die Website, einzige HTML-Datei im Wurzelverzeichnis |
+| `assets/images/people/` | vier Porträts |
+| `assets/images/stock/` | Video, Standbild, drei Fotos |
+| `assets/images/brand/` | Logo, Grundriss-Zeichnung |
+| `assets/fonts/` | `inter-latin.woff2`, `inter-latin-ext.woff2` |
+| `content/` | vorher `brief/` |
+| `docs/` | vorher `Doku/`, dazu dieses Protokoll |
+| `archive/` | vorher `_archiv/`, dazu `erstentwurf.html`, `source-images/` (vorher `uploads/`), `unused/` |
+
+Ordnernamen sind jetzt durchgehend englisch und kleingeschrieben, wie es
+die Sprachregel in `CLAUDE.md` vorsieht. Die Dokumente darin behalten
+ihre deutschen Namen, weil jeder Querverweis im Projekt auf sie zeigt.
+
+Dateinamen der Bilder sagen jetzt, was zu sehen ist, statt
+iStock-Nummern: `hero-video.mp4`, `hero-still.jpg`, `handshake.jpg`,
+`handshake-small.jpg`, `approach-header.jpg`, `meeting.jpg`. Die
+Zuordnung zur Lizenz steht weiterhin in den Bildnachweisen im Impressum,
+die Originaldateien tragen ihre iStock-Nummern im Archiv.
+
+### Ableitungen statt Originale
+
+Die Website lud bisher iStock-Originale mit bis zu 8530 × 5687 px.
+Jetzt lädt sie Ableitungen in der Größe, die sie braucht:
+
+| Bild | vorher | jetzt |
+|---|---|---|
+| Angebot, Foto rechts | 8530 × 5687, 16,1 MB | 2400 × 1600, 268 KB |
+| Unser Ansatz, Kopfbild | 3864 × 2577, 4,5 MB | 2400 × 1601, 345 KB |
+| Ablauf, Foto rechts | 3992 × 2494, 5,0 MB | 1800 × 1125, 175 KB |
+| Porträt Lorenz | 3543 × 2363, 2,1 MB | 900 × 600, 51 KB |
+
+**27,7 MB → 839 KB.** Damit erfüllt die Seite Regel 5: Ausgeliefert
+werden nur Ableitungen, die Originale liegen in `archive/source-images/`.
+Das Hero-Video bleibt bei 17 MB, dafür fehlt auf diesem Rechner das
+Werkzeug zum Umkodieren.
+
+### Kontrolle
+
+- Kein Verweis auf einen alten Pfad mehr in `index.html`, keine
+  fehlgeschlagene Anfrage, keine Konsolenmeldung.
+- Desktop-Screenshot gegen den Stand davor: gleiche Seitenhöhe, und die
+  Bildbereiche weichen im Mittel um 0,44 beziehungsweise 0,68 von 255 ab
+  — unsichtbar. Der Rest ist identisch bis auf den Videobereich.
+- Alle Querverweise in den Dokumenten auf die neuen Ordner gezogen.
+
+**Nicht angefasst:** `api/kontakt.js` und `vercel.json`, beide am
+23.09.2026 um 11:24 von Julia angelegt.
 
 ---
 
@@ -15,7 +82,7 @@ Entpackt zu:
 
 - `index.html` — 1.507 Zeilen statt zwei Zeilen à 4,7 MB / 690 KB
 - `assets/img/` — 3 Bilder · `assets/fonts/` — 7 woff2 (Inter)
-- `uploads/` — 8 iStock-Originale, 78 MB, aus dem Wurzel-`uploads/`
+- `archive/source-images/` — 8 iStock-Originale, 78 MB, aus dem Wurzel-`archive/source-images/`
   kopiert. Sie waren nicht Teil des Bundles, werden aber direkt
   referenziert.
 
@@ -44,11 +111,11 @@ Bestand.
 **Zur Urheberzeile:** „Die Gründer" statt des Firmennamens, weil ein
 Unternehmen, das sich selbst zitiert, keine der fünf Fragen beantwortet
 (Regel 4). Der Begriff stammt aus dem vorhandenen Wortlaut
-(`brief/inhalte.md`, FAQ 9 und Kontakt-Intro), ist also keine
+(`content/inhalte.md`, FAQ 9 und Kontakt-Intro), ist also keine
 Neuformulierung.
 
 **Schreibweise:** *Manereal*, wie im Logo, im Seitentitel und
-durchgängig in `brief/inhalte.md`.
+durchgängig in `content/inhalte.md`.
 
 **Technisch:** neue CSS-Klasse `.vision-quote` am Ende des
 Haupt-Stylesheets. Keine Bewegung, kein Hover, keine neuen Abhängigkeiten.
@@ -134,7 +201,7 @@ das Umschreiben von Überschriften aus; Julia hat es am 22.09.2026
 ausdrücklich angewiesen. Der erste Satzteil ist ein entnommener
 Leitsatz aus dem gestrichenen Einleitungssatz derselben Sektion und
 insofern eine Auswahl — „So auch unser Angebot" ist dagegen neu.
-Vermerkt in `brief/inhalte.md` unter „Hinweise zur Weitergabe", Punkt 6.
+Vermerkt in `content/inhalte.md` unter „Hinweise zur Weitergabe", Punkt 6.
 
 ### Hintergrund entfernt
 
@@ -363,7 +430,7 @@ Hintergrund-Fassung endgültig feststeht.
 
 - **Angebot-Überschrift:** „Jede Hausverwaltung ist anders. So auch
   unser **individuelles** Angebot" (zweite Änderung am Wortlaut, auf
-  Julias Anweisung — siehe `brief/inhalte.md`, Punkt 6).
+  Julias Anweisung — siehe `content/inhalte.md`, Punkt 6).
 - **Unser Anliegen:** Die Aufzählungszeichen (Teal-Quadrate) sind
   entfernt, die Punkte stehen zentriert statt linksbündig.
 
@@ -382,7 +449,7 @@ Auf Julias Anweisung an beiden Stellen der Website von
 Bewertung".
 
 Die Form ohne Fugen-s ist die im Duden geführte; darauf wurde vor der
-Umsetzung hingewiesen, die Entscheidung fiel danach. `brief/inhalte.md`
+Umsetzung hingewiesen, die Entscheidung fiel danach. `content/inhalte.md`
 behält den alten Wortlaut — Website und Brief weichen hier voneinander
 ab, vermerkt dort unter „Hinweise zur Weitergabe", Punkt 7.
 
@@ -433,7 +500,7 @@ ausgeglichen (35/35, 283/283, 1/1).
   gekürzt — ohne Punkt, ohne zweiten Satz. Damit ist sie wieder ein
   reiner Auszug aus dem Bestand (erster Satz des ursprünglichen
   Einleitungstexts, Schlusspunkt entfernt). Die Hinweise 6 in
-  `brief/inhalte.md` bleiben stehen, weil der ursprüngliche Titel
+  `content/inhalte.md` bleiben stehen, weil der ursprüngliche Titel
   „Ein Angebot, das sich Ihrer Situation anpasst" weiterhin ersetzt ist.
 
 ---
@@ -488,7 +555,7 @@ HTML (668 KB → 83 KB):
 - `assets/img/` — logo-light, logo-dark, blueprint.svg
 
 Die unbenutzte Kopie `iStock-2258307045.jpg` ist aus der Arbeitskopie
-entfernt (das Original liegt weiter im Wurzel-`uploads/`).
+entfernt (das Original liegt weiter im Wurzel-`archive/source-images/`).
 
 **Offen vor dem Launch:** `Bilder_Stock/` umfasst 73 MB, darunter ein
 17-MB-Video und ein 16-MB-JPEG; `lorenz-ambrosius.jpg` hat 3543 × 2363 px
@@ -520,7 +587,7 @@ Alte Links auf `#versprechen` führen jetzt auf „Über uns"
 (Weiterleitung im Router-Script).
 
 Die vier Collage-Fotos sind aus `Bilder_Stock/` entfernt (73 → 44 MB);
-die Originale liegen weiter im Wurzel-`uploads/`.
+die Originale liegen weiter im Wurzel-`archive/source-images/`.
 
 ### Team an Hausverwaltern
 Die zwei Platzhalter „Hausverwalter/in" sind zu **einem** Block „Team an
@@ -544,7 +611,7 @@ Klammerbilanz ausgeglichen.
 ## 15 — Text „Team an Hausverwaltern" (22.09.2026)
 
 Julias Text ersetzt den Übergangstext, wörtlich übernommen, drei Absätze.
-Er steht jetzt auch in `brief/inhalte.md` unter „Das Team" — die zwei
+Er steht jetzt auch in `content/inhalte.md` unter „Das Team" — die zwei
 alten „Hausverwalter/in"-Zeilen sind dort durch ihn ersetzt.
 
 **Offen:** Der neue Text deckt sich weitgehend mit dem Intro der
@@ -578,7 +645,7 @@ die Beschriftungen und `.hv-compare`.
   stehen erfahrene Partner mit mehr als 15 Jahren Praxis in der
   Hausverwaltung – … verantwortungsvolle Übergabe." Seine Aussage steckt
   im Text „Team an Hausverwaltern" (Dopplung aufgelöst, Hinweis 8 in
-  `brief/inhalte.md` erledigt).
+  `content/inhalte.md` erledigt).
 
 ### Kompetenzen: drei Varianten (offen, temporär)
 
@@ -635,7 +702,7 @@ dem Kopf bis kurz unter die Gürtelschnalle → **1066 × 1145 px, 105 KB**.
 Gilt für beide Stellen auf „Über uns" (Bildreihe und rundes Portrait).
 
 Das ungeschnittene Original liegt unter
-`_archiv/bilder/niklas-gruber-ganzkoerper.jpg` — außerhalb von
+`archive/bilder/niklas-gruber-ganzkoerper.jpg` — außerhalb von
 `original/`, damit es nicht mit ausgeliefert wird.
 
 ---
@@ -703,7 +770,7 @@ Unser Ansatz: Bild → Ablauf → Herausforderungen → FAQ.
 Die Platzhalter und der Vor-Go-Live-Hinweis sind durch Julias Daten
 ersetzt (Int. Möbelspedition R. Gruber Ges.m.b.H & CoKG, Linz). Telefon
 und Fax auf ihren Wunsch weggelassen, nur E-Mail. Blattlinie und
-Bildnachweise unverändert. Offene Punkte: `brief/inhalte.md`, Hinweis 10.
+Bildnachweise unverändert. Offene Punkte: `content/inhalte.md`, Hinweis 10.
 
 ---
 
@@ -734,6 +801,53 @@ E-Mail im Impressum: kontakt@manereal.at.
 
 **Offen:** Die Hinweisbox „vor Go-Live prüfen" im Datenschutz steht
 noch; sie fällt nach der rechtlichen Prüfung weg.
+
+---
+
+## 29 — Kontaktformular verschickt wirklich (23.09.2026)
+
+**Vorher war es eine Attrappe.** Der Submit-Knopf baute einen
+`mailto:`-Link und öffnete das E-Mail-Programm des Besuchers — verschickt
+wurde nichts, der Besucher hätte in seinem eigenen Outlook nochmals auf
+„Senden" drücken müssen. Wer Webmail im Browser nutzt (GMX, A1, Gmail —
+in dieser Altersgruppe die Regel), bei dem passierte gar nichts. Die
+Bestätigung „Danke für Ihre Nachricht" erschien trotzdem. Schlimmster
+Fall: Der Interessent hält sich für gemeldet, und niemand ruft zurück.
+
+### Jetzt
+
+| | |
+|---|---|
+| Entgegennahme | [`api/kontakt.js`](../api/kontakt.js), Vercel-Function |
+| Region | Frankfurt (`fra1`), festgelegt in [`vercel.json`](../vercel.json) |
+| Versand | Brevo REST-API, Rechenzentren in der EU |
+| Abhängigkeiten | keine — kein `npm install`, kein Build-Schritt |
+
+**Das E-Mail:** Betreff `Erstgespräch: Name, Unternehmen`. Antwort-An
+steht auf der Adresse des Interessenten, „Antworten" geht also direkt an
+ihn. Versandt wird Nur-Text **und** HTML; Telefonnummer und E-Mail sind
+im HTML anklickbar. Fußzeile nennt den Eingangszeitpunkt in Wiener Zeit.
+
+**Spam ohne Captcha:** ein unsichtbares Feld (`website`) — füllt es ein
+Bot aus, wird verworfen und trotzdem „ok" geantwortet. Dazu höchstens
+fünf Anfragen pro Minute und IP. Ein Captcha wäre für 55- bis 75-Jährige
+eine größere Hürde als der Spam ein Problem.
+
+**Fehlerfall:** Kommt die Nachricht nicht durch, erscheint nicht mehr
+„Danke", sondern ein roter Hinweis mit kontakt@manereal.at.
+
+**Vor Betrieb einzurichten** (vier Environment-Variablen in Vercel):
+`BREVO_API_KEY`, `MAIL_TO`, `MAIL_FROM` (bei Brevo verifizierte Adresse),
+optional `MAIL_FROM_NAME`. Ohne sie antwortet die Function mit 500 und
+das Formular zeigt den Fehlerhinweis — sie behauptet nie einen Erfolg,
+den es nicht gab.
+
+**Offen:** Der Bestätigungstext sagt weiterhin „Falls sich Ihr
+E-Mail-Programm nicht geöffnet hat" — das trifft nicht mehr zu. Wortlaut
+unverändert gelassen (Regel 6), Vermerk in
+[`../content/inhalte.md`](../content/inhalte.md). Ebenso offen: der
+Datenschutztext braucht einen Absatz zum Formular und zu Brevo, und es
+braucht einen Auftragsverarbeitungsvertrag mit Brevo.
 
 ---
 
@@ -961,7 +1075,7 @@ Die Route `kontakt` ist gelöscht. **Auf der ganzen Website entfallen damit:**
   Jakob Scherzenlehner) — ausdrückliche Anweisung: keine Telefonnummer
   irgendwo auf der Seite
 - **Jakob Scherzenlehner** kommt damit auf der Website nicht mehr vor
-  (löst Hinweis 2 in `brief/inhalte.md`)
+  (löst Hinweis 2 in `content/inhalte.md`)
 - der Abschlusssatz „Jedes Gespräch bleibt vertraulich, heute und in jedem
   weiteren Schritt." — er steht weiterhin in FAQ 4
 
@@ -1018,7 +1132,7 @@ Ohne sichtbare Änderung, nur Ballast:
   Mobilfassung vier `!important`. Beides ist jetzt normales CSS
   (`.ablauf-grid`, `.photo-band`, `.cta-note`).
 - **Nicht mehr verwendete Dateien** liegen in
-  [`../_archiv/original-altlasten/`](../_archiv/original-altlasten/):
+  [`../archive/unused/`](../archive/unused/):
   fünf Schriftdateien, `logo-light.png`, `kontakt-hero.jpg`,
   `jakob-scherzenlehner.jpg`.
 

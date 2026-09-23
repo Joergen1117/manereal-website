@@ -17,9 +17,30 @@ gesetzt und werden übernommen (Regel 6).
 | Ebene | Ort | Gilt für |
 |---|---|---|
 | Sachlage | [PRODUCT.md](PRODUCT.md) | alle Entwürfe |
-| Wortlaut | [brief/inhalte.md](brief/inhalte.md) | alle Entwürfe |
-| Assets | [brief/assets/](brief/assets/) | alle Entwürfe |
+| Wortlaut | [content/inhalte.md](content/inhalte.md) | alle Entwürfe |
+| Assets | [content/assets/](content/assets/) | alle Entwürfe |
 | Gestaltung | [designs/NN-name/](designs/) | genau einen Entwurf |
+
+---
+
+## Wo was liegt
+
+Stand 23.09.2026. Ordnernamen sind englisch (siehe Sprache), die
+Dokumente darin deutsch.
+
+| | |
+|---|---|
+| [index.html](index.html) | **Die Website.** Die einzige HTML-Datei, die ausgeliefert wird. |
+| [assets/](assets/) | Alles, was diese Seite lädt: `images/people`, `images/stock`, `images/brand`, `fonts` |
+| `api/`, `vercel.json` | Kontaktformular und Auslieferung über Vercel |
+| [content/](content/) | Wortlaut, Logos, CI — die gemeinsame Grundlage aller Entwürfe |
+| [designs/](designs/) | Die konkurrierenden Entwürfe, je ein Ordner |
+| [docs/](docs/) | Änderungsprotokoll der Website und Arbeitsstände |
+| [archive/](archive/) | Erstentwurf, Rechtstexte, Rohmaterial, ausgemusterte Dateien |
+
+Die Bilder der Website sind **Ableitungen** in der Größe, die die Seite
+braucht. Die Originale liegen in `archive/source-images/` und werden nie
+direkt eingebunden (Regel 5).
 
 ---
 
@@ -27,7 +48,7 @@ gesetzt und werden übernommen (Regel 6).
 
 Beim Arbeiten an einem Entwurf gilt **ausschließlich**:
 
-- `PRODUCT.md`, `brief/inhalte.md`, `brief/assets/` — das Gemeinsame
+- `PRODUCT.md`, `content/inhalte.md`, `content/assets/` — das Gemeinsame
 - `designs/NN-name/CLAUDE.md` — die Regeln dieses einen Entwurfs
 - `designs/NN-name/DESIGN.md` — die Design-Tokens dieses einen Entwurfs
 
@@ -45,13 +66,13 @@ funktioniert er unverändert weiter.
 
 ## Regel 2 — Geteiltes bleibt designfrei
 
-`PRODUCT.md` und `brief/` enthalten **Fakten und Inhalte**, niemals
+`PRODUCT.md` und `content/` enthalten **Fakten und Inhalte**, niemals
 Design-Entscheidungen. Keine Farbwerte, keine Fonts, keine
 Layout-Vorgaben. Sobald eine Aussage gestalterisch ist, gehört sie in
 das `DESIGN.md` eines Entwurfs.
 
 Umgekehrt: Inhaltliche Fakten werden **nicht** in Entwurfsordner
-kopiert, sondern aus `brief/` bezogen. Ändert sich ein Fakt, darf er nur
+kopiert, sondern aus `content/` bezogen. Ändert sich ein Fakt, darf er nur
 an einer Stelle geändert werden müssen.
 
 ## Regel 3 — Wer die Seite besucht und warum
@@ -108,16 +129,16 @@ nach unten schiebt, arbeitet gegen das Ziel der Seite.
 
 ## Regel 5 — Assets
 
-- `uploads/` ist **Rohmaterial** (iStock, 5–17 MB pro Datei). Wird
+- `archive/source-images/` ist **Rohmaterial** (iStock, 5–17 MB pro Datei). Wird
   niemals direkt eingebunden. Ausgeliefert werden nur optimierte
-  Ableitungen aus `brief/assets/`.
+  Ableitungen aus `content/assets/`.
 - Entwurfsspezifische Assets: `designs/NN-name/assets/`.
 - Bildlizenzen sind vor Veröffentlichung zu klären, nicht danach.
 
 ## Regel 6 — Wortlaut ist gesetzt, Auswahl ist Gestaltung
 
 Der Auftrag ist **Gestaltung**. Der Wortlaut in
-[brief/inhalte.md](brief/inhalte.md) ist verbindlich.
+[content/inhalte.md](content/inhalte.md) ist verbindlich.
 
 **Am Text selbst wird nichts geändert:** nicht umformulieren, nicht
 einzelne Wörter streichen, nicht ergänzen, nicht "verbessern", keinen
@@ -151,29 +172,30 @@ wird dort ausdrücklich benannt, damit die Entscheidung überprüfbar
 bleibt.
 
 Fällt inhaltlich etwas auf, wird es unter "Hinweise zur Weitergabe" in
-`brief/inhalte.md` notiert — nicht eigenmächtig geändert.
+`content/inhalte.md` notiert — nicht eigenmächtig geändert.
 
-## Regel 7 — `index.html` im Root ist Altbestand
+## Regel 7 — Der Erstentwurf liegt im Archiv
 
-Die [index.html](index.html) im Wurzelverzeichnis ist der 5,4 MB große
-Erstentwurf (gebündeltes Artifact). Ihr **Inhalt** ist gesichert und
-gilt (Regel 6). Ihre **Gestaltung** ist gesichert in
-[_archiv/erstentwurf-design.md](_archiv/erstentwurf-design.md).
+Die [index.html](index.html) im Wurzelverzeichnis ist **die Website**.
+Der 5,4 MB große Erstentwurf (gebündeltes Artifact) liegt seit dem
+23.09.2026 als [archive/erstentwurf.html](archive/erstentwurf.html). Sein
+**Inhalt** ist gesichert und gilt (Regel 6). Seine **Gestaltung** ist
+gesichert in
+[archive/erstentwurf-design.md](archive/erstentwurf-design.md).
 
-Kein Entwurf liest die `index.html` selbst — die Datei ist ein
+Kein Entwurf liest `archive/erstentwurf.html` selbst — die Datei ist ein
 Bundle mit eingebetteten Base64-Assets und als Vorlage unbrauchbar.
 
 Für die gestalterische Referenz gilt eine Abstufung:
 
 - **Entwurf 1** orientiert sich bewusst an der Formensprache des
-  Erstentwurfs und darf `_archiv/erstentwurf-design.md` lesen.
+  Erstentwurfs und darf `archive/erstentwurf-design.md` lesen.
 - **Alle anderen Entwürfe** dürfen diese Datei **nicht** lesen. Sie
   sollen radikal andere Haltungen entwickeln, und das gelingt nicht,
   wenn die alte Formensprache im Kopf sitzt.
 
-Die Datei nicht verschieben oder löschen ohne Rückfrage — möglicherweise
-öffentlich erreichbar. Der Datenschutztext nennt Vercel als Hosting,
-was gegen eine aktive GitHub-Pages-Auslieferung spricht.
+Die Datei nicht löschen ohne Rückfrage. Ausgeliefert wird über Vercel
+(`vercel.json`, `api/kontakt.js`), also aus dem Wurzelverzeichnis.
 
 ---
 
@@ -186,6 +208,6 @@ bleiben und die Technikwahl nicht vorwegnehmen.
 
 ## Sprache
 
-- Seiteninhalte: Deutsch, Österreich — exakt nach `brief/inhalte.md`.
+- Seiteninhalte: Deutsch, Österreich — exakt nach `content/inhalte.md`.
 - Code, Kommentare, Token-Namen, Dateinamen: Englisch.
 - Dokumentation und Antworten an Julia: Deutsch.

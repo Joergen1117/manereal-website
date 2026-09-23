@@ -7,7 +7,7 @@ Was aus dem Erstentwurf gesichert wurde.
 | `erstentwurf-rechtstexte.md` | Impressum und Datenschutz im Wortlaut |
 
 Der gesamte übrige Wortlaut liegt in
-[../brief/inhalte.md](../brief/inhalte.md) und ist von dort verbindlich.
+[../content/inhalte.md](../content/inhalte.md) und ist von dort verbindlich.
 
 Die Datei `../index.html` selbst bleibt unangetastet im
 Wurzelverzeichnis, bis geklärt ist, ob sie über GitHub Pages öffentlich

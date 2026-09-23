@@ -1,6 +1,6 @@
 # Altlasten aus `original/` (22.09.2026)
 
-Dateien, die die Website nach Schritt 26 (`original/AENDERUNGEN.md`) nicht
+Dateien, die die Website nach Schritt 26 (`docs/AENDERUNGEN.md`) nicht
 mehr verwendet. Sie liegen hier, statt gelöscht zu werden, weil `original/`
 nicht versioniert ist.
 

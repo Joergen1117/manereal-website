@@ -15,8 +15,8 @@ Verbindlich, siehe [../../CLAUDE.md](../../CLAUDE.md), Regel 1:
 
 - **Nicht lesen:** `../01-*`, `../02-*`, `../03-*` — alle anderen
   Entwurfsordner. Auch nicht "nur kurz zum Vergleich".
-- **Lesen:** `../../PRODUCT.md`, `../../brief/inhalte.md`,
-  `../../brief/assets/`, sowie diese Datei und `DESIGN.md`.
+- **Lesen:** `../../PRODUCT.md`, `../../content/inhalte.md`,
+  `../../content/assets/`, sowie diese Datei und `DESIGN.md`.
 - Keine Begründung darf auf einen anderen Entwurf verweisen.
 
 Dieser Ordner muss autark sein: löscht man die Geschwisterordner,
@@ -56,7 +56,7 @@ mit **welchem gestalterischen Mittel** jede Frage beantwortet wird.
 ## Seitenaufbau
 
 «Welche Routen, in welcher Reihenfolge, mit welchem Gewicht. Inhalte
-kommen unverändert aus `../../brief/inhalte.md` (Regel 6) — hier steht
+kommen unverändert aus `../../content/inhalte.md` (Regel 6) — hier steht
 nur ihre Anordnung und Gewichtung.»
 
 ## Verbote in diesem Entwurf
@@ -68,7 +68,7 @@ Zusätzlich zu den projektweiten Verboten (Regel 3):
 ## Selbstprüfung vor jeder Abgabe
 
 - [ ] Kein «Platzhalter» mehr in dieser Datei und in `DESIGN.md`
-- [ ] Jeder Text wörtlich aus `../../brief/inhalte.md`, nichts
+- [ ] Jeder Text wörtlich aus `../../content/inhalte.md`, nichts
       umformuliert, nichts ergänzt
 - [ ] Kein Blick in einen anderen Entwurfsordner
 - [ ] Fließtext mindestens 18 px, Kontrast ≥ 7:1 geprüft
@@ -76,5 +76,5 @@ Zusätzlich zu den projektweiten Verboten (Regel 3):
 - [ ] Bedienbar ohne Hover, mit Tastatur, bei 200 % Zoom
 - [ ] `prefers-reduced-motion` respektiert
 - [ ] Getestet bei 375 px, 768 px, 1440 px Breite
-- [ ] Kein Bild über 400 KB, kein Asset direkt aus `../../uploads/`
+- [ ] Kein Bild über 400 KB, kein Asset direkt aus `../../archive/source-images/`
 - [ ] Die Seite ist bei deaktiviertem JavaScript noch lesbar

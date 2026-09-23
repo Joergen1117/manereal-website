@@ -4,7 +4,7 @@ Optimierte Dateien, die **allen** Entwürfen zur Verfügung stehen:
 Portraits, Objektfotos, Logo, Favicon.
 
 Regeln:
-- Nichts aus `../../uploads/` direkt einbinden. Dort liegen 5–17 MB
+- Nichts aus `../../archive/source-images/` direkt einbinden. Dort liegen 5–17 MB
   Rohdateien. Hier landen nur Ableitungen.
 - Zielwerte fürs Web: Hero-Bilder max. 2560 px Breite und unter 400 KB,
   Inhaltsbilder max. 1600 px und unter 200 KB, Portraits max. 1200 px.

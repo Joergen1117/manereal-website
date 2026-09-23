@@ -5,7 +5,7 @@ was im CSS steht, muss hier begründet sein. Gilt nur für diesen Ordner
 (siehe [CLAUDE.md](CLAUDE.md)).
 
 Marke und Logofarben sind vorgegeben:
-[../../brief/ci.md](../../brief/ci.md).
+[../../content/ci.md](../../content/ci.md).
 
 ---
 
@@ -101,7 +101,7 @@ Der Kern der Vorgabe. Aufbau von oben nach unten:
 2. **Medienfläche** — Höhe `min(88vh, 860px)`. Nicht volle
    Fensterhöhe, damit die Unterkante sichtbar bleibt und klar wird,
    dass die Seite weitergeht.
-   - Video `uploads/iStock-2172622017.mp4` (Wien von oben),
+   - Video `archive/source-images/iStock-2172622017.mp4` (Wien von oben),
      `object-fit: cover`, stummgeschaltet, in Schleife
    - `poster` mit einem Standbild: die Fläche ist sofort gefüllt, das
      Video erscheint, sobald es geladen ist

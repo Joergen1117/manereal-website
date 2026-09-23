@@ -11,11 +11,11 @@ Verbindlich, siehe [../../CLAUDE.md](../../CLAUDE.md), Regel 1:
 
 - **Nicht lesen:** `../02-*`, `../03-*` — die anderen Entwurfsordner.
   Auch nicht "nur kurz zum Vergleich".
-- **Lesen:** `../../PRODUCT.md`, `../../brief/inhalte.md`,
-  `../../brief/ci.md`, `../../brief/assets/`, sowie diese Datei und
+- **Lesen:** `../../PRODUCT.md`, `../../content/inhalte.md`,
+  `../../content/ci.md`, `../../content/assets/`, sowie diese Datei und
   `DESIGN.md`.
 - **Zusätzlich erlaubt** (Ausnahme nach Regel 7):
-  `../../_archiv/erstentwurf-design.md` — dieser Entwurf ist der
+  `../../archive/erstentwurf-design.md` — dieser Entwurf ist der
   Bestandsnahe und darf wissen, wovon er sich absetzt.
 - Keine Begründung darf auf einen anderen Entwurf verweisen.
 
@@ -95,7 +95,7 @@ Zusätzlich zu den projektweiten Verboten (Regel 3):
 ## Selbstprüfung vor jeder Abgabe
 
 - [ ] Kein «Platzhalter» mehr in dieser Datei und in `DESIGN.md`
-- [ ] Jeder Text wörtlich aus `../../brief/inhalte.md`, nichts
+- [ ] Jeder Text wörtlich aus `../../content/inhalte.md`, nichts
       umformuliert, nichts ergänzt — der Leitsatz ist entnommen, nicht
       formuliert
 - [ ] Kein Blick in `../02-*` oder `../03-*`
@@ -108,5 +108,5 @@ Zusätzlich zu den projektweiten Verboten (Regel 3):
 - [ ] `prefers-reduced-motion` respektiert; Video hat eine
       Standbild-Alternative
 - [ ] Getestet bei 375 px, 768 px, 1440 px Breite
-- [ ] Kein Bild über 400 KB, kein Asset direkt aus `../../uploads/`
+- [ ] Kein Bild über 400 KB, kein Asset direkt aus `../../archive/source-images/`
 - [ ] Die Seite ist bei deaktiviertem JavaScript noch lesbar

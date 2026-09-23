@@ -95,13 +95,13 @@ Datenschutzgerüst.
 
 **Der Auftrag ist ausschließlich die visuelle Gestaltung.** Der Wortlaut
 ist gesetzt und wird unverändert übernommen — kanonische Quelle:
-[brief/inhalte.md](brief/inhalte.md), Rechtstexte in
-[_archiv/erstentwurf-rechtstexte.md](_archiv/erstentwurf-rechtstexte.md).
+[content/inhalte.md](content/inhalte.md), Rechtstexte in
+[archive/erstentwurf-rechtstexte.md](archive/erstentwurf-rechtstexte.md).
 
 Inhaltliche Lücken (Blindtext, widersprüchliche Personenangaben,
 offene Rechtsplatzhalter) werden **nicht** im Rahmen dieser Arbeit
 geschlossen. Sie sind unter "Hinweise zur Weitergabe" in
-`brief/inhalte.md` dokumentiert und gehen an die inhaltlich
+`content/inhalte.md` dokumentiert und gehen an die inhaltlich
 Verantwortlichen.
 
 ## Seitenstruktur des Erstentwurfs
@@ -148,7 +148,7 @@ Diese Punkte müssen für die Entwürfe geklärt werden.
 Notiert, weil relevant — aber nicht in dieser Arbeit zu lösen. Die
 Punkte gehören an die inhaltlich und rechtlich Verantwortlichen,
 siehe "Hinweise zur Weitergabe" in
-[brief/inhalte.md](brief/inhalte.md).
+[content/inhalte.md](content/inhalte.md).
 
 - **Kapitalherkunft** — Frage 3 des Besuchers ("Ist das Geld da?")
   bleibt im vorhandenen Text unbeantwortet. Eine Stiftungsanbindung wäre

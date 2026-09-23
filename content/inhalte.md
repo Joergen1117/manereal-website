@@ -59,7 +59,7 @@ Kontakt: kontakt@manereal.at · Wien, Österreich
 - H1: **Ihr Lebenswerk.** / **Unsere Verantwortung.** (zweizeilig)
 - Lead: Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.
 - Buttons: Vertrauliches Erstgespräch · So läuft die Übergabe →
-- Medium: Video `uploads/iStock-2172622017.mp4`, autoplay, muted, loop
+- Medium: Video `archive/source-images/iStock-2172622017.mp4`, autoplay, muted, loop
 
 ### Unsere Vision
 - H2: Aufbau einer österreichischen Hausverwaltungsgruppe mit starkem Netzwerk
@@ -288,12 +288,18 @@ Die Rollenzeile „Experte für KI" wird auf der Website nicht mehr gezeigt.*
 - Button: Anfrage senden
 - Bestätigung: **Danke für Ihre Nachricht** — Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen. Falls sich Ihr E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an kontakt@manereal.at.
 - Technik im Erstentwurf: kein Backend, das Formular baut einen `mailto:`-Link.
+- Technik seit 23.09.2026: Das Formular verschickt die Anfrage selbst
+  (Vercel-Function, Versand über Brevo/EU). Siehe Schritt 29 in
+  [`../docs/AENDERUNGEN.md`](../docs/AENDERUNGEN.md).
+- Fehlerhinweis (neuer Text, nicht aus dem Erstentwurf, Wortlaut zur
+  Freigabe): Ihre Nachricht konnte nicht übermittelt werden. Bitte
+  schreiben Sie uns direkt an kontakt@manereal.at.
 
 ---
 
 ## Routen `impressum` und `datenschutz`
 
-Vollständiger Wortlaut: [../_archiv/erstentwurf-rechtstexte.md](../_archiv/erstentwurf-rechtstexte.md).
+Vollständiger Wortlaut: [../archive/erstentwurf-rechtstexte.md](../archive/erstentwurf-rechtstexte.md).
 
 Beide bestehen im Erstentwurf teils aus Platzhaltern in eckigen Klammern
 und tragen einen Vor-Go-Live-Hinweis. Sie werden **unverändert**
@@ -403,3 +409,9 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     sagen, man spreche direkt „mit den Gründern". Keine Person auf der
     Website ist als Gründer ausgewiesen; der Beirat trägt eine Rollenzeile,
     das Team nicht. (22.09.2026)
+17. **Bestätigung nennt das E-Mail-Programm** — „Falls sich Ihr
+    E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an
+    kontakt@manereal.at." Seit 23.09.2026 verschickt das Formular selbst,
+    es öffnet sich kein E-Mail-Programm mehr. Der Satz verwirrt jetzt.
+    Wortlaut unverändert gelassen. Vorschlag: Der zweite Satz entfällt
+    ersatzlos, der erste bleibt wörtlich stehen. (23.09.2026)
