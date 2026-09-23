@@ -480,6 +480,15 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   .m-people2 img{width:100%;height:100%;object-fit:cover}
   .m-people2 h3{font-size:16px;font-weight:700;text-align:center;margin:0}
 }
+
+/* ---- Nur ab Laptop-Breite ----
+   Zwischen Bildunterkante und „Unsere Vision" lagen 200 px: 72 aus dem
+   Hero, 72 aus der Sektion, 56 aus dem Zitatblock. Der Anschluss ans
+   Bild traegt die Haelfte davon, das Bild bringt seine Ruhe selbst mit.
+   Am Handy bleibt alles, wie es war. */
+@media(min-width:901px){
+  .hero{padding-bottom:0}
+}
 </style>
 </head>
 <body>
