@@ -167,9 +167,11 @@ module.exports = async function handler(req, res) {
     return res.status(422).json({ ok: false, error: 'invalid_input' });
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
-  const to = process.env.MAIL_TO;
-  const from = process.env.MAIL_FROM;
+  // getrimmt, weil beim Einfügen in Vercel leicht ein Leerzeichen oder
+  // ein Zeilenumbruch mitwandert — der Schlüssel wäre dann ungültig
+  const apiKey = (process.env.BREVO_API_KEY || '').trim();
+  const to = (process.env.MAIL_TO || '').trim();
+  const from = (process.env.MAIL_FROM || '').trim();
   if (!apiKey || !to || !from) {
     console.error('Kontaktformular: BREVO_API_KEY, MAIL_TO oder MAIL_FROM fehlt.');
     return res.status(500).json({ ok: false, error: 'not_configured' });
