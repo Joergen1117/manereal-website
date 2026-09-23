@@ -235,16 +235,15 @@ Link: So läuft die Übergabe →
 |---|---|
 | Jörgen Oberkofler | Jörgen begleitet seit über 12 Jahren Unternehmerinnen und Unternehmer im DACH-Raum als Käufer, Entwickler und Sparringspartner bei der Übergabe ihres Betriebs. Sein Antrieb ist es, Lebenswerke weiterzuführen und Kontinuität in Unternehmen zu wahren. |
 | Lorenz Ambrosius | Lorenz begleitet seit über 5 Jahren mittelständische Unternehmen bei Finanzierungen, der strategischen Weiterentwicklung und Integration in Gruppen. Er hat dabei Betriebe durch unterschiedliche Phasen der Veränderung geführt und weiß, wie aus einer Übergabe ein stabiler Neustart wird. |
-| Niklas Gruber | *Blindtext im Erstentwurf — Text fehlt, siehe Hinweise zur Weitergabe* |
+| Niklas Gruber | Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel. Als Gründer hat er die Grand Garage in Linz sieben Jahre lang von null zu einem der größten Innovationszentren Österreichs entwickelt, danach hat er bei Holcim die digitale Transformation in Österreich, Ungarn, Tschechien und Slowenien verantwortet. Sein Antrieb ist es, in alten stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen. *(Text von Julia, 23.09.2026 — ersetzt den Blindtext des Erstentwurfs.)* |
 
-#### Team an Hausverwaltern
-*Ersetzt die zwei Platzhalter „Hausverwalter/in" (Text von Julia, 22.09.2026).*
+#### Hausverwaltungsteam
+*Ersetzt die zwei Platzhalter „Hausverwalter/in" (Text von Julia, 22.09.2026;
+Überschrift und Text neu gefasst von Julia, 23.09.2026).*
 
-Hinter Manereal stehen erfahrene Partner aus Fachleuten der Hausverwaltungsbranche mit mehr als 15 Jahren Erfahrung in der täglichen Verwaltungspraxis.
+Hinter Manereal stehen zwei erfahrene, gewerberechtlich zertifizierte Fachleute aus der Hausverwaltungsbranche mit jeweils mehr als 15 Jahren praktischer Erfahrung.
 
-Sie kennen die Herausforderungen einer professionellen Hausverwaltung aus erster Hand – von der Betreuung von Eigentümern und Liegenschaften über die Führung von Teams bis hin zu Instandhaltung, kaufmännischen Prozessen und rechtlichen Fragestellungen.
-
-Dieses Wissen fließt direkt in unseren Ansatz ein. Gemeinsam verbinden wir unternehmerisches Denken mit langjähriger Branchenerfahrung und schaffen so die Grundlage für eine verantwortungsvolle Übergabe und die nachhaltige Weiterentwicklung Ihrer Hausverwaltung.
+Sie kennen die Anforderungen und Herausforderungen einer professionellen Hausverwaltung aus eigener langjähriger Praxis – von der Betreuung von Eigentümern und Liegenschaften über die Führung und Organisation von Teams bis hin zu Instandhaltung, kaufmännischen Prozessen und rechtlichen Fragestellungen. Darüber hinaus verfügen sie über umfassende Erfahrung im Aufbau, in der Strukturierung und in der Weiterentwicklung einer gewerblichen Hausverwaltung.
 
 ### Beirat
 - H2: Expertise an unserer Seite
@@ -339,7 +338,10 @@ Kopfzeile.
 Nicht Teil des Gestaltungsauftrags, aber beim Sichern der Texte
 aufgefallen. Gehört an die inhaltlich Verantwortlichen:
 
-1. **Zwei Blindtext-Blöcke** — Niklas Gruber und die zweite
+1. **[Erledigt 23.09.2026 — Julia hat den Text zu Niklas Gruber geliefert;
+   die Hausverwalter/in-Platzhalter sind seit 22.09.2026 durch den
+   Sammelblock „Hausverwaltungsteam" ersetzt. Auf der Website steht kein
+   Blindtext mehr.]** **Zwei Blindtext-Blöcke** — Niklas Gruber und die zweite
    Hausverwalter/in-Rolle enthalten Lorem ipsum. Auf einer Seite, die
    Vertrauen herstellen soll, ist das der auffälligste Mangel.
 2. **[Erledigt 22.09.2026 — die Kontaktseite entfällt, Jakob Scherzenlehner
@@ -375,7 +377,9 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
    Manereal stehen erfahrene Partner …", nennen beide „mehr als 15 Jahre"
    und dieselbe Aufzählung (Eigentümer, Liegenschaften, Teams, rechtliche
    Fragen). Einer der beiden sollte entfallen.
-9. **Formulierung „Partner aus Fachleuten"** — im neuen Text: „erfahrene
+9. **[Erledigt 23.09.2026 — Julia hat den Block neu gefasst: „zwei erfahrene,
+   gewerberechtlich zertifizierte Fachleute aus der Hausverwaltungsbranche".]**
+   **Formulierung „Partner aus Fachleuten"** — im neuen Text: „erfahrene
    Partner aus Fachleuten der Hausverwaltungsbranche". Vermutlich gemeint:
    „erfahrene Fachleute aus der Hausverwaltungsbranche". Unverändert
    übernommen.
@@ -432,3 +436,14 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     den Brevo bereitstellt. Der Vertrag ist noch abzuschließen. Eine
     anwaltliche Prüfung des Gesamttexts ersetzt dieser Einbau
     nicht. (23.09.2026)
+19. **„gewerberechtlich zertifiziert"** (23.09.2026) — in Österreich gibt es
+    für die Immobilienverwaltung keine „Zertifizierung", sondern die
+    **Gewerbeberechtigung** für das reglementierte Gewerbe
+    Immobilientreuhänder (§ 94 Z 35 GewO) samt Befähigungsnachweis.
+    Gegenüber einer Zielgruppe, die dieses Gewerbe selbst ausübt, fällt der
+    Begriff auf. Wortlaut unverändert übernommen; Prüfung vor Go-Live
+    empfohlen.
+20. **Zwei namenlose Fachleute** (23.09.2026) — der Block „Hausverwaltungsteam"
+    nennt jetzt ausdrücklich „zwei" Personen, aber weiterhin keine Namen und
+    keine Portraits. Nach Regel 4 trägt die Seite über die Person, die
+    verantwortet; ein namenloses Paar trägt diese Last nicht mit.

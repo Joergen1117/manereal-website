@@ -116,9 +116,17 @@ h2{font-size:clamp(28px,3.4vw,42px);line-height:1.15;font-weight:800;letter-spac
    andere Sektion auch. Sonst beginnt ein getoentes Band direkt an der
    Bildkante (Handy: „Unsere Vision", Unser Ansatz: „Der Weg zu uns"). */
 .hero{position:relative;padding:0 0 var(--s-section)}
-.hero-media{position:relative;margin-top:0;width:100%;height:680px;border-radius:24px;overflow:hidden;background:var(--navy)}
-.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%}
-.hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,26,44,.82) 0%,rgba(9,26,44,.5) 34%,rgba(9,26,44,0) 66%)}
+/* Flackernde Ecken: das Video laeuft auf einer eigenen GPU-Ebene, die
+   der Browser beim Neuzeichnen nicht immer am runden Rand des Elters
+   beschneidet — dann blitzen fuer einen Frame eckige Ecken auf. Drei
+   Massnahmen dagegen: der Elter wird selbst eine GPU-Ebene
+   (translateZ) und ein eigener Kompositions-Kontext (isolation),
+   und Video wie Verlauf tragen den Radius zusaetzlich selbst. */
+.hero-media{position:relative;margin-top:0;width:100%;height:680px;border-radius:24px;overflow:hidden;background:var(--navy);
+  isolation:isolate;transform:translateZ(0)}
+.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%;
+  border-radius:inherit}
+.hero-media::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top,rgba(9,26,44,.82) 0%,rgba(9,26,44,.5) 34%,rgba(9,26,44,0) 66%)}
 .hero-overlay{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:0 56px 56px}
 .hero-overlay h1{color:#fff;max-width:780px}
 .hero-overlay .lead{margin:16px 0 32px;font-size:18px;color:#fff;max-width:560px}
@@ -263,7 +271,10 @@ footer a:hover{color:var(--teal)}
 .tl-step:last-child{padding-bottom:0}
 .tl-dot{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;z-index:1}
 .tl-phase{color:var(--teal);font-weight:700;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase}
-.tl-step h3{font-size:18.5px;margin:4px 0 var(--s-tight)}
+/* Eigene line-height: sonst erbt die Ueberschrift die 1.65 des
+   Fliesstexts und die zwei Zeilen, in die sie am Handy umbricht,
+   stehen viel zu weit auseinander. */
+.tl-step h3{font-size:18.5px;line-height:1.25;margin:4px 0 var(--s-tight)}
 .tl-step p{color:var(--ink-soft);font-size:15px;max-width:560px}
 
 /* FAQ */
@@ -386,7 +397,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   .chv-bottom{padding:20px 24px var(--s-card)}
 }
 
-/* ---- Ueber uns: Team an Hausverwaltern,
+/* ---- Ueber uns: Hausverwaltungsteam,
        Symbol und Titel links, Text rechts ---- */
 .hv-team{display:grid;grid-template-columns:240px 1fr;gap:48px;align-items:center;
   max-width:1000px;margin:var(--s-block) auto 0;padding-top:var(--s-block);
@@ -857,18 +868,17 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       <div class="member">
         <div class="avatar"><img src="assets/images/people/niklas-gruber.jpg" alt="Niklas Gruber"></div>
         <h3>Niklas Gruber</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam.</p>
+        <p>Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel. Als Gründer hat er die Grand Garage in Linz sieben Jahre lang von null zu einem der größten Innovationszentren Österreichs entwickelt, danach hat er bei Holcim die digitale Transformation in Österreich, Ungarn, Tschechien und Slowenien verantwortet. Sein Antrieb ist es, in alten stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen.</p>
       </div>
     </div>
     <div class="hv-team">
       <div class="hv-team-head">
         <div class="hv-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0F6C7C" stroke-width="1.5"><circle cx="9" cy="8" r="3.2"></circle><circle cx="16.5" cy="9" r="2.6"></circle><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6"></path><path d="M15 14.3c.5-.2 1-.3 1.5-.3 2.6 0 4.5 1.9 4.5 4.8"></path></svg></div>
-        <h3>Team an Hausverwaltern</h3>
+        <h3>Hausverwaltungsteam</h3>
       </div>
       <div class="hv-team-text">
-        <p>Hinter Manereal stehen erfahrene Partner aus Fachleuten der Hausverwaltungsbranche mit mehr als 15 Jahren Erfahrung in der täglichen Verwaltungspraxis.</p>
-        <p>Sie kennen die Herausforderungen einer professionellen Hausverwaltung aus erster Hand – von der Betreuung von Eigentümern und Liegenschaften über die Führung von Teams bis hin zu Instandhaltung, kaufmännischen Prozessen und rechtlichen Fragestellungen.</p>
-        <p>Dieses Wissen fließt direkt in unseren Ansatz ein. Gemeinsam verbinden wir unternehmerisches Denken mit langjähriger Branchenerfahrung und schaffen so die Grundlage für eine verantwortungsvolle Übergabe und die nachhaltige Weiterentwicklung Ihrer Hausverwaltung.</p>
+        <p>Hinter Manereal stehen zwei erfahrene, gewerberechtlich zertifizierte Fachleute aus der Hausverwaltungsbranche mit jeweils mehr als 15 Jahren praktischer Erfahrung.</p>
+        <p>Sie kennen die Anforderungen und Herausforderungen einer professionellen Hausverwaltung aus eigener langjähriger Praxis – von der Betreuung von Eigentümern und Liegenschaften über die Führung und Organisation von Teams bis hin zu Instandhaltung, kaufmännischen Prozessen und rechtlichen Fragestellungen. Darüber hinaus verfügen sie über umfassende Erfahrung im Aufbau, in der Strukturierung und in der Weiterentwicklung einer gewerblichen Hausverwaltung.</p>
       </div>
     </div>
   </div>

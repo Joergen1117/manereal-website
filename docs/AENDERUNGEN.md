@@ -13,6 +13,66 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 32 — Texte „Über uns", Timeline-Umbruch, Video-Ecken (23.09.2026)
+
+Fünf Änderungen auf Julias Anweisung. Drei betreffen den Wortlaut, zwei
+die Darstellung.
+
+**Wortlaut** (Julias Texte, wörtlich übernommen; `content/inhalte.md`
+ist mitgezogen, damit Regel 2 hält):
+
+1. **Niklas Gruber** — der Blindtext des Erstentwurfs ist ersetzt. Damit
+   steht auf der Website kein Lorem ipsum mehr. Hinweis 1 in „Hinweise
+   zur Weitergabe" ist erledigt.
+2. **„Team an Hausverwaltern" → „Hausverwaltungsteam"**.
+3. **Text des Hausverwaltungsteams** — neu gefasst, von drei Absätzen auf
+   zwei. Der dritte Absatz („Dieses Wissen fließt direkt in unseren
+   Ansatz ein …") entfällt ersatzlos. Hinweis 9 („Partner aus
+   Fachleuten") ist damit erledigt.
+
+Zwei neue Hinweise sind dabei entstanden und in `content/inhalte.md`
+notiert, nicht eigenmächtig geändert: „gewerberechtlich zertifiziert"
+(in Österreich heißt das Gewerbeberechtigung, § 94 Z 35 GewO) und die
+jetzt ausdrücklich genannten „zwei" Fachleute, die weiterhin ohne Namen
+und Portrait bleiben.
+
+**Darstellung:**
+
+4. **Zeilenabstand der Timeline-Überschriften** („Der Weg zu uns").
+   `.tl-step h3` hatte keine eigene `line-height` und erbte die 1.65 des
+   Fließtexts — bei 18,5 px sind das 30,5 px je Zeile. Am Laptop fiel das
+   nicht auf, weil die Überschriften einzeilig stehen; am Handy brechen
+   „Vertrauliches Kennenlernen" und „Konzept und indikatives Angebot" um
+   und die zwei Zeilen standen weit auseinander. Jetzt `line-height:1.25`
+   → 23,1 px. Gilt für alle fünf Schritte.
+
+5. **Flackernde Ecken des Hero-Videos.** Das Video läuft auf einer eigenen
+   GPU-Ebene. Diese Ebene beschneidet der Browser beim Neuzeichnen nicht
+   zuverlässig am runden Rand des Elters (`border-radius` +
+   `overflow:hidden`) — dann blitzen für einzelne Frames eckige Ecken auf.
+   Ein bekanntes Verhalten mobiler Browser, kein Fehler der Videodatei.
+   Drei Maßnahmen: `.hero-media` wird per `transform:translateZ(0)` selbst
+   zur GPU-Ebene und per `isolation:isolate` zu einem eigenen
+   Kompositions-Kontext, Video und Verlaufs-Overlay tragen den Radius über
+   `border-radius:inherit` zusätzlich selbst. Damit ist die Ecke auch dann
+   rund, wenn der Beschnitt des Elters aussetzt.
+
+   **Nicht** umgesetzt wurde der Vorschlag, das Video als GIF in
+   Endlosschleife einzubinden. Ein GIF kennt nur 256 Farben (sichtbare
+   Streifen im Abendhimmel), wäre als Datei um ein Vielfaches größer als
+   die 17,7 MB der MP4, wird ohne Hardware-Unterstützung dekodiert und
+   lässt sich nicht anhalten — womit `prefers-reduced-motion` (Regel 3)
+   nicht mehr erfüllbar wäre. Vor allem aber löst es die Ursache nicht:
+   der Beschnitt am runden Rand ist unabhängig davon, was in der Ebene
+   liegt.
+
+**Offen geblieben, nicht Teil des Auftrags:** Das Hero-Video wird
+unabhängig von `prefers-reduced-motion` abgespielt. Regel 3 verlangt,
+diese Einstellung zu respektieren. Und mit 17,7 MB ist die Datei für
+eine Zielgruppe, die die Seite auch mobil aufruft, zu schwer.
+
+---
+
 ## 31 — Formular scheiterte an Brevos IP-Sperre (23.09.2026)
 
 *Die Nummer 30 ist doppelt vergeben: An diesem Tag haben zwei Sitzungen
