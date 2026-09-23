@@ -13,6 +13,61 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 33 — Vierte Person im Team, Trennstrich, Niklas gekürzt (23.09.2026)
+
+### Julian Pils kommt dazu
+
+Das Team zeigt jetzt vier statt drei Personen. Das bisherige Raster war
+`repeat(3,1fr)` — die vierte Person hätte allein in einer zweiten Reihe
+links gestanden. Stattdessen greift die bereits vorhandene Klasse
+`team-2`, daraus wird ein 2×2. Kein neues CSS, nur eine zusätzliche
+Klasse im Markup. Am Handy ändert sich nichts, dort steht ohnehin alles
+untereinander.
+
+Vier nebeneinander wurde verworfen: die Textspalten wären auf rund
+255 px geschrumpft, und Regel 4 hält fest, dass kleine Portraits gegen
+das Ziel der Seite arbeiten.
+
+**Portrait.** Julia hat zwei Dateien geliefert, beide dasselbe Motiv:
+ein Bühnenfoto mit Mikrofon. `Julian_Pils_01.jpeg` (587 × 887) und
+`Julian_pils_02.jpeg` (1600 × 1600). Verwendet wird 02 — 01 ist bereits
+in der Kamera so eng beschnitten, dass der Kopf selbst im größtmöglichen
+quadratischen Ausschnitt 39 % der Höhe einnimmt. Die übrigen Portraits
+liegen bei 28 %, gemessen an Niklas Gruber.
+
+Der ausgelieferte Zuschnitt: Ausschnitt 1446 × 1446 ab (60|57),
+heruntergerechnet auf 600 × 600 → `assets/images/people/julian-pils.jpg`.
+Damit sitzt der Kopf bei 28 % und das Gesicht bei 51 % der Bildbreite.
+Weiter zentrieren geht nicht, ohne die zweite Person im Hintergrund
+sichtbar werden zu lassen. Die beiden Originale liegen nach Regel 5 in
+`archive/source-images/`.
+
+### Trennstrich sitzt jetzt vor dem Beirat
+
+Er war ein `border-top` auf `.hv-team` und trennte damit die Portraits
+vom Hausverwaltungsteam — also innerhalb eines Abschnitts. Auf Julias
+Hinweis steht er jetzt als `::before` auf `#beirat .container` und
+trennt Team von Beirat, zwei verschiedene Personenkreise. Breite
+(1000 px), Farbe (`--line`) und Abstand (56 px beidseitig) unverändert.
+
+### Niklas Gruber gekürzt
+
+Von 466 auf 298 Zeichen, Text von Julia. Nebeneffekt: Alle vier Karten
+stehen jetzt auf exakt 427 px. Vorher war die untere Reihe des 2×2
+546 px hoch und damit 119 px höher als die obere.
+
+### Offen — vor Veröffentlichung zu klären
+
+**Unter Julian Pils steht wortgleich der Absatz von Niklas Gruber.** Auf
+Julias ausdrückliche Anweisung vom 23.09.2026, bis der echte Text
+vorliegt. Der jetzige Stand behauptet damit, Julian Pils habe die Grand
+Garage gegründet und bei Holcim die Digitalisierung verantwortet. Das
+ist in `content/inhalte.md` als Hinweis 21 festgehalten und **muss vor
+einem Livegang ersetzt werden**. Deshalb ist dieser Stand committet,
+aber nicht deployed.
+
+---
+
 ## 32 — Texte „Über uns", Timeline-Umbruch, Video-Ecken (23.09.2026)
 
 Fünf Änderungen auf Julias Anweisung. Drei betreffen den Wortlaut, zwei

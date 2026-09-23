@@ -399,9 +399,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
 /* ---- Ueber uns: Hausverwaltungsteam,
        Symbol und Titel links, Text rechts ---- */
+/* Ohne Trennstrich: Hausverwaltungsteam und die vier Portraits
+   daruber gehoeren zusammen. Der Strich sitzt stattdessen vor dem
+   Beirat — siehe #beirat weiter unten. */
 .hv-team{display:grid;grid-template-columns:240px 1fr;gap:48px;align-items:center;
   max-width:1000px;margin:var(--s-block) auto 0;padding-top:var(--s-block);
-  border-top:1px solid var(--line);text-align:left}
+  text-align:left}
 .hv-team-head{text-align:center}
 .hv-icon{width:88px;height:88px;border-radius:50%;background:#E7EDEF;
   display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-text)}
@@ -438,7 +441,13 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 [data-route="ueber-uns"] .page-hero .lead{max-width:640px;margin-left:auto;margin-right:auto}
 #menschen{padding-top:var(--s-section);padding-bottom:var(--s-block)}
 #menschen .team{margin-top:0}
+/* Der Trennstrich sitzt hier, nicht mehr innerhalb von „Die Menschen
+   dahinter". Er trennt jetzt das Team vom Beirat — also zwei
+   Personenkreise voneinander — statt das Team in sich zu zerteilen.
+   Gleiche Breite wie zuvor (1000 px), damit die Optik gleich bleibt. */
 #beirat{padding-top:0}
+#beirat .container::before{content:"";display:block;max-width:1000px;
+  margin:0 auto var(--s-block);border-top:1px solid var(--line)}
 
 /* ---- Startseite am Handy ----
    Alles hier gilt nur unter 900 px. Am Desktop bleibt alles, wie es ist:
@@ -854,7 +863,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
 <section id="menschen">
   <div class="container center">
-    <div class="team">
+    <div class="team team-2">
       <div class="member">
         <div class="avatar"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div>
         <h3>Jörgen Oberkofler</h3>
@@ -868,7 +877,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       <div class="member">
         <div class="avatar"><img src="assets/images/people/niklas-gruber.jpg" alt="Niklas Gruber"></div>
         <h3>Niklas Gruber</h3>
-        <p>Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel. Als Gründer hat er die Grand Garage in Linz sieben Jahre lang von null zu einem der größten Innovationszentren Österreichs entwickelt, danach hat er bei Holcim die digitale Transformation in Österreich, Ungarn, Tschechien und Slowenien verantwortet. Sein Antrieb ist es, in alten stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen.</p>
+        <p>Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel, von der Gründung der Grand Garage in Linz bis zur Digitalisierung bei Holcim in Europa. Sein Antrieb ist es, in stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen.</p>
+      </div>
+      <div class="member">
+        <div class="avatar"><img src="assets/images/people/julian-pils.jpg" alt="Julian Pils"></div>
+        <h3>Julian Pils</h3>
+        <p>Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel, von der Gründung der Grand Garage in Linz bis zur Digitalisierung bei Holcim in Europa. Sein Antrieb ist es, in stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen.</p>
       </div>
     </div>
     <div class="hv-team">
