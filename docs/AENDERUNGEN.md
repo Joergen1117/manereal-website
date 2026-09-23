@@ -13,6 +13,46 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 31 — Formular scheiterte an Brevos IP-Sperre (23.09.2026)
+
+*Die Nummer 30 ist doppelt vergeben: An diesem Tag haben zwei Sitzungen
+parallel an der Seite gearbeitet und beide einen Eintrag geschrieben.*
+
+Nach dem Livegang meldete das Formular bei jedem Absenden einen Fehler.
+Die Funktion antwortete mit `502 send_failed` — also waren die
+Umgebungsvariablen gesetzt (sonst käme `500 not_configured`), aber Brevo
+lehnte ab. Die Begründung stand nur im Laufzeit-Log von Vercel.
+
+Sichtbar gemacht mit einem vorübergehenden Schalter: Mit `?diag=1` gab
+die Funktion Brevos Antwort zurück. Sie lautete:
+
+> 401 — „We have detected you are using an unrecognised IP address
+> 3.120.133.183."
+
+**Ursache:** Im Brevo-Konto war die IP-Beschränkung aktiv. Der
+API-Schlüssel durfte nur von bekannten Adressen benutzt werden. Vercels
+Funktionen laufen aber unter ständig wechselnden Adressen aus dem
+Rechenzentrum Frankfurt. Einzelne IPs einzutragen hilft deshalb nicht.
+
+**Behoben:** Julia hat die Beschränkung unter
+`app.brevo.com/security/authorised_ips` abgeschaltet. Testversand kam mit
+`200 {"ok":true}` durch. Der Diagnose-Schalter ist wieder entfernt.
+
+Nicht die Ursache waren, entgegen der ersten Vermutung: gleiche Adresse
+für `MAIL_FROM` und `MAIL_TO` (erlaubt), der Absender (verifiziert) und
+der Schlüssel selbst.
+
+**Geblieben ist eine Kleinigkeit:** Die drei Umgebungsvariablen werden
+jetzt getrimmt. Beim Einfügen in Vercel wandert leicht ein Leerzeichen
+mit, und der Schlüssel wäre dann ohne erkennbaren Grund ungültig.
+
+**Offen:** In Brevo ist die Domain `manereal.at` weder mit DKIM noch mit
+DMARC hinterlegt. Für den Versand an die eigene Adresse egal, für Mails
+an Interessenten nicht — Gmail und Outlook sortieren solche Nachrichten
+schnell als Spam aus.
+
+---
+
 ## 30 — Kontaktformular verschickt wirklich (23.09.2026)
 
 **Vorher war es eine Attrappe.** Der Submit-Knopf baute einen
