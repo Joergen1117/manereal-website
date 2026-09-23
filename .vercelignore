@@ -1,0 +1,21 @@
+# Was Vercel NICHT ausliefern soll.
+# Ausgeliefert werden nur: index.html, assets/, api/, vercel.json
+#
+# Ohne diese Liste wären interne Unterlagen über die Domain abrufbar,
+# zum Beispiel manereal.at/PRODUCT.md oder /docs/AENDERUNGEN.md.
+
+# Arbeitsunterlagen
+CLAUDE.md
+PRODUCT.md
+content/
+designs/
+docs/
+
+# Archiv: Erstentwurf, Rohmaterial, ausgemusterte Dateien (rund 80 MB)
+archive/
+
+# Werkzeuge und Sitzungsdateien
+.claude/
+_tmp/
+.gstack/
+.playwright-mcp/

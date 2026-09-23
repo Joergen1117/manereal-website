@@ -13,6 +13,111 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 30 — Kontaktformular verschickt wirklich (23.09.2026)
+
+**Vorher war es eine Attrappe.** Der Submit-Knopf baute einen
+`mailto:`-Link und öffnete das E-Mail-Programm des Besuchers — verschickt
+wurde nichts, der Besucher hätte in seinem eigenen Outlook nochmals auf
+„Senden" drücken müssen. Wer Webmail im Browser nutzt (GMX, A1, Gmail —
+in dieser Altersgruppe die Regel), bei dem passierte gar nichts. Die
+Bestätigung „Danke für Ihre Nachricht" erschien trotzdem. Schlimmster
+Fall: Der Interessent hält sich für gemeldet, und niemand ruft zurück.
+
+### Technik
+
+| | |
+|---|---|
+| Entgegennahme | [`../api/kontakt.js`](../api/kontakt.js), Vercel-Function |
+| Region | Frankfurt (`fra1`), festgelegt in [`../vercel.json`](../vercel.json) |
+| Versand | Brevo REST-API, Rechenzentren in der EU |
+| Abhängigkeiten | keine — kein `npm install`, kein Build-Schritt |
+
+*(Beide Dateien stammen aus dieser Sitzung, nicht von Julia — Schritt 29
+vermutet das irrtümlich.)*
+
+**Das E-Mail:** Betreff `Erstgespräch: Name, Unternehmen`. Antwort-An
+steht auf der Adresse des Interessenten, „Antworten" geht also direkt an
+ihn. Versandt wird Nur-Text **und** HTML; Telefonnummer und E-Mail sind
+im HTML anklickbar. Fußzeile nennt den Eingangszeitpunkt in Wiener Zeit.
+
+**Spam ohne Captcha:** ein unsichtbares Feld (`website`) — füllt es ein
+Bot aus, wird verworfen und trotzdem „ok" geantwortet. Dazu höchstens
+fünf Anfragen pro Minute und IP. Ein Captcha wäre für 55- bis 75-Jährige
+eine größere Hürde als der Spam ein Problem.
+
+**Fehlerfall:** Kommt die Nachricht nicht durch, erscheint nicht mehr
+„Danke", sondern ein roter Hinweis mit kontakt@manereal.at. Das Formular
+behauptet keinen Erfolg mehr, den es nicht gab.
+
+**Vor Betrieb einzurichten** (Environment-Variablen in Vercel):
+`BREVO_API_KEY`, `MAIL_TO`, `MAIL_FROM` (bei Brevo verifizierte Adresse),
+optional `MAIL_FROM_NAME`. Fehlen sie, antwortet die Function mit 500 und
+das Formular zeigt den Fehlerhinweis.
+
+**Geprüft:** acht Fälle gegen die Function — gültige Anfrage, gefüllter
+Honeypot, fehlender Name, ungültige E-Mail, GET statt POST, Zeilenumbrüche
+im Namen (Header-Injektion), Ratenbegrenzung, fehlende Konfiguration.
+Alle verhalten sich wie vorgesehen. Ein echter Versand hat noch nicht
+stattgefunden, dafür fehlt der API-Schlüssel.
+
+### Text
+
+- **Bestätigung geändert** (Julia, 23.09.2026). „Falls sich Ihr
+  E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an
+  kontakt@manereal.at." ist ersatzlos entfallen — es öffnet sich kein
+  E-Mail-Programm mehr. Davor steht neu „Vielen Dank!". Der Absatz lautet
+  jetzt: *Vielen Dank! Wir melden uns innerhalb von 24 Stunden persönlich
+  bei Ihnen.* Die Überschrift „Danke für Ihre Nachricht" darüber bleibt
+  unverändert; der Dank steht damit zweimal untereinander.
+- **Fehlerhinweis, neuer Text:** „Ihre Nachricht konnte nicht übermittelt
+  werden. Bitte schreiben Sie uns direkt an kontakt@manereal.at."
+- **Datenschutz, Abschnitt 3** heißt jetzt „Kontaktaufnahme und
+  Kontaktformular" und hat vier neue Absätze: erhobene Felder und
+  Rechtsgrundlage, Brevo als Auftragsverarbeiter nach Art. 28 DSGVO,
+  IP-Adresse zur Spam-Abwehr, Speicherdauer. Die Hinweisbox „vor Go-Live
+  prüfen" ist damit entfallen, ebenso die nun unbenutzte CSS-Regel
+  `.legal .todo`.
+
+**Offen:** Zwei Angaben im Datenschutztext sind Annahmen und gehören
+verifiziert — die Speicherdauer von 24 Monaten und Firmierung samt
+Anschrift von Brevo. Beides steht im Auftragsverarbeitungsvertrag, der
+noch abzuschließen ist. Eine anwaltliche Prüfung des Gesamttexts steht
+weiterhin aus; siehe Punkt 18 in
+[`../content/inhalte.md`](../content/inhalte.md).
+
+---
+
+## 30 — Ladeschirm und `.vercelignore` (23.09.2026)
+
+### Ladeschirm
+
+Die alte Fassung auf `manereal-website.vercel.app` zeigt beim Laden kurz
+eine Navy-Fläche mit der Wortmarke. Das kommt dort vom Artifact-Bundle
+(`#__bundler_thumbnail`), das erst entpackt werden muss. Julia möchte
+diesen Moment behalten.
+
+Nachgebaut als `.splash`: fixe Navy-Fläche, weiße Wortmarke in der Mitte,
+sichtbar 0,35 s, dann 0,4 s Überblendung. **Reines CSS** — eine
+`@keyframes`-Animation blendet sie aus, ohne JavaScript. So kann sie auch
+dann nicht hängen bleiben, wenn ein Skript scheitert. Bei
+`prefers-reduced-motion: reduce` erscheint sie gar nicht.
+
+Dafür neu: `assets/images/brand/logo-white.png`, 600 × 135 px, 17 KB,
+verkleinert aus `content/assets/logo-manereal-invers.png`.
+
+*Abwägung:* Die neue Seite wiegt 63 KB und ist sofort da — es gibt
+eigentlich nichts zu überbrücken. Der Ladeschirm kostet jeden Besucher
+0,75 Sekunden. Er ist ein Markenmoment, kein technischer Notbehelf.
+
+### `.vercelignore`
+
+Ausgeliefert werden nur `index.html`, `assets/`, `api/` und
+`vercel.json`. Ohne diese Liste wären über die Domain auch `PRODUCT.md`,
+`content/inhalte.md`, `docs/AENDERUNGEN.md` und das ganze `archive/`
+abrufbar gewesen — also die internen Unterlagen samt Rohmaterial.
+
+---
+
 ## 29 — Struktur aufgeräumt (23.09.2026)
 
 Vorher war nicht erkennbar, welche Datei die Website ist: Eine

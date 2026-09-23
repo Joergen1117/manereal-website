@@ -286,7 +286,12 @@ Die Rollenzeile „Experte für KI" wird auf der Website nicht mehr gezeigt.*
 - Felder: Name · Unternehmen · E-Mail · Telefon · Verwaltete Liegenschaften (Keine Angabe / unter 50 / 50–150 / 150–400 / über 400) · Ihre Nachricht
 - Hinweis: Ihre Angaben behandeln wir streng vertraulich und geben sie nicht weiter. Details in unserer Datenschutzerklärung.
 - Button: Anfrage senden
-- Bestätigung: **Danke für Ihre Nachricht** — Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen. Falls sich Ihr E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an kontakt@manereal.at.
+- Bestätigung: **Danke für Ihre Nachricht** — Vielen Dank! Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen.
+  *(Zwei Änderungen am 23.09.2026 auf Julias Anweisung: „Vielen Dank!"
+  neu vorangestellt; der Satz „Falls sich Ihr E-Mail-Programm nicht
+  geöffnet hat, schreiben Sie uns direkt an kontakt@manereal.at."
+  ersatzlos entfallen — das Formular verschickt jetzt selbst, es öffnet
+  sich kein E-Mail-Programm mehr.)*
 - Technik im Erstentwurf: kein Backend, das Formular baut einen `mailto:`-Link.
 - Technik seit 23.09.2026: Das Formular verschickt die Anfrage selbst
   (Vercel-Function, Versand über Brevo/EU). Siehe Schritt 29 in
@@ -409,9 +414,21 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     sagen, man spreche direkt „mit den Gründern". Keine Person auf der
     Website ist als Gründer ausgewiesen; der Beirat trägt eine Rollenzeile,
     das Team nicht. (22.09.2026)
-17. **Bestätigung nennt das E-Mail-Programm** — „Falls sich Ihr
+17. **[Erledigt 23.09.2026 — Julia: Satz raus. Der zweite Satz ist
+    ersatzlos entfallen, der erste steht wörtlich weiter.]**
+    **Bestätigung nennt das E-Mail-Programm** — „Falls sich Ihr
     E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an
     kontakt@manereal.at." Seit 23.09.2026 verschickt das Formular selbst,
-    es öffnet sich kein E-Mail-Programm mehr. Der Satz verwirrt jetzt.
-    Wortlaut unverändert gelassen. Vorschlag: Der zweite Satz entfällt
-    ersatzlos, der erste bleibt wörtlich stehen. (23.09.2026)
+    es öffnet sich kein E-Mail-Programm mehr. Der Satz verwirrte.
+18. **Datenschutz: Text zum Kontaktformular neu geschrieben, nicht
+    geprüft** — Am 23.09.2026 auf Julias Anweisung eingebaut: vier Absätze
+    in Abschnitt 3 (erhobene Felder, Brevo als Auftragsverarbeiter,
+    IP-Adresse zur Spam-Abwehr, Speicherdauer), Überschrift jetzt
+    „Kontaktaufnahme und Kontaktformular". Die Hinweisbox „vor Go-Live
+    prüfen" ist damit entfallen. **Zwei Angaben darin sind Annahmen und
+    gehören verifiziert:** die Speicherdauer von 24 Monaten (frei gewählt,
+    es gibt keine festgelegte Frist im Haus) und die Firmierung samt
+    Anschrift von Brevo — beides steht im Auftragsverarbeitungsvertrag,
+    den Brevo bereitstellt. Der Vertrag ist noch abzuschließen. Eine
+    anwaltliche Prüfung des Gesamttexts ersetzt dieser Einbau
+    nicht. (23.09.2026)

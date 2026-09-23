@@ -35,6 +35,18 @@
   --teal-bright:#6FBECB;
   --ink-soft:#5B6B7A;
   --line:#E8E5E0;
+
+  /* Abstandsskala. Alles Vertikale auf dieser Seite stammt aus diesen
+     Werten - keine Zwischengroessen, keine Inline-Abstaende im HTML. */
+  --header-h:84px;    /* Hoehe der fixen Kopfzeile */
+  --gap-hero:32px;    /* Kopfzeile -> schwebendes Bild */
+  --gap-page:64px;    /* Kopfzeile -> Text auf Unterseiten */
+  --s-section:72px;   /* Luft ueber und unter jeder Sektion */
+  --s-block:56px;     /* Sektionskopf -> Inhaltsblock, Block -> Schaltflaeche */
+  --s-grid:48px;      /* Zeilenabstand in Rastern */
+  --s-card:24px;      /* Abstand zwischen Karten, Innenrand kleiner Flaechen */
+  --s-text:16px;      /* Ueberschrift -> Text, Symbol -> Titel */
+  --s-tight:12px;     /* Titel -> Beschreibung, Listenzeilen */
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -44,6 +56,17 @@ a{color:var(--teal);text-decoration:none}
 .container{max-width:1200px;margin:0 auto;padding:0 24px}
 .route[hidden]{display:none}
 
+/* ---- Ladeschirm ----
+   Navy-Flaeche mit der Wortmarke, die sich selbst wieder ausblendet.
+   Bewusst reines CSS: ohne JavaScript kann sie nicht haengen bleiben.
+   Sichtbar 0,35 s, dann 0,4 s Ueberblendung. */
+.splash{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;
+  background:var(--navy);animation:splash-out .4s ease .35s forwards}
+.splash img{width:200px;max-width:48vw;height:auto;animation:splash-in .45s ease both}
+@keyframes splash-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes splash-out{to{opacity:0;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){.splash{display:none}}
+
 /* Inhalt liegt ueber dem Hintergrund-Grundriss (body::before) */
 main,footer{position:relative;z-index:1}
 
@@ -51,11 +74,11 @@ main,footer{position:relative;z-index:1}
 header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:84px}
 .nav .logo img{height:44px;width:auto}
-.nav ul{display:flex;align-items:center;gap:34px;list-style:none}
+.nav ul{display:flex;align-items:center;gap:32px;list-style:none}
 .nav ul a{color:var(--navy);font-weight:500;font-size:15px;transition:color .2s}
 .nav ul a:hover{color:var(--teal)}
 .nav ul a.active{font-weight:700;color:var(--teal)}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border-radius:999px;font-weight:600;font-size:15px;transition:all .25s;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:12px;padding:16px 32px;border-radius:999px;font-weight:600;font-size:15px;transition:all .25s;cursor:pointer}
 .btn-primary{background:var(--navy);color:#fff}
 .btn-primary:hover{background:var(--teal)}
 .btn-white{background:#fff;color:var(--navy)}
@@ -64,7 +87,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,2
 .btn-ghost:hover{background:rgba(255,255,255,.14)}
 .btn-ghost-dark{border:1.5px solid rgba(14,42,71,.28);color:var(--navy)}
 .btn-ghost-dark:hover{background:rgba(14,42,71,.06)}
-.nav .btn{padding:11px 24px;background:var(--navy);color:#fff}
+.nav .btn{padding:12px 24px;background:var(--navy);color:#fff}
 .nav .btn:hover{background:var(--teal);color:#fff}
 .menu-toggle{display:none;background:none;border:none;font-size:26px;color:var(--navy);cursor:pointer}
 
@@ -76,94 +99,101 @@ h1{font-size:clamp(38px,5vw,62px);line-height:1.08;font-weight:800;letter-spacin
 h2{font-size:clamp(28px,3.4vw,42px);line-height:1.15;font-weight:800;letter-spacing:-.02em}
 
 /* Hero — full bleed bis ganz oben */
-.hero{position:relative}
-.hero-media{position:relative;margin-top:24px;width:100%;height:680px;border-radius:24px;overflow:hidden;background:var(--navy)}
+/* Der Seitenkopf traegt seinen Abstand nach unten selbst — wie jede
+   andere Sektion auch. Sonst beginnt ein getoentes Band direkt an der
+   Bildkante (Handy: „Unsere Vision", Unser Ansatz: „Der Weg zu uns"). */
+.hero{position:relative;padding:0 0 var(--s-section)}
+.hero-media{position:relative;margin-top:0;width:100%;height:680px;border-radius:24px;overflow:hidden;background:var(--navy)}
 .hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 15%}
 .hero-media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,26,44,.82) 0%,rgba(9,26,44,.5) 34%,rgba(9,26,44,0) 66%)}
-.hero-overlay{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:0 60px 56px}
+.hero-overlay{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:0 56px 56px}
 .hero-overlay h1{color:#fff;max-width:780px}
-.hero-overlay .lead{margin:18px 0 30px;font-size:18px;color:#fff;max-width:560px}
-.hero-inner{position:relative;z-index:2;width:100%;padding:104px 0 0}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.hero-overlay .lead{margin:16px 0 32px;font-size:18px;color:#fff;max-width:560px}
+.hero-inner{position:relative;z-index:2;width:100%;
+  padding:calc(var(--header-h) + var(--gap-hero)) 0 0}
+.hero-actions{display:flex;gap:var(--s-text);flex-wrap:wrap;align-items:center}
 
 /* Sections */
-section{padding:72px 0}
+section{padding:var(--s-section) 0}
 .center{text-align:center}
-.center h2{max-width:760px;margin:0 auto}
-.section-intro{margin:18px auto 0;color:var(--ink-soft);font-size:17px;max-width:620px}
+.center h2,.h2-narrow{max-width:760px}
+.center h2{margin:0 auto}
+.section-intro{margin:var(--s-text) auto 0;color:var(--ink-soft);font-size:17px;max-width:620px}
 
 /* Anliegen — zentriert, Aufzaehlung mit kurzem Strich */
-#anliegen{padding-bottom:40px}
-.criteria{display:grid;grid-template-columns:repeat(3,1fr);gap:56px;margin-top:56px}
+.criteria{display:grid;grid-template-columns:repeat(3,1fr);
+  gap:var(--s-block);margin-top:var(--s-block)}
 .criterion{text-align:center}
-.criterion h3{font-size:18.5px;font-weight:700;margin-bottom:14px}
+.criterion h3{font-size:18.5px;font-weight:700;margin-bottom:var(--s-tight)}
 .criterion ul{list-style:none;display:inline-block;text-align:left;color:var(--ink-soft);font-size:15px;max-width:320px}
-.criterion ul li{padding-left:26px;position:relative;margin-bottom:9px}
+.criterion ul li{padding-left:24px;position:relative;margin-bottom:8px}
 .criterion ul li::before{content:"";position:absolute;left:0;top:11px;width:14px;height:1.5px;background:var(--teal)}
 
 /* Angebot: sechs Punkte links, Foto rechts */
-.angebot-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.72fr);gap:44px 56px;align-items:stretch}
+.angebot-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,0.72fr);
+  gap:var(--s-block);align-items:stretch}
 .angebot-head{grid-column:1;max-width:640px}
 .promises{display:grid;grid-template-columns:1fr 1fr;gap:40px}
-.promise .p-icon{width:54px;height:54px;border-radius:50%;background:rgba(15,108,124,.1);display:flex;align-items:center;justify-content:center;margin:0 0 16px}
-.promise h3{font-size:17.5px;font-weight:700;margin-bottom:8px}
+.promise .p-icon{width:54px;height:54px;border-radius:50%;background:rgba(15,108,124,.1);display:flex;align-items:center;justify-content:center;margin:0 0 var(--s-text)}
+.promise h3{font-size:17.5px;font-weight:700;margin-bottom:var(--s-tight)}
 .promise p{color:var(--ink-soft);font-size:15px;max-width:300px;margin:0 auto}
 .angebot-photo{grid-column:2;grid-row:1/span 2;align-self:stretch;min-height:760px;border-radius:24px;background:url('assets/images/stock/handshake.jpg') 78% 10%/cover no-repeat}
-@media(max-width:900px){.angebot-grid{grid-template-columns:1fr;gap:40px}.angebot-head{max-width:none}.angebot-photo{grid-column:1;grid-row:auto;height:320px;min-height:0}}
+@media(max-width:900px){.angebot-grid{grid-template-columns:1fr;gap:var(--s-grid)}.angebot-head{max-width:none}.angebot-photo{grid-column:1;grid-row:auto;height:320px;min-height:0}}
 
 /* Kontakt-Dialog */
-.modal-back{position:fixed;inset:0;background:rgba(14,42,71,.55);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;z-index:200;padding:48px 20px;overflow-y:auto}
+.modal-back{position:fixed;inset:0;background:rgba(14,42,71,.55);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;z-index:200;padding:48px 24px;overflow-y:auto}
 .modal-back.open{display:flex}
-.modal{background:#fff;border-radius:24px;max-width:560px;width:100%;padding:44px 44px 38px;position:relative;box-shadow:0 24px 64px rgba(14,42,71,.28)}
-.modal h3{font-size:25px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px}
-.modal .modal-intro{color:var(--ink-soft);font-size:15.5px;margin-bottom:26px}
-.modal-close{position:absolute;top:20px;right:22px;background:none;border:0;font-size:26px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:4px 8px;border-radius:8px}
+.modal{background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 40px 32px;position:relative;box-shadow:0 24px 64px rgba(14,42,71,.28)}
+.modal h3{font-size:25px;font-weight:700;letter-spacing:-.01em;margin-bottom:var(--s-tight)}
+.modal .modal-intro{color:var(--ink-soft);font-size:15.5px;margin-bottom:var(--s-card)}
+.modal-close{position:absolute;top:20px;right:20px;background:none;border:0;font-size:26px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:4px 8px;border-radius:8px}
 .modal-close:hover{background:#F2F6F7;color:var(--navy)}
-.field{display:grid;gap:7px;margin-bottom:18px}
+.field{display:grid;gap:8px;margin-bottom:20px}
 .field label{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--navy)}
-.field input,.field textarea,.field select{font-family:inherit;font-size:15.5px;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px;width:100%;transition:border-color .2s,box-shadow .2s}
+.field input,.field textarea,.field select{font-family:inherit;font-size:15.5px;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;width:100%;transition:border-color .2s,box-shadow .2s}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,108,124,.12)}
 .field textarea{min-height:104px;resize:vertical}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.form-note{font-size:13.5px;color:var(--ink-soft);margin:6px 0 22px;line-height:1.55}
+.form-note{font-size:13.5px;color:var(--ink-soft);margin:8px 0 var(--s-card);line-height:1.55}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.form-error{font-size:15.5px;line-height:1.55;color:#8A2B2B;background:#FBF0F0;border:1px solid #E8CFCF;border-radius:12px;padding:14px 16px;margin:0 0 20px}
+.form-error{font-size:15.5px;line-height:1.55;color:#8A2B2B;background:#FBF0F0;border:1px solid #E8CFCF;border-radius:12px;padding:16px;margin:0 0 20px}
 .form-error a{color:#8A2B2B}
 .modal .btn[aria-busy="true"]{opacity:.55;pointer-events:none}
 .modal .btn{width:100%;justify-content:center}
 .form-done{text-align:center;padding:12px 0 4px}
 .form-done h3{margin-bottom:12px}
-@media(max-width:560px){.modal{padding:36px 24px 30px}.field-row{grid-template-columns:1fr}}
+@media(max-width:560px){.modal{padding:32px 24px 24px}.field-row{grid-template-columns:1fr}}
 
 /* Unser Ansatz: Ablauf, Zeitleiste links, Foto rechts mitlaufend */
-.ablauf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px 56px;align-items:start}
+.ablauf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+  gap:var(--s-block);align-items:start}
 .ablauf-head{grid-column:1/-1}
 .ablauf-grid .timeline{margin-top:0}
 .photo-band{position:sticky;top:120px;height:600px;border-radius:24px;overflow:hidden;background:url('assets/images/stock/meeting.jpg') 55% 35%/cover no-repeat}
 
 /* CTA — full bleed */
-.cta{position:relative;color:#fff;padding:80px 40px;background:var(--navy);text-align:center;max-width:1200px;margin:64px auto;border-radius:24px}
+.cta{position:relative;color:#fff;padding:var(--s-section) 40px;background:var(--navy);
+  text-align:center;max-width:1200px;margin:64px auto;border-radius:24px}
 .cta .container{position:relative;z-index:2}
-.cta h2{color:#fff;margin:0 auto 14px;max-width:680px}
-.cta p{color:rgba(255,255,255,.78);max-width:520px;margin:0 auto 36px}
-.cta .cta-note{margin:-26px auto 36px;font-size:14.5px;color:rgba(255,255,255,.62)}
+.cta h2{color:#fff;margin:0 auto var(--s-text);max-width:680px}
+.cta p{color:rgba(255,255,255,.78);max-width:520px;margin:0 auto 32px}
+.cta .cta-note{margin:-24px auto 32px;font-size:14.5px;color:rgba(255,255,255,.62)}
 
 /* Footer */
-footer{padding:72px 0 36px;font-size:14.5px;color:var(--ink-soft)}
+footer{padding:var(--s-section) 0 32px;font-size:14.5px;color:var(--ink-soft)}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:48px}
 .footer-brand img{height:40px;margin-bottom:16px}
 footer h4{color:var(--navy);font-size:13px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px;font-weight:700}
 footer ul{list-style:none}
-footer ul li{margin-bottom:10px}
+footer ul li{margin-bottom:var(--s-tight)}
 footer a{color:var(--ink-soft)}
 footer a:hover{color:var(--teal)}
-.footer-bottom{border-top:1px solid var(--line);padding-top:28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13.5px;color:#93A0AC}
+.footer-bottom{border-top:1px solid var(--line);padding-top:32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13.5px;color:#93A0AC}
 
 @media(max-width:900px){
-  .criteria{grid-template-columns:1fr;gap:44px}
-  #anliegen{padding-bottom:36px}
+  .criteria{grid-template-columns:1fr;gap:var(--s-grid)}
   .footer-grid{grid-template-columns:1fr}
-  .hero-inner{padding:96px 0 0}
+  .hero-inner{padding:calc(var(--header-h) + var(--s-card)) 0 0}
   .hero-media{height:520px}
   /* Am Handy nur Leitsatz und eine Schaltflaeche ueber dem Video:
      Leitsatz oben am Bild, Schaltflaeche unten. Der Lead-Satz und
@@ -180,90 +210,97 @@ footer a:hover{color:var(--teal)}
 
   /* Abschluss-Block: schmalere Raender, kleinere Ueberschrift,
      Schaltflaeche ueber die volle Breite statt dreizeilig */
-  .cta{margin:40px 16px;padding:48px 20px;border-radius:18px}
+  .cta{margin:40px 24px;padding:48px 24px;border-radius:18px}
   .cta .container{padding:0}
   .cta h2{font-size:25px;line-height:1.22}
-  .cta p{font-size:15px;margin-bottom:28px}
-  .cta .cta-note{font-size:13.5px;margin:-18px auto 28px}
-  .cta .btn{width:100%;justify-content:center;padding:15px 16px;font-size:14.5px}
-  .ablauf-grid{grid-template-columns:1fr;gap:44px}
+  .cta p{font-size:15px;margin-bottom:var(--s-card)}
+  .cta .cta-note{font-size:13.5px;margin:-16px auto var(--s-card)}
+  .cta .btn{width:100%;justify-content:center;padding:16px;font-size:14.5px}
+  .ablauf-grid{grid-template-columns:1fr;gap:var(--s-grid)}
   .photo-band{position:static;height:320px}
   .nav ul{display:none}
-  .nav ul.open{display:flex;position:absolute;top:84px;left:0;right:0;background:#fff;flex-direction:column;padding:24px;border-bottom:1px solid var(--line);gap:18px}
+  .nav ul.open{display:flex;position:absolute;top:84px;left:0;right:0;background:#fff;flex-direction:column;padding:24px;border-bottom:1px solid var(--line);gap:var(--s-text)}
   .menu-toggle{display:block}
 }
 
 /* ---- Unterseiten ---- */
-.page-hero{position:relative;color:var(--navy);padding-bottom:0}
-.page-hero-media{margin-top:32px;width:100%;height:460px;border-radius:24px;background-image:var(--pg);background-size:cover;background-position:var(--pgpos,center 65%)}
-.page-hero-inner{position:relative;z-index:2;width:100%;padding:92px 0 0}
+.page-hero{position:relative;color:var(--navy);padding:0 0 var(--s-section)}
+.page-hero-media{margin-top:var(--gap-hero);width:100%;height:460px;border-radius:24px;background-image:var(--pg);background-size:cover;background-position:var(--pgpos,center 65%)}
+.page-hero-inner{position:relative;z-index:2;width:100%;
+  padding:calc(var(--header-h) + var(--gap-page)) 0 0}
 .page-hero h1{font-size:clamp(32px,4vw,48px)}
-.page-hero .lead{margin-top:14px;font-size:17.5px;color:var(--ink-soft);max-width:620px}
+.page-hero .lead{margin-top:var(--s-text);font-size:17.5px;color:var(--ink-soft);max-width:620px}
 
 /* Symbol, Titel, Text zentriert:
    Vision (vier Spalten) und Versprechen auf Ueber uns (zwei Spalten) */
-.challenges{display:grid;grid-template-columns:repeat(2,1fr);gap:72px 80px;margin-top:64px}
+.challenges{display:grid;grid-template-columns:repeat(2,1fr);
+  gap:var(--s-block) var(--s-grid);margin-top:var(--s-block)}
 .challenge{text-align:center}
-.challenge h3{font-size:18.5px;font-weight:700;margin-bottom:12px}
-.challenge .ch-problem{color:var(--ink-soft);font-size:15px;max-width:430px;margin:0 auto 16px}
+.challenge h3{font-size:18.5px;font-weight:700;margin-bottom:var(--s-tight)}
+.challenge .ch-problem{color:var(--ink-soft);font-size:15px;max-width:430px;margin:0 auto var(--s-text)}
 
 /* Timeline */
-.timeline{max-width:760px;margin:64px auto 0;text-align:left;position:relative}
+.timeline{max-width:760px;margin:var(--s-block) auto 0;text-align:left;position:relative}
 .timeline::before{content:"";position:absolute;left:26px;top:10px;bottom:10px;width:2px;background:rgba(15,108,124,.25)}
-.tl-step{position:relative;padding:0 0 46px 84px}
+.tl-step{position:relative;padding:0 0 var(--s-grid) 84px}
 .tl-step:last-child{padding-bottom:0}
 .tl-dot{position:absolute;left:0;top:0;width:52px;height:52px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;z-index:1}
 .tl-phase{color:var(--teal);font-weight:700;font-size:12.5px;letter-spacing:.16em;text-transform:uppercase}
-.tl-step h3{font-size:18.5px;margin:4px 0 8px}
+.tl-step h3{font-size:18.5px;margin:4px 0 var(--s-tight)}
 .tl-step p{color:var(--ink-soft);font-size:15px;max-width:560px}
 
 /* FAQ */
-.faq{max-width:760px;margin:56px auto 0;text-align:left}
-.faq details{border-bottom:1px solid var(--line);padding:22px 4px}
+.faq{max-width:760px;margin:var(--s-block) auto 0;text-align:left}
+.faq details{border-bottom:1px solid var(--line);padding:var(--s-card) 4px}
 .faq summary{cursor:pointer;font-weight:600;font-size:16.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px}
 .faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";color:var(--teal);font-size:24px;font-weight:600;flex:none}
 .faq details[open] summary::after{content:"\2212"}
-.faq details p{margin-top:12px;color:var(--ink-soft);font-size:15px}
+.faq details p{margin-top:var(--s-tight);color:var(--ink-soft);font-size:15px}
 
 /* Team */
-.team{display:grid;grid-template-columns:repeat(3,1fr);gap:56px;margin-top:64px}
+.team{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-block);margin-top:var(--s-block)}
 .member{text-align:center}
-.member .avatar{width:180px;height:180px;border-radius:50%;overflow:hidden;margin:0 auto 22px;box-shadow:0 16px 40px rgba(14,42,71,.16)}
+.member .avatar{width:180px;height:180px;border-radius:50%;overflow:hidden;margin:0 auto var(--s-card);box-shadow:0 16px 40px rgba(14,42,71,.16)}
 .member .avatar img{width:100%;height:100%;object-fit:cover}
 .member h3{font-size:19px;font-weight:700}
 .member p{color:var(--ink-soft);font-size:14.5px;max-width:300px;margin:0 auto}
 
 .team-2{grid-template-columns:repeat(2,1fr);max-width:820px;margin-left:auto;margin-right:auto}
+.team-1{grid-template-columns:1fr;max-width:280px;margin-left:auto;margin-right:auto}
+#wer-dahinter .avatar{width:150px;height:150px}
+
+/* Schaltflaeche am Ende einer Sektion - ueberall derselbe Abstand */
+.section-action{margin-top:var(--s-block)}
 @media(max-width:900px){.team-2{grid-template-columns:1fr}}
 
 /* Legal */
-.legal{max-width:780px;margin:0 auto;padding:150px 24px 90px;position:relative;z-index:1}
-.legal h1{font-size:clamp(30px,3.6vw,42px);margin-bottom:34px}
-.legal h2{font-size:20px;margin:36px 0 12px}
-.credits-wrap{overflow-x:auto;margin:18px 0 8px;border:1px solid var(--line);border-radius:16px}
+.legal{max-width:780px;margin:0 auto;
+  padding:calc(var(--header-h) + var(--gap-page)) 24px 96px;position:relative;z-index:1}
+.legal h1{font-size:clamp(30px,3.6vw,42px);margin-bottom:32px}
+.legal h2{font-size:20px;margin:32px 0 var(--s-tight)}
+.credits-wrap{overflow-x:auto;margin:var(--s-text) 0 8px;border:1px solid var(--line);border-radius:16px}
 table.credits{width:100%;border-collapse:collapse;font-size:15px;line-height:1.55}
-table.credits th{text-align:left;font-weight:600;color:var(--navy);background:#FAF9F7;padding:14px 18px;border-bottom:1px solid var(--line);white-space:nowrap}
-table.credits td{padding:14px 18px;border-bottom:1px solid var(--line);color:var(--ink-soft);vertical-align:top}
+table.credits th{text-align:left;font-weight:600;color:var(--navy);background:#FAF9F7;padding:var(--s-text) 20px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.credits td{padding:var(--s-text) 20px;border-bottom:1px solid var(--line);color:var(--ink-soft);vertical-align:top}
 table.credits tr:last-child td{border-bottom:0}
 table.credits td:first-child{color:var(--navy)}
 table.credits td:last-child{white-space:nowrap}
-@media(max-width:640px){table.credits{font-size:14px}table.credits th,table.credits td{padding:12px 14px}}
+@media(max-width:640px){table.credits{font-size:14px}table.credits th,table.credits td{padding:var(--s-tight) var(--s-text)}}
 
 .legal p, .legal li{color:var(--ink-soft);font-size:15.5px}
-.legal ul{padding-left:22px;margin:10px 0}
-.legal .todo{background:rgba(176,141,87,.12);border-left:3px solid #B08D57;padding:14px 18px;border-radius:0 6px 6px 0;margin:10px 0;color:var(--navy);font-size:14.5px}
+.legal ul{padding-left:24px;margin:var(--s-tight) 0}
 
 
 @media(max-width:900px){
-  .challenges{grid-template-columns:1fr;gap:52px}
+  .challenges{grid-template-columns:1fr;gap:var(--s-grid)}
   .team{grid-template-columns:1fr}
 }
 
 /* ---- Vision: Label oben, Satz darunter ---- */
-.vision-split{max-width:900px;margin:0 auto;padding:52px 0;text-align:center;
+.vision-split{max-width:900px;margin:0 auto;padding:var(--s-block) 0;text-align:center;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.vision-split .eyebrow{margin:0 0 22px}
+.vision-split .eyebrow{margin:0 0 20px}
 .vision-split .vq-text{font-size:clamp(21px,2.1vw,29px);line-height:1.35;
   font-weight:400;letter-spacing:-.008em;color:var(--navy);max-width:720px;
   margin:0 auto;text-align:center;text-wrap:balance}
@@ -273,20 +310,21 @@ table.credits td:last-child{white-space:nowrap}
 }
 
 /* ---- Vision: die vier Schlagwoerter mit Erklaertext ---- */
-#vision .cw-keywords{grid-template-columns:repeat(4,1fr);gap:44px 36px;margin-top:64px}
+#vision .cw-keywords{grid-template-columns:repeat(4,1fr);gap:var(--s-grid) 40px;
+  margin-top:var(--s-block)}
 #vision .cw-keywords .p-icon{display:flex;align-items:center;justify-content:center;
-  margin:0 auto 16px}
+  margin:0 auto var(--s-text)}
 #vision .cw-keywords .p-icon svg{width:48px;height:48px;stroke-width:1.5}
 #vision .cw-keywords .challenge h3{font-size:19px;font-weight:700;line-height:1.3;
-  margin-bottom:12px;color:var(--navy);text-wrap:balance}
+  margin-bottom:var(--s-tight);color:var(--navy);text-wrap:balance}
 #vision .cw-keywords .ch-problem{font-size:15px;line-height:1.55;max-width:none;
   margin:0;color:var(--ink-soft)}
 
 @media(max-width:1100px){
-  #vision .cw-keywords{grid-template-columns:repeat(2,1fr);gap:56px 48px}
+  #vision .cw-keywords{grid-template-columns:repeat(2,1fr);gap:var(--s-block) var(--s-grid)}
 }
 @media(max-width:640px){
-  #vision .cw-keywords{grid-template-columns:1fr;gap:44px}
+  #vision .cw-keywords{grid-template-columns:1fr;gap:var(--s-grid)}
   #vision .cw-keywords .p-icon svg{width:40px;height:40px}
 }
 
@@ -315,33 +353,33 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
 /* ---- Unser Ansatz: Herausforderungen als Karten,
        Loesung unten auf getoenter Flaeche ---- */
-.ch-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;
-  margin-top:56px;text-align:left}
+.ch-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s-card);
+  margin-top:var(--s-block);text-align:left}
 .ch-card{background:#fff;border:1px solid var(--line);border-radius:18px;
   overflow:hidden;display:flex;flex-direction:column}
-.ch-card h3{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:10px}
-.chv-top{padding:34px 36px 26px}
+.ch-card h3{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:var(--s-tight)}
+.chv-top{padding:32px 32px var(--s-card)}
 .ch-card-problem{color:var(--ink-soft);font-size:16px;line-height:1.6;margin:0}
-.chv-bottom{margin-top:auto;padding:24px 36px 28px;background:#EAF3F4;
+.chv-bottom{margin-top:auto;padding:var(--s-card) 32px 32px;background:#EAF3F4;
   border-top:1px solid rgba(15,108,124,.18)}
 .chv-sol{color:var(--navy);font-size:16px;line-height:1.6;margin:0}
 @media(max-width:820px){
-  .ch-cards{grid-template-columns:1fr;gap:20px}
-  .chv-top{padding:26px 24px 20px}
-  .chv-bottom{padding:20px 24px 24px}
+  .ch-cards{grid-template-columns:1fr;gap:var(--s-card)}
+  .chv-top{padding:var(--s-card) 24px 20px}
+  .chv-bottom{padding:20px 24px var(--s-card)}
 }
 
 /* ---- Ueber uns: Team an Hausverwaltern,
        Symbol und Titel links, Text rechts ---- */
 .hv-team{display:grid;grid-template-columns:240px 1fr;gap:48px;align-items:center;
-  max-width:1000px;margin:72px auto 0;padding-top:56px;
+  max-width:1000px;margin:var(--s-block) auto 0;padding-top:var(--s-block);
   border-top:1px solid var(--line);text-align:left}
 .hv-team-head{text-align:center}
 .hv-icon{width:88px;height:88px;border-radius:50%;background:#E7EDEF;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-text)}
 .hv-team h3{font-size:20px;margin:0;text-wrap:balance}
 .hv-team p{color:var(--ink-soft);font-size:16px;line-height:1.65;margin:0}
-.hv-team p + p{margin-top:14px}
+.hv-team p + p{margin-top:var(--s-text)}
 @media(max-width:820px){
   /* Untereinander und zentriert wie der Rest der Sektion */
   .hv-team{grid-template-columns:1fr;gap:24px;text-align:center}
@@ -349,14 +387,14 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
 /* ---- Ueber uns: Versprechen mit groesseren Symbolen ---- */
 #versprechen-4 .p-icon{display:flex;align-items:center;justify-content:center;
-  margin:0 auto 22px}
+  margin:0 auto var(--s-text)}
 #versprechen-4 .p-icon svg{width:44px;height:44px;stroke-width:1.5}
 #versprechen-4 .ch-problem{margin-bottom:0}
 
 /* ---- Kompetenzen: Verzeichnis mit kleinen Symbolen ---- */
-.kv-a{max-width:980px;margin:56px auto 0;text-align:left}
+.kv-a{max-width:980px;margin:var(--s-block) auto 0;text-align:left}
 .kv-a-row{display:grid;grid-template-columns:360px 1fr;gap:40px;align-items:center;
-  padding:26px 0;border-top:1px solid var(--line)}
+  padding:var(--s-card) 0;border-top:1px solid var(--line)}
 .kv-a-row:last-child{border-bottom:1px solid var(--line)}
 .kv-a-row h3{display:flex;align-items:center;gap:16px;font-size:20px;font-weight:700;
   color:var(--navy);margin:0}
@@ -364,14 +402,15 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 .kv-a-ic{flex:0 0 auto;display:flex}
 .kv-a-ic svg{width:28px;height:28px;stroke:var(--teal);stroke-width:1.5}
 @media(max-width:900px){
-  .kv-a-row{grid-template-columns:1fr;gap:8px;padding:22px 0}
+  .kv-a-row{grid-template-columns:1fr;gap:8px;padding:var(--s-card) 0}
 }
 
 /* ---- Ueber uns: Kopf zentriert, fuehrt direkt zum Team ---- */
 [data-route="ueber-uns"] .page-hero .container{text-align:center}
 [data-route="ueber-uns"] .page-hero .lead{max-width:640px;margin-left:auto;margin-right:auto}
-#menschen{padding-top:72px}
+#menschen{padding-top:var(--s-section);padding-bottom:var(--s-block)}
 #menschen .team{margin-top:0}
+#beirat{padding-top:0}
 
 /* ---- Startseite am Handy ----
    Alles hier gilt nur unter 900 px. Am Desktop bleibt alles, wie es ist:
@@ -387,12 +426,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
   /* Kopf der Unterseiten: weniger Luft ueber der Eyebrow.
      Steht hier am Ende, weil .page-hero-inner weiter oben definiert ist. */
-  .page-hero{padding-top:0}
-  .page-hero-inner{padding-top:116px}
+  .page-hero-inner{padding-top:calc(var(--header-h) + var(--gap-page))}
+  .legal{padding-top:calc(var(--header-h) + var(--gap-page))}
 
   /* Mit dem Anliegen ist auch das graue Band weg. Damit sich helle und
      getoente Flaechen weiter abwechseln, liegt die Vision jetzt im Band. */
-  #vision{background:#E7EEF1;padding:52px 0}
+  #vision{background:#E7EEF1;padding:var(--s-section) 0}
   .vision-split{border-top:0;border-bottom:0;padding:0}
 
   /* Am Handy traegt das Angebot die Ueberschrift des dort
@@ -409,24 +448,28 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   .m-acc details{border-bottom:1px solid var(--line)}
   .m-acc details:first-child{border-top:1px solid var(--line)}
   .m-acc summary{list-style:none;display:flex;align-items:center;gap:12px;
-    padding:15px 0;font-size:16px;font-weight:700;cursor:pointer;text-align:left}
+    padding:var(--s-text) 0;font-size:16px;font-weight:700;cursor:pointer;text-align:left}
   .m-acc summary::-webkit-details-marker{display:none}
   .m-acc summary svg{flex:none;width:24px;height:24px;stroke-width:1.5}
   .m-acc summary::after{content:"+";margin-left:auto;color:var(--teal);
     font-size:22px;font-weight:600;line-height:1}
   .m-acc details[open] summary::after{content:"\2212"}
-  .m-acc details p{margin:0 0 16px;font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
+  .m-acc details p{margin:0 0 var(--s-text);font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
 
   /* Personen nebeneinander */
-  .m-people2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:40px}
+  .m-people2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-text);margin-top:40px}
   .m-people2 .avatar{width:112px;height:112px;border-radius:50%;overflow:hidden;
-    margin:0 auto 12px;box-shadow:0 16px 40px rgba(14,42,71,.16)}
+    margin:0 auto var(--s-tight);box-shadow:0 16px 40px rgba(14,42,71,.16)}
   .m-people2 img{width:100%;height:100%;object-fit:cover}
   .m-people2 h3{font-size:16px;font-weight:700;text-align:center;margin:0}
 }
 </style>
 </head>
 <body>
+<!-- Ladeschirm: verschwindet von selbst, auch ohne JavaScript -->
+<div class="splash" aria-hidden="true">
+  <img src="assets/images/brand/logo-white.png" alt="" width="600" height="135">
+</div>
 <header id="siteHeader">
   <div class="container nav">
     <a class="logo" href="#start">
@@ -442,7 +485,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 </header>
 <main><div class="route" data-route="start" hidden="">
 
-<section class="hero" style="padding:0">
+<section class="hero">
   <div class="hero-inner">
     <div class="container">
       <div class="hero-media">
@@ -534,7 +577,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <div class="container angebot-grid">
     <div class="angebot-head">
       <span class="eyebrow">Unser Angebot</span>
-      <h2 style="max-width:760px">Ein Angebot, das sich Ihrer Situation anpasst</h2>
+      <h2 class="h2-narrow">Ein Angebot, das sich Ihrer Situation anpasst</h2>
       <!-- Nur am Handy: die Ueberschrift des dort entfallenen
            Abschnitts „Unser Anliegen", Wortlaut unveraendert -->
       <h2 class="m-h2">Wir suchen Unternehmer, deren Lebenswerk wir weiterführen dürfen</h2>
@@ -582,7 +625,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
         <details><summary><svg viewBox="0 0 24 24" fill="none" stroke="#0F6C7C" stroke-width="2" aria-hidden="true"><path d="M9 15l6-6M8 12l-2.5 2.5a3.5 3.5 0 105 5L13 17M16 12l2.5-2.5a3.5 3.5 0 10-5-5L11 7"></path></svg>Stärke des Verbunds</summary><p>Recruiting, Digitalisierung, Buchhaltung und Einkauf im Netzwerk. Ihr Betrieb profitiert vom ersten Tag an.</p></details>
         <details><summary><svg viewBox="0 0 24 24" fill="none" stroke="#0F6C7C" stroke-width="2" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 018 0v3"></path></svg>Absolute Diskretion</summary><p>Kein Wort nach außen, bis Sie es entscheiden. Vertraulichkeit in jedem Schritt.</p></details>
     </div>
-    <p style="margin-top:56px"><a href="#nachfolge" class="btn btn-primary">So läuft die Übergabe →</a></p>
+    <p class="section-action"><a href="#nachfolge" class="btn btn-primary">So läuft die Übergabe →</a></p>
     </div>
     <div class="angebot-photo" role="img" aria-label="Handschlag zwischen zwei Unternehmern"></div>
   </div>
@@ -595,11 +638,11 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     <h2>Unternehmer mit Handschlagsqualität</h2>
     <div class="team team-2">
       <div class="member">
-        <div class="avatar" style="width:150px;height:150px"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div>
+        <div class="avatar"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div>
         <h3>Jörgen Oberkofler</h3>
       </div>
       <div class="member">
-        <div class="avatar" style="width:150px;height:150px"><img src="assets/images/people/lorenz-ambrosius.jpg" alt="Lorenz Ambrosius"></div>
+        <div class="avatar"><img src="assets/images/people/lorenz-ambrosius.jpg" alt="Lorenz Ambrosius"></div>
         <h3>Lorenz Ambrosius</h3>
       </div>
     </div>
@@ -609,7 +652,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       <div><div class="avatar"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div><h3>Jörgen Oberkofler</h3></div>
       <div><div class="avatar"><img src="assets/images/people/lorenz-ambrosius.jpg" alt="Lorenz Ambrosius"></div><h3>Lorenz Ambrosius</h3></div>
     </div>
-    <p style="margin-top:48px"><a href="#ueber-uns" class="btn btn-primary">Mehr über uns →</a></p>
+    <p class="section-action"><a href="#ueber-uns" class="btn btn-primary">Mehr über uns →</a></p>
   </div>
 </section>
 
@@ -763,7 +806,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   </div>
 </section>
 
-<section id="menschen" style="padding-bottom:48px">
+<section id="menschen">
   <div class="container center">
     <div class="team">
       <div class="member">
@@ -796,11 +839,11 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   </div>
 </section>
 
-<section id="beirat" style="padding-top:0">
+<section id="beirat">
   <div class="container center">
     <span class="eyebrow">Beirat</span>
     <h2>Expertise an unserer Seite</h2>
-    <div class="team" style="grid-template-columns:1fr;max-width:280px;margin:64px auto 0">
+    <div class="team team-1">
       <div class="member">
         <div class="avatar"><img src="assets/images/people/nikolaus-mueller.jpg" alt="Nikolaus Müller"></div>
         <h3>Nikolaus Müller</h3>
@@ -814,7 +857,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <div class="container center">
     <span class="eyebrow">Unser Versprechen</span>
     <h2>Was Sie von uns erwarten können</h2>
-    <div class="challenges" style="margin-top:56px">
+    <div class="challenges">
       <div class="challenge">
         <div class="p-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F6C7C" stroke-width="2"><path d="M3 11l9-8 9 8"></path><path d="M5 9.5V21h14V9.5"></path><path d="M10 21v-6h4v6"></path></svg></div>
         <h3>Ihre Mandate in guter Hand</h3>
@@ -908,15 +951,18 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 </div><div class="route" data-route="datenschutz" hidden="">
 <div class="legal">
   <h1>Datenschutzerklärung</h1>
-  <div class="todo"><strong>Hinweis (vor Go-Live prüfen):</strong> Dieser Text ist ein Entwurf und muss an die tatsächliche Datenverarbeitung (Hosting-Anbieter, ggf. Kontaktformular, Analyse-Tools) angepasst und rechtlich geprüft werden.</div>
   <h2>1. Verantwortlicher</h2>
   <p>Int. Möbelspedition R. Gruber Ges.m.b.H &amp; CoKG, Winetzhammerstraße 3, 4030 Linz, Österreich, E-Mail: <a href="mailto:kontakt@manereal.at">kontakt@manereal.at</a></p>
   <h2>2. Hosting</h2>
   <p>Diese Website wird über die Plattform Vercel Inc. (340 S Lemon Ave #4133, Walnut, CA 91789, USA) gehostet. Beim Aufruf der Website verarbeitet Vercel automatisch technische Zugriffsdaten (IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seite, Browsertyp und -version, verwendetes Betriebssystem) in Server-Logfiles. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einem sicheren, stabilen und performanten Betrieb der Website (Art. 6 Abs. 1 lit. f DSGVO).</p>
   <p>Da Vercel Inc. ein US-amerikanisches Unternehmen ist, kann es dabei zu einer Übermittlung personenbezogener Daten in die USA (Drittland) kommen. Vercel ist nach eigenen Angaben unter dem EU-U.S. Data Privacy Framework zertifiziert; ergänzend werden, soweit erforderlich, EU-Standardvertragsklauseln (Art. 46 DSGVO) als Garantie für ein angemessenes Datenschutzniveau eingesetzt. Weitere Informationen: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">vercel.com/legal/privacy-policy</a> und <a href="https://vercel.com/legal/dpa" target="_blank" rel="noopener">vercel.com/legal/dpa</a>.</p>
   <p>Die Logfiles werden nach 30 Tagen automatisch gelöscht.</p>
-  <h2>3. Kontaktaufnahme</h2>
+  <h2>3. Kontaktaufnahme und Kontaktformular</h2>
   <p>Wenn Sie uns per E-Mail oder Telefon kontaktieren, verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage und für Anschlussfragen (Art. 6 Abs. 1 lit. b und f DSGVO). Ihre Daten werden vertraulich behandelt und nicht ohne Ihre Zustimmung weitergegeben.</p>
+  <p>Über das Kontaktformular auf dieser Website erheben wir Ihren Namen und Ihre E-Mail-Adresse als Pflichtangaben sowie, soweit Sie sie angeben, Ihr Unternehmen, Ihre Telefonnummer, die Zahl der von Ihnen verwalteten Liegenschaften und Ihre Nachricht. Wir verarbeiten diese Angaben ausschließlich, um Ihre Anfrage zu beantworten und auf Ihren Wunsch ein Erstgespräch zu vereinbaren (Art. 6 Abs. 1 lit. b und f DSGVO). Die Angaben sind freiwillig; ohne Name und E-Mail-Adresse können wir Ihre Anfrage jedoch nicht bearbeiten.</p>
+  <p>Für den technischen Versand der Formularnachricht setzen wir Brevo (Brevo SAS, vormals Sendinblue SAS, 106 boulevard Haussmann, 75008 Paris, Frankreich) als Auftragsverarbeiter gemäß Art. 28 DSGVO ein. Die Verarbeitung erfolgt auf Servern innerhalb der Europäischen Union; eine Übermittlung in ein Drittland findet dabei nicht statt. Weitere Informationen: <a href="https://www.brevo.com/legal/privacypolicy/" target="_blank" rel="noopener">brevo.com/legal/privacypolicy</a>.</p>
+  <p>Zum Schutz vor automatisierten Massenzusendungen verarbeiten wir beim Absenden des Formulars vorübergehend Ihre IP-Adresse. Sie wird ausschließlich zur Begrenzung der Anfragezahl verwendet, nicht gespeichert und nicht mit Ihren übrigen Angaben zusammengeführt (Art. 6 Abs. 1 lit. f DSGVO).</p>
+  <p>Ihre Anfrage und die zugehörige Korrespondenz bewahren wir auf, solange das zur Bearbeitung erforderlich ist, und löschen sie spätestens 24 Monate nach dem letzten Kontakt, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
   <h2>4. Cookies und Tracking</h2>
   <p>Diese Website verwendet keine Cookies zu Analyse- oder Marketingzwecken.</p>
   <h2>5. Ihre Rechte</h2>
@@ -987,7 +1033,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     </div>
     <div class="form-done" id="contactDone" hidden="">
       <h3>Danke für Ihre Nachricht</h3>
-      <p class="modal-intro">Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen. Falls sich Ihr E-Mail-Programm nicht geöffnet hat, schreiben Sie uns direkt an <a href="mailto:kontakt@manereal.at">kontakt@manereal.at</a>.</p>
+      <p class="modal-intro">Vielen Dank! Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen.</p>
       <button type="button" class="btn btn-ghost-dark" data-close="">Schließen</button>
     </div>
   </div>
