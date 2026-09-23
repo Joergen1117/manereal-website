@@ -1,0 +1,22 @@
+# Betriebssystem
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Abhängigkeiten und Build
+node_modules/
+dist/
+.cache/
+
+# Impeccable-Laufzeitdateien
+.impeccable/
+.claude/skills/impeccable/scripts/impeccable-bin*
+
+# Arbeitsdateien dieser Sitzung (Vorschauen, Screenshots)
+_tmp/
+.playwright-mcp/
+.gstack/
