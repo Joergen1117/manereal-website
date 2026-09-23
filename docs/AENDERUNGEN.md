@@ -96,14 +96,41 @@ eine Navy-Fläche mit der Wortmarke. Das kommt dort vom Artifact-Bundle
 (`#__bundler_thumbnail`), das erst entpackt werden muss. Julia möchte
 diesen Moment behalten.
 
-Nachgebaut als `.splash`: fixe Navy-Fläche, weiße Wortmarke in der Mitte,
-sichtbar 0,35 s, dann 0,4 s Überblendung. **Reines CSS** — eine
-`@keyframes`-Animation blendet sie aus, ohne JavaScript. So kann sie auch
-dann nicht hängen bleiben, wenn ein Skript scheitert. Bei
-`prefers-reduced-motion: reduce` erscheint sie gar nicht.
+Nachgebaut als `.splash`, **reines CSS** — ohne JavaScript kann nichts
+hängen bleiben, wenn ein Skript scheitert:
 
-Dafür neu: `assets/images/brand/logo-white.png`, 600 × 135 px, 17 KB,
-verkleinert aus `content/assets/logo-manereal-invers.png`.
+| ab | |
+|---|---|
+| 0 s | Wortmarke wird eingeblendet, groß auf Navy |
+| 0,45 s | Wortmarke blendet aus |
+| 0,5 s | **Vorhang öffnet sich**: die obere Hälfte fährt nach oben, die untere nach unten, dahinter liegt schon das Hero-Bild |
+| 1,15 s | Ladeschirm ist weg |
+
+Die Wortmarke ist 620 px breit am Desktop, 76 % der Breite am Handy. Bei
+`prefers-reduced-motion: reduce` erscheint der Ladeschirm gar nicht,
+`pointer-events: none` sorgt dafür, dass er nie einen Klick abfängt.
+
+*Abwägung:* Die neue Seite wiegt 63 KB und ist sofort da — es gibt
+eigentlich nichts zu überbrücken. Der Ladeschirm kostet jeden Besucher
+1,15 Sekunden. Er ist ein Markenmoment, kein technischer Notbehelf.
+
+### Neues Logo eingepasst
+
+Julia hat am 23.09.2026 ein neues Logo abgelegt: die Bildmarke mit
+„Manereal", ohne die Zeile „HAUSVERWALTUNG" darunter. Die Datei war
+**6000 × 3375 px, aber nur 9 % davon Logo** — der Rest durchsichtiger
+Rand. Im Kopf der Seite, wo auf 44 px Höhe skaliert wird, blieb davon
+fast nichts sichtbar.
+
+Behoben: durchsichtigen Rand beschnitten und auf Anzeigegröße gebracht.
+
+| | vorher | jetzt |
+|---|---|---|
+| `logo.png` | 6000 × 3375, 357 KB | 1200 × 220, 50 KB |
+| `logo-white.png` | 6000 × 3375, 387 KB | 1400 × 263, 58 KB |
+
+Julias Originaldateien liegen unverändert als
+`archive/source-images/logo-6000.png` und `logo-white-6000.png`.
 
 *Abwägung:* Die neue Seite wiegt 63 KB und ist sofort da — es gibt
 eigentlich nichts zu überbrücken. Der Ladeschirm kostet jeden Besucher

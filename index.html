@@ -57,14 +57,27 @@ a{color:var(--teal);text-decoration:none}
 .route[hidden]{display:none}
 
 /* ---- Ladeschirm ----
-   Navy-Flaeche mit der Wortmarke, die sich selbst wieder ausblendet.
-   Bewusst reines CSS: ohne JavaScript kann sie nicht haengen bleiben.
-   Sichtbar 0,35 s, dann 0,4 s Ueberblendung. */
-.splash{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;
-  background:var(--navy);animation:splash-out .4s ease .35s forwards}
-.splash img{width:200px;max-width:48vw;height:auto;animation:splash-in .45s ease both}
-@keyframes splash-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
-@keyframes splash-out{to{opacity:0;visibility:hidden}}
+   Zwei Navy-Haelften mit der Wortmarke dazwischen. Nach kurzem Stand
+   faehrt die obere nach oben, die untere nach unten, und geben die Seite
+   frei. Bewusst reines CSS: ohne JavaScript kann nichts haengen bleiben.
+   Ablauf: 0,45 s Wortmarke -> 0,5 s Vorhang oeffnet -> nach 1,15 s weg. */
+.splash{position:fixed;inset:0;z-index:300;pointer-events:none;
+  animation:splash-end .01s linear 1.15s forwards}
+@keyframes splash-end{to{visibility:hidden}}
+
+.splash__half{position:absolute;left:0;right:0;height:50.5%;background:var(--navy)}
+.splash__half--top{top:0;animation:curtain-up .6s cubic-bezier(.76,0,.24,1) .5s forwards}
+.splash__half--bottom{bottom:0;animation:curtain-down .6s cubic-bezier(.76,0,.24,1) .5s forwards}
+@keyframes curtain-up{to{transform:translateY(-100%)}}
+@keyframes curtain-down{to{transform:translateY(100%)}}
+
+.splash__logo{position:absolute;top:50%;left:50%;width:min(620px,76vw);height:auto;
+  transform:translate(-50%,-50%);
+  animation:logo-in .45s cubic-bezier(.2,.7,.3,1) both, logo-out .3s ease .45s forwards}
+@keyframes logo-in{from{opacity:0;transform:translate(-50%,-46%) scale(.94)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes logo-out{to{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+
 @media(prefers-reduced-motion:reduce){.splash{display:none}}
 
 /* Inhalt liegt ueber dem Hintergrund-Grundriss (body::before) */
@@ -466,9 +479,11 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 </style>
 </head>
 <body>
-<!-- Ladeschirm: verschwindet von selbst, auch ohne JavaScript -->
+<!-- Ladeschirm: oeffnet sich von selbst, auch ohne JavaScript -->
 <div class="splash" aria-hidden="true">
-  <img src="assets/images/brand/logo-white.png" alt="" width="600" height="135">
+  <span class="splash__half splash__half--top"></span>
+  <span class="splash__half splash__half--bottom"></span>
+  <img class="splash__logo" src="assets/images/brand/logo-white.png" alt="" width="1400" height="263">
 </div>
 <header id="siteHeader">
   <div class="container nav">
