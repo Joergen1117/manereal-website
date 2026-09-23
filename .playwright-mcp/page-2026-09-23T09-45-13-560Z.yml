@@ -1,0 +1,145 @@
+- generic [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - link [ref=f2e4] [cursor=pointer]:
+        - /url: "#start"
+        - img "Manereal Hausverwaltung" [ref=f2e5]
+      - list [ref=f2e6]:
+        - listitem [ref=f2e7]:
+          - link "Unser Ansatz" [ref=f2e8] [cursor=pointer]:
+            - /url: "#nachfolge"
+        - listitem [ref=f2e9]:
+          - link "Über Manereal" [ref=f2e10] [cursor=pointer]:
+            - /url: "#ueber-uns"
+        - listitem [ref=f2e11]:
+          - link "Erstgespräch vereinbaren" [ref=f2e12] [cursor=pointer]:
+            - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+  - main [ref=f2e13]:
+    - generic [ref=f2e14]:
+      - generic [ref=f2e20]:
+        - heading "Ihr Lebenswerk. Unsere Verantwortung." [level=1] [ref=f2e21]: Ihr Lebenswerk.Unsere Verantwortung.
+        - paragraph [ref=f2e22]: Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.
+        - generic [ref=f2e23]:
+          - link "Vertrauliches Erstgespräch" [ref=f2e24] [cursor=pointer]:
+            - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+          - link "So läuft die Übergabe →" [ref=f2e25] [cursor=pointer]:
+            - /url: "#nachfolge"
+      - generic [ref=f2e27]:
+        - generic [ref=f2e28]:
+          - generic [ref=f2e29]: Unsere Vision
+          - heading "Aufbau einer österreichischen Hausverwaltungsgruppe mit starkem Netzwerk" [level=2] [ref=f2e30]
+        - generic [ref=f2e31]:
+          - generic [ref=f2e32]:
+            - heading "Langfristige Perspektive" [level=3] [ref=f2e36]
+            - paragraph [ref=f2e37]: Ihr Unternehmen wird verantwortungsvoll weitergeführt und langfristig gestärkt.
+          - generic [ref=f2e38]:
+            - heading "Starkes Team" [level=3] [ref=f2e42]
+            - paragraph [ref=f2e43]: Gemeinsames Recruiting, eigene Akademie und Fachkräfte aus dem Verbund, wenn Ihr Team sie braucht.
+          - generic [ref=f2e44]:
+            - heading "Digital & effizient" [level=3] [ref=f2e50]
+            - paragraph [ref=f2e51]: Gemeinsame Plattform und Prozesse statt teurer Einzellösungen.
+          - generic [ref=f2e52]:
+            - heading "Synergien & Skalen" [level=3] [ref=f2e56]
+            - paragraph [ref=f2e57]: "Buchhaltung, Recht, Finanzen, Marketing: Geteiltes Know-how für mehr Schlagkraft am Markt."
+      - generic [ref=f2e60]:
+        - generic [ref=f2e61]: Unser Anliegen
+        - heading "Wir suchen Unternehmer, deren Lebenswerk wir weiterführen dürfen" [level=2] [ref=f2e62]
+        - generic [ref=f2e63]:
+          - generic [ref=f2e64]:
+            - heading "Größe & Portfolio" [level=3] [ref=f2e65]
+            - list [ref=f2e66]:
+              - listitem [ref=f2e67]: Hausverwaltungen mit über 50 Liegenschaften
+              - listitem [ref=f2e68]: Wohn- und/oder Gewerbeimmobilien
+              - listitem [ref=f2e69]: Sitz und Portfolio in Österreich
+          - generic [ref=f2e70]:
+            - heading "Eigentümer & Nachfolge" [level=3] [ref=f2e71]
+            - list [ref=f2e72]:
+              - listitem [ref=f2e73]: Keine abschließend gesicherte interne oder familiäre Nachfolge
+              - listitem [ref=f2e74]: Grundsätzliche Offenheit für eine Übergabe oder einen Verkauf
+              - listitem [ref=f2e75]: Übergabe ganz oder teilweise in den nächsten 12–24 Monaten
+          - generic [ref=f2e76]:
+            - heading "Flexible Lösung" [level=3] [ref=f2e77]
+            - list [ref=f2e78]:
+              - listitem [ref=f2e79]: Voll-, Teilverkauf oder schrittweise Übergabe
+              - listitem [ref=f2e80]: Unsere Struktur passt sich Ihrer Situation an
+              - listitem [ref=f2e81]: Sie entscheiden über Tempo und Umfang
+      - generic [ref=f2e83]:
+        - generic [ref=f2e84]:
+          - generic [ref=f2e85]: Unser Angebot
+          - heading "Ein Angebot, das sich Ihrer Situation anpasst" [level=2] [ref=f2e86]
+        - generic [ref=f2e87]:
+          - generic [ref=f2e88]:
+            - generic [ref=f2e89]:
+              - heading "Flexible Übergabemodelle" [level=3] [ref=f2e93]
+              - paragraph [ref=f2e94]: Vollverkauf, Teilverkauf oder schrittweise Übergabe. Sie entscheiden, wann und wie viel Verantwortung Sie abgeben.
+            - generic [ref=f2e95]:
+              - heading "Faire Bewertung" [level=3] [ref=f2e100]
+              - paragraph [ref=f2e101]: Eine transparente, nachvollziehbare Bewertung ohne versteckte Abschläge. Offen kommuniziert und ehrlich verhandelt.
+            - generic [ref=f2e102]:
+              - heading "Klarer Prozess" [level=3] [ref=f2e107]
+              - paragraph [ref=f2e108]: Vom Erstgespräch bis zum Vertrag in rund sechs Wochen. Sie wissen jederzeit, wo wir stehen.
+            - generic [ref=f2e109]:
+              - heading "Kontinuität für Team & Kunden" [level=3] [ref=f2e113]
+              - paragraph [ref=f2e114]: Ihre Mitarbeiter bleiben an Bord, Ihre Kunden behalten ihre Ansprechpartner. Der Betrieb läuft ohne Bruch weiter.
+            - generic [ref=f2e115]:
+              - heading "Stärke des Verbunds" [level=3] [ref=f2e119]
+              - paragraph [ref=f2e120]: Recruiting, Digitalisierung, Buchhaltung und Einkauf im Netzwerk. Ihr Betrieb profitiert vom ersten Tag an.
+            - generic [ref=f2e121]:
+              - heading "Absolute Diskretion" [level=3] [ref=f2e126]
+              - paragraph [ref=f2e127]: Kein Wort nach außen, bis Sie es entscheiden. Vertraulichkeit in jedem Schritt.
+          - paragraph [ref=f2e128]:
+            - link "So läuft die Übergabe →" [ref=f2e129] [cursor=pointer]:
+              - /url: "#nachfolge"
+        - img "Handschlag zwischen zwei Unternehmern" [ref=f2e130]
+      - generic [ref=f2e132]:
+        - generic [ref=f2e133]: Wer dahinter steht
+        - heading "Unternehmer mit Handschlagsqualität" [level=2] [ref=f2e134]
+        - generic [ref=f2e135]:
+          - generic [ref=f2e136]:
+            - img "Jörgen Oberkofler" [ref=f2e138]
+            - heading "Jörgen Oberkofler" [level=3] [ref=f2e139]
+          - generic [ref=f2e140]:
+            - img "Lorenz Ambrosius" [ref=f2e142]
+            - heading "Lorenz Ambrosius" [level=3] [ref=f2e143]
+        - paragraph [ref=f2e144]:
+          - link "Mehr über uns →" [ref=f2e145] [cursor=pointer]:
+            - /url: "#ueber-uns"
+      - generic [ref=f2e147]:
+        - generic [ref=f2e148]: Der Weg zu uns
+        - heading "Lassen Sie uns sprechen. Unverbindlich und in aller Vertraulichkeit." [level=2] [ref=f2e149]
+        - paragraph [ref=f2e150]: Wir nehmen uns Zeit für Ihre Fragen und Ihre Situation.
+        - paragraph [ref=f2e151]: 30 Minuten, telefonisch oder persönlich. Ohne Unterlagen, ohne Verpflichtung.
+        - link "Vertrauliches Erstgespräch vereinbaren" [ref=f2e152] [cursor=pointer]:
+          - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+    - text: + + + + + + + + +
+  - contentinfo [ref=f2e153]:
+    - generic [ref=f2e154]:
+      - generic [ref=f2e155]:
+        - generic [ref=f2e156]:
+          - img "Manereal Hausverwaltung" [ref=f2e158]
+          - paragraph [ref=f2e159]: Wir übernehmen Hausverwaltungen in Österreich, führen sie verantwortungsvoll weiter und sichern dabei Kontinuität für Mitarbeiter und Kunden.
+        - generic [ref=f2e160]:
+          - heading "Navigation" [level=4] [ref=f2e161]
+          - list [ref=f2e162]:
+            - listitem [ref=f2e163]:
+              - link "Start" [ref=f2e164] [cursor=pointer]:
+                - /url: "#start"
+            - listitem [ref=f2e165]:
+              - link "Unser Ansatz" [ref=f2e166] [cursor=pointer]:
+                - /url: "#nachfolge"
+            - listitem [ref=f2e167]:
+              - link "Über Manereal" [ref=f2e168] [cursor=pointer]:
+                - /url: "#ueber-uns"
+        - generic [ref=f2e169]:
+          - heading "Kontakt" [level=4] [ref=f2e170]
+          - list [ref=f2e171]:
+            - listitem [ref=f2e172]:
+              - link "kontakt@manereal.at" [ref=f2e173] [cursor=pointer]:
+                - /url: mailto:kontakt@manereal.at
+            - listitem [ref=f2e174]:
+              - link "Impressum" [ref=f2e175] [cursor=pointer]:
+                - /url: "#impressum"
+            - listitem [ref=f2e176]:
+              - link "Datenschutz" [ref=f2e177] [cursor=pointer]:
+                - /url: "#datenschutz"
+      - generic [ref=f2e178]: © 2026 Manereal. Alle Rechte vorbehalten.

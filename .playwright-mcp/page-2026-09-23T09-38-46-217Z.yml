@@ -1,0 +1,67 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link [ref=f1e4] [cursor=pointer]:
+        - /url: "#start"
+        - img "Manereal Hausverwaltung" [ref=f1e5]
+      - button "☰" [ref=f1e266] [cursor=pointer]
+  - main [ref=f1e13]:
+    - text: + + + + + + + + + + + + + + +
+    - generic [ref=f1e342]:
+      - heading "Datenschutzerklärung" [level=1] [ref=f1e343]
+      - generic [ref=f1e344]:
+        - strong [ref=f1e345]: "Hinweis (vor Go-Live prüfen):"
+        - text: Dieser Text ist ein Entwurf und muss an die tatsächliche Datenverarbeitung (Hosting-Anbieter, ggf. Kontaktformular, Analyse-Tools) angepasst und rechtlich geprüft werden.
+      - heading "1. Verantwortlicher" [level=2] [ref=f1e346]
+      - paragraph [ref=f1e347]:
+        - text: "Int. Möbelspedition R. Gruber Ges.m.b.H & CoKG, Winetzhammerstraße 3, 4030 Linz, Österreich, E-Mail:"
+        - link "kontakt@manereal.at" [ref=f1e348] [cursor=pointer]:
+          - /url: mailto:kontakt@manereal.at
+      - heading "2. Hosting" [level=2] [ref=f1e349]
+      - paragraph [ref=f1e350]: "Diese Website wird über die Plattform Vercel Inc. (340 S Lemon Ave #4133, Walnut, CA 91789, USA) gehostet. Beim Aufruf der Website verarbeitet Vercel automatisch technische Zugriffsdaten (IP-Adresse, Datum und Uhrzeit des Zugriffs, aufgerufene Seite, Browsertyp und -version, verwendetes Betriebssystem) in Server-Logfiles. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einem sicheren, stabilen und performanten Betrieb der Website (Art. 6 Abs. 1 lit. f DSGVO)."
+      - paragraph [ref=f1e351]:
+        - text: "Da Vercel Inc. ein US-amerikanisches Unternehmen ist, kann es dabei zu einer Übermittlung personenbezogener Daten in die USA (Drittland) kommen. Vercel ist nach eigenen Angaben unter dem EU-U.S. Data Privacy Framework zertifiziert; ergänzend werden, soweit erforderlich, EU-Standardvertragsklauseln (Art. 46 DSGVO) als Garantie für ein angemessenes Datenschutzniveau eingesetzt. Weitere Informationen:"
+        - link "vercel.com/legal/privacy-policy" [ref=f1e352] [cursor=pointer]:
+          - /url: https://vercel.com/legal/privacy-policy
+        - text: und
+        - link "vercel.com/legal/dpa" [ref=f1e353] [cursor=pointer]:
+          - /url: https://vercel.com/legal/dpa
+        - text: .
+      - paragraph [ref=f1e354]: Die Logfiles werden nach 30 Tagen automatisch gelöscht.
+      - heading "3. Kontaktaufnahme" [level=2] [ref=f1e355]
+      - paragraph [ref=f1e356]: Wenn Sie uns per E-Mail oder Telefon kontaktieren, verarbeiten wir Ihre Angaben zur Bearbeitung der Anfrage und für Anschlussfragen (Art. 6 Abs. 1 lit. b und f DSGVO). Ihre Daten werden vertraulich behandelt und nicht ohne Ihre Zustimmung weitergegeben.
+      - heading "4. Cookies und Tracking" [level=2] [ref=f1e357]
+      - paragraph [ref=f1e358]: Diese Website verwendet keine Cookies zu Analyse- oder Marketingzwecken.
+      - heading "5. Ihre Rechte" [level=2] [ref=f1e359]
+      - paragraph [ref=f1e360]: Ihnen stehen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch zu. Sie können sich zudem bei der österreichischen Datenschutzbehörde (dsb.gv.at) beschweren.
+  - contentinfo [ref=f1e110]:
+    - generic [ref=f1e111]:
+      - generic [ref=f1e112]:
+        - generic [ref=f1e113]:
+          - img "Manereal Hausverwaltung" [ref=f1e115]
+          - paragraph [ref=f1e116]: Wir übernehmen Hausverwaltungen in Österreich, führen sie verantwortungsvoll weiter und sichern dabei Kontinuität für Mitarbeiter und Kunden.
+        - generic [ref=f1e117]:
+          - heading "Navigation" [level=4] [ref=f1e118]
+          - list [ref=f1e119]:
+            - listitem [ref=f1e120]:
+              - link "Start" [ref=f1e121] [cursor=pointer]:
+                - /url: "#start"
+            - listitem [ref=f1e122]:
+              - link "Unser Ansatz" [ref=f1e123] [cursor=pointer]:
+                - /url: "#nachfolge"
+            - listitem [ref=f1e124]:
+              - link "Über Manereal" [ref=f1e125] [cursor=pointer]:
+                - /url: "#ueber-uns"
+        - generic [ref=f1e126]:
+          - heading "Kontakt" [level=4] [ref=f1e127]
+          - list [ref=f1e128]:
+            - listitem [ref=f1e129]:
+              - link "kontakt@manereal.at" [ref=f1e130] [cursor=pointer]:
+                - /url: mailto:kontakt@manereal.at
+            - listitem [ref=f1e131]:
+              - link "Impressum" [ref=f1e132] [cursor=pointer]:
+                - /url: "#impressum"
+            - listitem [ref=f1e133]:
+              - link "Datenschutz" [ref=f1e134] [cursor=pointer]:
+                - /url: "#datenschutz"
+      - generic [ref=f1e135]: © 2026 Manereal. Alle Rechte vorbehalten.

@@ -1,0 +1,90 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link [ref=f1e4] [cursor=pointer]:
+        - /url: "#start"
+        - img "Manereal Hausverwaltung" [ref=f1e5]
+      - button "☰" [ref=f1e266] [cursor=pointer]
+  - main [ref=f1e13]:
+    - generic [ref=f1e267]:
+      - generic [ref=f1e273]:
+        - heading "Ihr Lebenswerk. Unsere Verantwortung." [level=1] [ref=f1e274]: Ihr Lebenswerk.Unsere Verantwortung.
+        - link "Vertrauliches Erstgespräch" [ref=f1e276] [cursor=pointer]:
+          - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+      - generic [ref=f1e279]:
+        - generic [ref=f1e280]: Unsere Vision
+        - heading "Aufbau einer österreichischen Hausverwaltungsgruppe mit starkem Netzwerk" [level=2] [ref=f1e281]
+      - generic [ref=f1e283]:
+        - generic [ref=f1e284]:
+          - generic [ref=f1e285]: Unser Angebot
+          - heading "Wir suchen Unternehmer, deren Lebenswerk wir weiterführen dürfen" [level=2] [ref=f1e286]
+        - generic [ref=f1e287]:
+          - generic [ref=f1e288]:
+            - group [ref=f1e289]:
+              - generic "Flexible Übergabemodelle +" [ref=f1e290] [cursor=pointer]
+            - group [ref=f1e293]:
+              - generic "Faire Bewertung +" [ref=f1e294] [cursor=pointer]
+            - group [ref=f1e298]:
+              - generic "Klarer Prozess +" [ref=f1e299] [cursor=pointer]
+            - group [ref=f1e303]:
+              - generic "Kontinuität für Team & Kunden +" [ref=f1e304] [cursor=pointer]
+            - group [ref=f1e307]:
+              - generic "Stärke des Verbunds +" [ref=f1e308] [cursor=pointer]
+            - group [ref=f1e311]:
+              - generic "Absolute Diskretion +" [ref=f1e312] [cursor=pointer]
+          - paragraph [ref=f1e316]:
+            - link "So läuft die Übergabe →" [ref=f1e317] [cursor=pointer]:
+              - /url: "#nachfolge"
+        - img "Handschlag zwischen zwei Unternehmern" [ref=f1e318]
+      - generic [ref=f1e320]:
+        - generic [ref=f1e321]: Wer dahinter steht
+        - heading "Unternehmer mit Handschlagsqualität" [level=2] [ref=f1e322]
+        - generic [ref=f1e323]:
+          - generic [ref=f1e324]:
+            - img "Jörgen Oberkofler" [ref=f1e326]
+            - heading "Jörgen Oberkofler" [level=3] [ref=f1e327]
+          - generic [ref=f1e328]:
+            - img "Lorenz Ambrosius" [ref=f1e330]
+            - heading "Lorenz Ambrosius" [level=3] [ref=f1e331]
+        - paragraph [ref=f1e332]:
+          - link "Mehr über uns →" [ref=f1e333] [cursor=pointer]:
+            - /url: "#ueber-uns"
+      - generic [ref=f1e335]:
+        - generic [ref=f1e336]: Der Weg zu uns
+        - heading "Lassen Sie uns sprechen. Unverbindlich und in aller Vertraulichkeit." [level=2] [ref=f1e337]
+        - paragraph [ref=f1e338]: Wir nehmen uns Zeit für Ihre Fragen und Ihre Situation.
+        - paragraph [ref=f1e339]: 30 Minuten, telefonisch oder persönlich. Ohne Unterlagen, ohne Verpflichtung.
+        - link "Vertrauliches Erstgespräch vereinbaren" [ref=f1e340] [cursor=pointer]:
+          - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+    - text: + + + + + + + + +
+  - contentinfo [ref=f1e110]:
+    - generic [ref=f1e111]:
+      - generic [ref=f1e112]:
+        - generic [ref=f1e113]:
+          - img "Manereal Hausverwaltung" [ref=f1e115]
+          - paragraph [ref=f1e116]: Wir übernehmen Hausverwaltungen in Österreich, führen sie verantwortungsvoll weiter und sichern dabei Kontinuität für Mitarbeiter und Kunden.
+        - generic [ref=f1e117]:
+          - heading "Navigation" [level=4] [ref=f1e118]
+          - list [ref=f1e119]:
+            - listitem [ref=f1e120]:
+              - link "Start" [ref=f1e121] [cursor=pointer]:
+                - /url: "#start"
+            - listitem [ref=f1e122]:
+              - link "Unser Ansatz" [ref=f1e123] [cursor=pointer]:
+                - /url: "#nachfolge"
+            - listitem [ref=f1e124]:
+              - link "Über Manereal" [ref=f1e125] [cursor=pointer]:
+                - /url: "#ueber-uns"
+        - generic [ref=f1e126]:
+          - heading "Kontakt" [level=4] [ref=f1e127]
+          - list [ref=f1e128]:
+            - listitem [ref=f1e129]:
+              - link "kontakt@manereal.at" [ref=f1e130] [cursor=pointer]:
+                - /url: mailto:kontakt@manereal.at
+            - listitem [ref=f1e131]:
+              - link "Impressum" [ref=f1e132] [cursor=pointer]:
+                - /url: "#impressum"
+            - listitem [ref=f1e133]:
+              - link "Datenschutz" [ref=f1e134] [cursor=pointer]:
+                - /url: "#datenschutz"
+      - generic [ref=f1e135]: © 2026 Manereal. Alle Rechte vorbehalten.

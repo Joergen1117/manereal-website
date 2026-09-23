@@ -1,0 +1,161 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link [ref=e4] [cursor=pointer]:
+        - /url: "#start"
+        - img "Manereal Hausverwaltung" [ref=e5]
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "Unser Ansatz" [ref=e8] [cursor=pointer]:
+            - /url: "#nachfolge"
+        - listitem [ref=e9]:
+          - link "Unser Versprechen" [ref=e10] [cursor=pointer]:
+            - /url: "#versprechen"
+        - listitem [ref=e11]:
+          - link "Über Manereal" [ref=e12] [cursor=pointer]:
+            - /url: "#ueber-uns"
+        - listitem [ref=e13]:
+          - link "Erstgespräch vereinbaren" [ref=e14] [cursor=pointer]:
+            - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e22]:
+        - heading "Ihr Lebenswerk. Unsere Verantwortung." [level=1] [ref=e23]: Ihr Lebenswerk.Unsere Verantwortung.
+        - paragraph [ref=e24]: Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.
+        - generic [ref=e25]:
+          - link "Vertrauliches Erstgespräch" [ref=e26] [cursor=pointer]:
+            - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+          - link "So läuft die Übergabe →" [ref=e27] [cursor=pointer]:
+            - /url: "#nachfolge"
+      - generic [ref=e29]:
+        - generic [ref=e30]: Unsere Vision
+        - heading "Aufbau einer österreichischen Hausverwaltungsgruppe mit starkem Netzwerk" [level=2] [ref=e31]
+        - paragraph [ref=e32]: Im Zusammenschluss lösen wir die Herausforderungen der Hausverwaltungsbranche und heben Potenziale, die allein nicht erreichbar sind.
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - heading "Langfristige Perspektive" [level=3] [ref=e38]
+            - paragraph [ref=e39]: Ihr Unternehmen wird verantwortungsvoll weitergeführt und langfristig gestärkt.
+          - generic [ref=e40]:
+            - heading "Starkes Team" [level=3] [ref=e44]
+            - paragraph [ref=e45]: Gemeinsames Recruiting, eigene Akademie und Fachkräfte aus dem Verbund, wenn Ihr Team sie braucht.
+          - generic [ref=e46]:
+            - heading "Digital & effizient" [level=3] [ref=e51]
+            - paragraph [ref=e52]: Gemeinsame Plattform und Prozesse statt teurer Einzellösungen.
+          - generic [ref=e53]:
+            - heading "Synergien & Skalen" [level=3] [ref=e57]
+            - paragraph [ref=e58]: "Buchhaltung, Recht, Finanzen, Marketing: Geteiltes Know-how für mehr Schlagkraft am Markt."
+      - generic [ref=e61]:
+        - generic [ref=e62]: Unser Anliegen
+        - heading "Wir suchen Unternehmer, deren Lebenswerk wir weiterführen dürfen" [level=2] [ref=e63]
+        - paragraph [ref=e64]: Viele Hausverwaltungen in Österreich stehen vor der Nachfolgefrage. Wir bieten Ihrem Unternehmen, Ihrem Team und Ihren Kunden eine neue Heimat.
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]: "01"
+            - heading "Größe & Portfolio" [level=3] [ref=e68]
+            - list [ref=e69]:
+              - listitem [ref=e70]: Hausverwaltungen mit über 50 Liegenschaften
+              - listitem [ref=e71]: Wohn- und/oder Gewerbeimmobilien
+              - listitem [ref=e72]: Sitz und Portfolio in Österreich
+          - generic [ref=e73]:
+            - generic [ref=e74]: "02"
+            - heading "Eigentümer & Nachfolge" [level=3] [ref=e75]
+            - list [ref=e76]:
+              - listitem [ref=e77]: Keine abschließend gesicherte interne oder familiäre Nachfolge
+              - listitem [ref=e78]: Grundsätzliche Offenheit für eine Übergabe oder einen Verkauf
+              - listitem [ref=e79]: Übergabe ganz oder teilweise in den nächsten 12–24 Monaten
+          - generic [ref=e80]:
+            - generic [ref=e81]: "03"
+            - heading "Flexible Lösung" [level=3] [ref=e82]
+            - list [ref=e83]:
+              - listitem [ref=e84]: Voll-, Teilverkauf oder schrittweise Übergabe
+              - listitem [ref=e85]: Unsere Struktur passt sich Ihrer Situation an
+              - listitem [ref=e86]: Sie entscheiden über Tempo und Umfang
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]: Unser Angebot
+          - heading "Ein Angebot, das sich Ihrer Situation anpasst" [level=2] [ref=e91]
+          - paragraph [ref=e92]: Jede Hausverwaltung ist anders. Deshalb gibt es bei uns kein Standardmodell, sondern ein Angebot, das zu Ihnen passt.
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - heading "Flexible Übergabemodelle" [level=3] [ref=e99]
+              - paragraph [ref=e100]: Vollverkauf, Teilverkauf oder schrittweise Übergabe. Sie entscheiden, wann und wie viel Verantwortung Sie abgeben.
+            - generic [ref=e101]:
+              - heading "Faire Bewertung" [level=3] [ref=e106]
+              - paragraph [ref=e107]: Eine transparente, nachvollziehbare Bewertung ohne versteckte Abschläge. Offen kommuniziert und ehrlich verhandelt.
+            - generic [ref=e108]:
+              - heading "Klarer Prozess" [level=3] [ref=e113]
+              - paragraph [ref=e114]: Vom Erstgespräch bis zum Vertrag in rund sechs Wochen. Sie wissen jederzeit, wo wir stehen.
+            - generic [ref=e115]:
+              - heading "Kontinuität für Team & Kunden" [level=3] [ref=e119]
+              - paragraph [ref=e120]: Ihre Mitarbeiter bleiben an Bord, Ihre Kunden behalten ihre Ansprechpartner. Der Betrieb läuft ohne Bruch weiter.
+            - generic [ref=e121]:
+              - heading "Stärke des Verbunds" [level=3] [ref=e125]
+              - paragraph [ref=e126]: Recruiting, Digitalisierung, Buchhaltung und Einkauf im Netzwerk. Ihr Betrieb profitiert vom ersten Tag an.
+            - generic [ref=e127]:
+              - heading "Absolute Diskretion" [level=3] [ref=e132]
+              - paragraph [ref=e133]: Kein Wort nach außen, bis Sie es entscheiden. Vertraulichkeit in jedem Schritt.
+          - paragraph [ref=e134]:
+            - link "So läuft die Übergabe →" [ref=e135] [cursor=pointer]:
+              - /url: "#nachfolge"
+        - img "Handschlag zwischen zwei Unternehmern" [ref=e136]
+      - generic [ref=e138]:
+        - generic [ref=e139]: Wer dahinter steht
+        - heading "Unternehmer mit Handschlagqualität" [level=2] [ref=e140]
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - img "Jörgen Oberkofler" [ref=e144]
+            - heading "Jörgen Oberkofler" [level=3] [ref=e145]
+          - generic [ref=e146]:
+            - img "Lorenz Ambrosius" [ref=e148]
+            - heading "Lorenz Ambrosius" [level=3] [ref=e149]
+        - paragraph [ref=e150]:
+          - link "Mehr über uns →" [ref=e151] [cursor=pointer]:
+            - /url: "#ueber-uns"
+      - generic [ref=e153]:
+        - generic [ref=e154]: Der Weg zu uns
+        - heading "Lassen Sie uns sprechen. Unverbindlich und in aller Vertraulichkeit." [level=2] [ref=e155]
+        - paragraph [ref=e156]: Wir nehmen uns Zeit für Ihre Fragen und Ihre Situation.
+        - paragraph [ref=e157]: 30 Minuten, telefonisch oder persönlich. Ohne Unterlagen, ohne Verpflichtung.
+        - link "Vertrauliches Erstgespräch vereinbaren" [ref=e158] [cursor=pointer]:
+          - /url: mailto:kontakt@manereal.at?subject=Vertrauliches%20Erstgespräch
+    - text: + + + + + + + + +
+  - contentinfo [ref=e159]:
+    - generic [ref=e160]:
+      - generic [ref=e161]:
+        - generic [ref=e162]:
+          - img "Manereal Hausverwaltung" [ref=e164]
+          - paragraph [ref=e165]: Wir übernehmen Hausverwaltungen in Österreich, führen sie verantwortungsvoll weiter und sichern dabei Kontinuität für Mitarbeitende und Kunden.
+        - generic [ref=e166]:
+          - heading "Navigation" [level=4] [ref=e167]
+          - list [ref=e168]:
+            - listitem [ref=e169]:
+              - link "Start" [ref=e170] [cursor=pointer]:
+                - /url: "#start"
+            - listitem [ref=e171]:
+              - link "Unser Ansatz" [ref=e172] [cursor=pointer]:
+                - /url: "#nachfolge"
+            - listitem [ref=e173]:
+              - link "Unser Versprechen" [ref=e174] [cursor=pointer]:
+                - /url: "#versprechen"
+            - listitem [ref=e175]:
+              - link "Über Manereal" [ref=e176] [cursor=pointer]:
+                - /url: "#ueber-uns"
+            - listitem [ref=e177]:
+              - link "Kontakt" [ref=e178] [cursor=pointer]:
+                - /url: "#kontakt"
+        - generic [ref=e179]:
+          - heading "Kontakt" [level=4] [ref=e180]
+          - list [ref=e181]:
+            - listitem [ref=e182]:
+              - link "kontakt@manereal.at" [ref=e183] [cursor=pointer]:
+                - /url: mailto:kontakt@manereal.at
+            - listitem [ref=e184]: Wien, Österreich
+      - generic [ref=e185]:
+        - generic [ref=e186]: © 2026 Manereal. Alle Rechte vorbehalten.
+        - generic [ref=e187]:
+          - link "Impressum" [ref=e188] [cursor=pointer]:
+            - /url: "#impressum"
+          - text: ·
+          - link "Datenschutz" [ref=e189] [cursor=pointer]:
+            - /url: "#datenschutz"
