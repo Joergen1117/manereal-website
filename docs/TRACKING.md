@@ -58,48 +58,111 @@ Pfad ist nirgends verlinkt und für Suchmaschinen gesperrt.
 
 ## Eine Welle vorbereiten
 
-**1. Kontakte als CSV exportieren.** Aus dem GMass-Sheet, mit diesen Spalten:
+**1. Kontaktliste als CSV speichern.** Erkannt werden diese Spalten — unabhängig
+von Schreibweise, Bindestrichen und Leerzeichen:
 
-| Spalte | Pflicht | Beispiel |
-|---|---|---|
-| `name` | ja | Max Mustermann |
-| `campaign` | ja | `welle-2-wien` |
-| `company` | nein | Hausverwaltung Mustermann GmbH |
-| `email` | nein | max@mustermann.at |
-| `sent_at` | nein | `2026-10-12` |
+| Spalte | Pflicht | wird erkannt als | Beispiel |
+|---|---|---|---|
+| E-Mail | **ja** | `email`, `E-Mail`, `mail` | max@mustermann.at |
+| Vorname | nein | `firstname`, `Vorname` | Max |
+| Nachname | nein | `lastname`, `Nachname` | Mustermann |
+| Unternehmen | nein | `company`, `Firma` | Hausverwaltung Mustermann GmbH |
+| Versanddatum | nein | `sent_at`, `versendet` | 2026-10-12 |
+
+**Alle weiteren Spalten werden unverändert durchgereicht** und stehen in
+Instantly als Variablen zur Verfügung. Wer eine Spalte `Branche` oder
+`Einheiten` mitliefert, kann damit personalisieren, ohne dass hier etwas
+anzupassen wäre.
 
 Komma oder Semikolon als Trennzeichen, beides wird erkannt.
 
-**2. Im Dashboard unter „Verwaltung" einspielen.** Es lädt sofort eine Datei
-`gmass-mit-links.csv` herunter — dieselben Zeilen plus die Spalte `link`.
-
-**3. Die Spalte `link` ins GMass-Sheet einfügen.** In der Mail steht dann
-`{link}` statt der nackten Adresse.
-
-**4. Als sichtbaren Linktext `manereal.at` setzen**, nicht „hier klicken".
-
-Für große Listen geht es auch auf der Kommandozeile:
+**2. Im Dashboard unter „Verwaltung" einspielen.** Kampagne eintragen (z. B.
+`welle-2-wien`), Datei wählen, einspielen. Es lädt sofort
+`instantly-welle-2-wien.csv` herunter:
 
 ```
-SEITEN_URL=https://manereal.at DATABASE_URL=… node scripts/links-erzeugen.js kontakte.csv
+Email,Firstname,Lastname,Company,Token,Branche,Einheiten
+herta.wolf@wo.at,Herta,Wolf,"Wolf, Huber & Partner KG",WCVYSNY2NH,Wohnbau,220
 ```
 
-`--trocken` erzeugt die Links, ohne etwas in die Datenbank zu schreiben.
+Komma-getrennt und ohne BOM — genau so, wie Instantly es braucht. Die Kampagne
+steht **nicht** in der Datei; sie bleibt auf unserer Seite und gruppiert nur die
+Auswertung.
+
+**Ein wiederholter Upload ist harmlos.** Dieselbe Adresse darf in mehreren
+Wellen stehen, aber nicht zweimal in derselben. Ein zweiter Upload derselben
+Datei legt nichts doppelt an und liefert dieselben Tokens wie beim ersten Mal.
+
+**3. In Instantly importieren.** Beim Zuordnen: `Email` → Email,
+**`Token` → Custom Variable**. Der Rest nach Bedarf.
+
+**4. Den Link in die Signatur setzen.** In der Sequenz die Code-Ansicht
+`<>` öffnen:
+
+```html
+<a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>
+```
+
+Sichtbar steht die Domain, dahinter liegt der persönliche Code. Weil Anzeige
+und Ziel dieselbe Domain haben, ist das für Spam-Filter unauffällig — ein
+Query-Parameter löst nichts aus.
+
+**5. Fünf Schalter prüfen.** Siehe unten. Drei davon entfernen das HTML und
+damit den Link, ohne dass man es merkt.
+
+Für Listen jenseits weniger tausend Zeilen geht es auch auf der Kommandozeile
+— dasselbe Ergebnis, dieselbe Funktion:
+
+```
+DATABASE_URL=… node scripts/links-erzeugen.js kontakte.csv welle-2-wien
+```
+
+---
+
+## Die fünf Schalter in Instantly
+
+Alle fünf gehören **aus**. Kampagne → Options, der letzte in den globalen
+Einstellungen.
+
+| Schalter | warum aus |
+|---|---|
+| *Send emails as text-only* | entfernt das HTML — der Link verschwindet |
+| *Send first email as text-only* | dasselbe, nur für die erste Mail |
+| *Always send first email as text-only* (global) | dasselbe, kampagnenübergreifend |
+| *Link Tracking* | schreibt die Adresse auf eine fremde Tracking-Domain um |
+| *Open Tracking* | Zählpixel: schadet der Zustellung und braucht eine Einwilligung |
+
+**Die ersten drei sind der gefährliche Teil.** Ist einer davon an, bleibt vom
+Link nur der sichtbare Text `www.manereal.at` übrig. Die Kampagne läuft, die
+Mails kommen an, alles sieht richtig aus — und kein einziger Klick ist einer
+Person zuzuordnen. Deshalb: **nach den ersten fünfzig Mails ins Dashboard
+sehen.** Stehen dort nur anonyme Aufrufe, ist der Code unterwegs verloren
+gegangen.
+
+Zum Öffnungs-Tracking: Die Öffnungsrate ist seit Apple Mail Privacy Protection
+ohnehin kaum noch aussagekräftig, und rechtlich ist ein Zählpixel die härtere
+Konstellation als unser Link-Code — die Artikel-29-Gruppe hält dafür eine
+ausdrückliche Einwilligung für nötig, weil die ePrivacy-Richtlinie vorgeht.
+Unser Dashboard weiß ohnehin mehr: nicht nur *ob* geklickt wurde, sondern was
+danach gelesen wurde.
 
 ---
 
 ## Zustellbarkeit — der größte Hebel
 
 Das ist kein Tracking-Thema, beeinflusst die Zahlen aber stärker als alles
-andere. Was GMass tut — viele verschiedene Absenderadressen, junge Domains,
-Links auf eine dritte Domain — ist genau das Muster, auf das Spam-Filter
-anschlagen.
+andere. Was beim Cold-Outreach passiert — viele verschiedene Absenderadressen,
+junge Domains, Links auf eine dritte Domain — ist genau das Muster, auf das
+Spam-Filter anschlagen. Bei Instantly mit vielen Postfächern wiegt das schwerer
+als bei einem einzelnen Konto.
 
 Vor jeder Welle:
 
 - [ ] **SPF, DKIM und DMARC** für **jede** Absender-Domain eingerichtet.
       Ohne das landet ein Teil der Kampagne nicht im Posteingang.
 - [ ] **Keine Kurz-URLs** (bit.ly und Ähnliches werden hart bewertet).
+- [ ] **Nur ein Link in der ersten Mail**, und zwar in der Signatur.
+- [ ] **Aufwärmphase** der Postfächer abgewartet, bevor Volumen kommt.
 - [ ] **Linktext = Ziel.** Die Abweichung zwischen Anzeigetext und
       tatsächlichem Ziel ist ein klassisches Phishing-Merkmal.
 - [ ] **Testmail an je eine Outlook-/Microsoft-365-, Gmail- und
@@ -202,7 +265,8 @@ auslösbar noch messbar — **jede Formular-Conversion-Rate ist systematisch zu
 niedrig**. Sobald Nummern auf der Seite stehen, kommt ein eigener
 Ereignistyp dazu.
 
-**Geöffnete E-Mails.** Das macht GMass, nicht wir.
+**Geöffnete E-Mails.** Dafür bräuchte es ein Zählpixel in Instantly — davon
+raten wir ab, siehe oben.
 
 **Weitergeleitete Links zeigen die falsche Person.** Leitet Herr Mustermann
 die Mail an seinen Steuerberater weiter, laufen dessen Klicks auf sein Konto.
@@ -225,7 +289,7 @@ davor bleibt vollständig zugeordnet.
 | [`api/auswertung.js`](../api/auswertung.js) | alle Abfragen des Dashboards |
 | [`api/_db.js`](../api/_db.js), [`api/_token.js`](../api/_token.js) | Datenbankzugriff, Code-Erzeugung |
 | [`auswertung.html`](../auswertung.html) | das Dashboard |
-| [`scripts/links-erzeugen.js`](../scripts/links-erzeugen.js) | Links für große Listen |
+| [`scripts/links-erzeugen.js`](../scripts/links-erzeugen.js) | dasselbe Einspielen auf der Kommandozeile |
 | [`index.html`](../index.html) | zwei Stellen: das Snippet im `<head>`, der Messblock am Ende |
 
 ---

@@ -4,21 +4,60 @@ Was am Tracking geändert werden muss, weil der Outreach über
 [Instantly](https://instantly.ai) statt über GMass läuft — und wie der Link in
 der Signatur aussehen sollte.
 
-Stand 24.09.2026. **Noch nichts davon ist umgesetzt.** Enthält die Auskunft des
-Instantly-Support-Agenten vom 24.09.2026.
+Stand 24.09.2026. **Umgesetzt ist alles, was in beiden Fällen nötig ist** —
+siehe unten. Offen bleibt nur, was von der Testmail abhängt. Enthält die
+Auskunft des Instantly-Support-Agenten vom 24.09.2026.
 
 ---
 
 ## Die Lage in drei Sätzen
 
 Es gibt zwei Wege, den persönlichen Code in die Mail zu bekommen. **Weg A**
-versteckt ihn hinter dem Text `www.manereal.at` und braucht **keine einzige
-Codeänderung** — wenn er funktioniert. **Weg B** zeigt einen kurzen Pfad
-(`manereal.at/k7f3mq`), kann nicht fehlschlagen, kostet aber einen halben
-Arbeitstag Umbau.
+versteckt ihn hinter dem Text `www.manereal.at` — gebaut und einsatzbereit.
+**Weg B** zeigt einen kurzen Pfad (`manereal.at/k7f3mq`), kann nicht
+fehlschlagen, kostet aber einen halben Arbeitstag Umbau und ist noch nicht
+gebaut.
 
 Welcher es wird, entscheidet **eine einzige Testmail**. Siehe
 [testmail-instantly.md](testmail-instantly.md).
+
+### Umgesetzt am 24.09.2026
+
+- Kontakte tragen **Vor- und Nachname getrennt** (`firstname`, `lastname`)
+- **Beliebige weitere Spalten** der hochgeladenen Datei werden unverändert
+  durchgereicht und stehen in Instantly als Variablen bereit
+- Spalten werden **unabhängig von Schreibweise erkannt**, auch deutsch:
+  `E-Mail`, `Vorname`, `Nachname`, `Firma`
+- Die Datei für Instantly ist **komma-getrennt, ohne BOM**, mit den Spalten
+  `Email, Firstname, Lastname, Company, Token` plus Zusatzspalten
+- Die Spalte heißt **`Token`** und enthält nur den Code, nicht die Adresse —
+  der Link wird in Instantly daraus gebaut
+- Die **Kampagne bleibt auf unserer Seite** und steht nicht in der Datei
+- Ein **wiederholter Upload** legt nichts doppelt an und liefert dieselben
+  Tokens (`unique (email, campaign)`)
+- Der Ergebnis-Export für Excel behält Semikolon und BOM
+- `scripts/links-erzeugen.js` ruft dieselbe Funktion auf wie das Dashboard —
+  es gibt keine zweite Umsetzung derselben Regeln
+
+### Die Entscheidung zur Token-Spalte
+
+Julia hat festgelegt, dass die Spalte **nur das Token** enthält und der Link in
+Instantly zusammengebaut wird:
+
+```html
+<a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>
+```
+
+Das ist die heiklere von zwei Formen: Die Variable steht *innerhalb* der URL,
+innerhalb eines Attributs. Manche Editoren prüfen beim Speichern, ob der `href`
+eine gültige Adresse ist, und kodieren die geschweiften Klammern zu
+`%7B%7BToken%7D%7D` um — dann wird nichts ersetzt. Eine Spalte mit dem
+**vollständigen Link** hätte dieses Risiko nicht, weil die Ersetzung dann den
+ganzen Attributwert austauscht.
+
+Die Testmail deckt genau diese Form ab. Fällt sie durch, ist der Wechsel auf
+eine Volllink-Spalte eine Zeile in
+[`api/auswertung.js`](../api/auswertung.js).
 
 ---
 
@@ -141,9 +180,9 @@ gegangen. Das ist die einzige Kontrolle, die im laufenden Betrieb greift.
 
 ---
 
-## Änderungen, die in **beiden** Fällen nötig sind
+## Was am CSV-Format geändert wurde *(erledigt)*
 
-### CSV-Format für Instantly — [`api/auswertung.js`](../api/auswertung.js)
+### [`api/auswertung.js`](../api/auswertung.js)
 
 Instantly stellt andere Anforderungen als Excel. **Zwei Formate statt einem:**
 
@@ -169,17 +208,16 @@ Inneren einer Adresse, die es vielleicht nicht tut.
 *Warum kein BOM:* Instantly verlangt UTF-8. Ein BOM kann dazu führen, dass die
 erste Spalte als `﻿Email` gelesen wird und das Mapping scheitert.
 
-### Texte anpassen
+### Texte *(erledigt)*
 
-- [`auswertung.html`](../auswertung.html), Reiter „Verwaltung": nennt GMass und
-  `{link}`. Neu: Instantly und `{{Link}}`.
-- [`docs/TRACKING.md`](TRACKING.md): Abschnitt „Eine Welle vorbereiten" und die
-  Zustellbarkeits-Checkliste.
-- [`scripts/links-erzeugen.js`](../scripts/links-erzeugen.js): Hinweistext am Ende.
+[`auswertung.html`](../auswertung.html) Reiter „Verwaltung",
+[`docs/TRACKING.md`](TRACKING.md) und
+[`scripts/links-erzeugen.js`](../scripts/links-erzeugen.js) beschreiben jetzt
+den Instantly-Weg. GMass kommt nirgends mehr vor.
 
 ---
 
-## Zusätzliche Änderungen nur für Weg B
+## Zusätzliche Änderungen nur für Weg B *(noch nicht gebaut)*
 
 Falls die Testmail scheitert und der Code sichtbar werden muss.
 

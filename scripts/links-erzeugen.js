@@ -1,29 +1,28 @@
-// Erzeugt die personalisierten Outreach-Links aus einer Kontaktliste.
+// Spielt eine Kontaktliste ein und schreibt die Datei für Instantly.
 //
 // Dasselbe wie „Verwaltung → Kontakte einspielen“ im Dashboard, nur für die
-// Kommandozeile — nützlich für große Listen oder wenn etwas wiederholt werden
-// muss. Wer nur eine Liste einspielen will, nimmt das Dashboard.
+// Kommandozeile — nützlich für Listen jenseits weniger tausend Zeilen. Es ruft
+// buchstäblich dieselbe Funktion auf; es gibt keine zweite Umsetzung derselben
+// Regeln, die auseinanderlaufen könnte.
 //
-//   node scripts/links-erzeugen.js kontakte.csv
-//   node scripts/links-erzeugen.js kontakte.csv --trocken     (nichts schreiben)
+//   node scripts/links-erzeugen.js kontakte.csv welle-2-wien
 //
 // Eingabe: CSV mit Kopfzeile, Trennzeichen Komma oder Semikolon.
-//   Pflicht:    name, campaign
-//   freiwillig: company, email, sent_at (JJJJ-MM-TT)
+//   Pflicht:     email
+//   erkannt:     firstname/vorname, lastname/nachname, company/firma, sent_at
+//   alles Übrige wird unverändert durchgereicht
 //
-// Ausgabe: <name>-mit-links.csv neben der Eingabedatei, mit zusätzlicher
-// Spalte "link". Diese Spalte wandert ins GMass-Sheet, in der Mail steht
-// dann {link}.
+// Ausgabe: instantly-<kampagne>.csv neben der Eingabedatei. Komma-getrennt,
+// ohne BOM, mit der Spalte "Token". Der Link wird in Instantly daraus gebaut:
+//   <a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>
 //
-// Erwartete Umgebungsvariablen:
+// Erwartete Umgebungsvariable:
 //   DATABASE_URL   Neon-Verbindung
-//   SEITEN_URL     z. B. https://manereal.at   (sonst wird danach gefragt)
 
 const fs = require('fs');
 const path = require('path');
 const { neon } = require('@neondatabase/serverless');
-const { neuerToken } = require('../api/_token');
-const { csvLesen, csvSchreiben } = require('../api/auswertung');
+const { importieren } = require('../api/auswertung');
 
 function abbruch(text) {
   console.error('\n  ' + text + '\n');
@@ -31,84 +30,36 @@ function abbruch(text) {
 }
 
 async function main() {
-  const args = process.argv.slice(2);
-  const trocken = args.includes('--trocken');
-  const datei = args.find((a) => !a.startsWith('--'));
+  const [datei, kampagne] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 
-  if (!datei) abbruch('Aufruf: node scripts/links-erzeugen.js <kontakte.csv> [--trocken]');
+  if (!datei || !kampagne) {
+    abbruch('Aufruf: node scripts/links-erzeugen.js <kontakte.csv> <kampagne>');
+  }
   if (!fs.existsSync(datei)) abbruch('Datei nicht gefunden: ' + datei);
 
-  const basis = (process.env.SEITEN_URL || '').trim().replace(/\/+$/, '');
-  if (!basis) abbruch('SEITEN_URL fehlt, zum Beispiel: SEITEN_URL=https://manereal.at');
-
   const url = (process.env.DATABASE_URL || '').trim();
-  if (!url && !trocken) abbruch('DATABASE_URL fehlt. Mit --trocken geht es auch ohne Datenbank.');
+  if (!url) abbruch('DATABASE_URL fehlt.');
 
-  const saetze = csvLesen(fs.readFileSync(datei, 'utf8'));
-  if (!saetze.length) abbruch('Die Datei enthält keine Zeilen.');
-
-  const fehlt = ['name', 'campaign'].filter((s) => !(s in saetze[0]));
-  if (fehlt.length) abbruch('Diese Spalten fehlen in der Kopfzeile: ' + fehlt.join(', '));
-
-  const kontakte = [];
-  let uebersprungen = 0;
-
-  for (const satz of saetze) {
-    const name = (satz.name || '').trim();
-    const campaign = (satz.campaign || '').trim();
-    if (!name || !campaign) { uebersprungen += 1; continue; }
-    kontakte.push({
-      token: neuerToken(),
-      name,
-      company: (satz.company || '').trim(),
-      email: (satz.email || '').trim(),
-      campaign,
-      sent_at: /^\d{4}-\d{2}-\d{2}$/.test(satz.sent_at || '') ? satz.sent_at : null,
-    });
-  }
-
-  if (!kontakte.length) abbruch('Keine verwertbare Zeile gefunden (name und campaign sind Pflicht).');
-
-  if (!trocken) {
-    const sql = neon(url);
-    // In Blöcken, damit auch sehr lange Listen nicht an der Paketgröße scheitern.
-    for (let i = 0; i < kontakte.length; i += 200) {
-      const teil = kontakte.slice(i, i + 200);
-      const werte = [];
-      const params = [];
-      teil.forEach((k) => {
-        const n = params.length;
-        werte.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5}, $${n + 6}::date)`);
-        params.push(k.token, k.name, k.company, k.email, k.campaign, k.sent_at);
-      });
-      await sql.query(
-        `insert into contacts (token, name, company, email, campaign, sent_at)
-         values ${werte.join(', ')} on conflict (token) do nothing`,
-        params,
-      );
-    }
-  }
+  const ergebnis = await importieren(neon(url), fs.readFileSync(datei, 'utf8'), kampagne);
+  if (ergebnis.fehler) abbruch(ergebnis.fehler);
 
   const ziel = path.join(
     path.dirname(datei),
-    path.basename(datei, path.extname(datei)) + '-mit-links.csv',
+    'instantly-' + kampagne.replace(/[^a-z0-9-]+/gi, '-') + '.csv',
   );
+  fs.writeFileSync(ziel, ergebnis.csv, 'utf8');
 
-  fs.writeFileSync(ziel, csvSchreiben(
-    ['name', 'company', 'email', 'campaign', 'token', 'link'],
-    kontakte.map((k) => [k.name, k.company, k.email, k.campaign, k.token, basis + '/?m=' + k.token]),
-  ), 'utf8');
-
-  const wellen = [...new Set(kontakte.map((k) => k.campaign))];
   console.log('');
-  console.log('  ' + kontakte.length + ' Kontakte' + (trocken ? ' (trocken, nichts geschrieben)' : ' angelegt'));
-  if (uebersprungen) console.log('  ' + uebersprungen + ' Zeilen übersprungen (name oder campaign fehlte)');
-  console.log('  Kampagnen: ' + wellen.join(', '));
+  console.log('  ' + ergebnis.angelegt + ' neu angelegt'
+    + (ergebnis.schonVorhanden ? ', ' + ergebnis.schonVorhanden + ' waren schon in dieser Kampagne' : '')
+    + (ergebnis.ohneAdresse ? ', ' + ergebnis.ohneAdresse + ' ohne gültige E-Mail-Adresse übersprungen' : ''));
+  console.log('  Die Datei enthält alle ' + ergebnis.gesamt + ' Kontakte der Kampagne "' + kampagne + '".');
+  console.log('  Spalten: ' + ergebnis.spalten.join(', '));
   console.log('  Geschrieben: ' + ziel);
   console.log('');
-  console.log('  Die Spalte "link" ins GMass-Sheet einfügen und in der Mail {link} schreiben.');
-  console.log('  Als sichtbaren Linktext manereal.at setzen, nicht „hier klicken“ — die Abweichung');
-  console.log('  zwischen Anzeigetext und Ziel ist ein Phishing-Merkmal und kostet Zustellrate.');
+  console.log('  In Instantly: "Token" als Custom Variable zuordnen, dann in der');
+  console.log('  Code-Ansicht der Sequenz:');
+  console.log('    <a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>');
   console.log('');
 }
 

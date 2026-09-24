@@ -14,7 +14,7 @@ Beide verschicken, nacheinander. Sie beantworten Unterschiedliches.
 | | prüft | Antwort sagt aus |
 |---|---|---|
 | **Variante 1** — feste Adresse | Kommt eine HTML-Mail an, deren sichtbarer Text eine andere Domain zeigt als das Ziel? | Zustellbarkeit unter **erschwerten** Bedingungen |
-| **Variante 2** — mit Variable | Wird `{{Link}}` im `href` ersetzt? | **Die eigentliche Frage.** Ohne ein Ja funktioniert Weg A nicht |
+| **Variante 2** — mit Variable | Wird `{{Token}}` mitten im `href` ersetzt? | **Die eigentliche Frage.** Ohne ein Ja bleibt der Code in der Mail stehen |
 
 Variante 1 ist strenger als die spätere Praxis: Sichtbar steht
 `www.jpprocessautomation.de`, das Ziel ist `manereal-website.vercel.app` —
@@ -69,23 +69,37 @@ Variable braucht eine Tabellenzeile.
 
 ### CSV zum Hochladen
 
-Als `testlauf.csv` speichern, **UTF-8, komma-getrennt, ohne BOM**:
+Als `testlauf.csv` speichern, **UTF-8, komma-getrennt, ohne BOM** — oder
+einfacher: im Dashboard unter *Verwaltung* eine Zeile einspielen und die dort
+erzeugte Datei nehmen, dann stimmt das Format von selbst und der Kontakt liegt
+gleich in der Datenbank.
 
 ```
-Email,Name,Company,Link
-Julian@pils.cc,Julian,JP Process Automation,https://manereal-website.vercel.app/?m=K7F3M2QX9P
+Email,Firstname,Lastname,Company,Token
+Julian@pils.cc,Julian,Pils,JP Process Automation,K7F3M2QX9P
 ```
 
-Beim Import zuordnen: `Email` → Email, `Name` → Custom Variable,
-`Company` → Company Name, **`Link` → Custom Variable**.
+Beim Import zuordnen: `Email` → Email, **`Token` → Custom Variable**,
+der Rest nach Bedarf.
 
 ### Text (Code-Ansicht)
 
 Identisch zu Variante 1, nur die letzte Zeile:
 
 ```html
-<a href="{{Link}}">www.jpprocessautomation.de</a>
+<a href="https://manereal-website.vercel.app/?m={{Token}}">www.jpprocessautomation.de</a>
 ```
+
+**Das ist die heikelste Form, die es gibt** — die Variable steht *innerhalb*
+der URL, innerhalb eines Attributs. Manche Editoren prüfen beim Speichern, ob
+der `href` eine gültige Adresse ist, und kodieren die geschweiften Klammern zu
+`%7B%7BToken%7D%7D` um. Dann wird nichts ersetzt. Genau deshalb wird getestet.
+
+Fällt der Test hier durch, aber die Ersetzung funktioniert sonst: Dann muss die
+Spalte statt des Tokens den **vollständigen Link** enthalten
+(`https://manereal.at/?m=K7F3M2QX9P`) und in der Sequenz steht `{{Link}}` als
+ganzer `href`. Das ist in
+[`api/auswertung.js`](../api/auswertung.js) eine Zeile Änderung.
 
 ---
 
@@ -118,8 +132,8 @@ oder die Mail als `.eml` speichern und im Texteditor öffnen.
 
 | Befund im Quelltext | Bedeutung |
 |---|---|
-| `<a href="https://manereal-website.vercel.app/?m=K7F3M2QX9P">` | **Bestanden.** Weg A funktioniert, keine Codeänderung nötig |
-| `<a href="{{Link}}">` | Ersetzung greift nicht im Attribut → **Weg B** |
+| `<a href="https://manereal-website.vercel.app/?m=K7F3M2QX9P">` | **Bestanden.** Der Weg funktioniert, nichts weiter zu tun |
+| `<a href="…?m={{Token}}">` | Ersetzung greift nicht im Attribut → Volllink-Spalte oder sichtbarer Pfad |
 | kein `<a>`, nur `www.jpprocessautomation.de` als Text | HTML wurde entfernt → Text-only-Schalter prüfen |
 | Ziel zeigt auf eine fremde Tracking-Domain | Link Tracking war noch an |
 
@@ -127,10 +141,10 @@ oder die Mail als `.eml` speichern und im Texteditor öffnen.
 `/auswertung` → Personen. Steht dort ein Besuch beim richtigen Kontakt, ist die
 ganze Kette bewiesen — von der Mail bis zur Auswertung.
 
-Das setzt voraus, dass der Kontakt mit dem Code `K7F3M2QX9P` in der Datenbank
-angelegt ist. Also vorher im Dashboard unter *Verwaltung* eine CSV mit einer
-Zeile einspielen und den dabei erzeugten Code in die Testmail übernehmen —
-oder umgekehrt den Code hier an den vergebenen anpassen.
+Das setzt voraus, dass der Kontakt in der Datenbank liegt. Am einfachsten:
+vorher im Dashboard unter *Verwaltung* eine CSV mit dieser einen Zeile
+einspielen und die zurückgegebene Datei direkt für Instantly verwenden — dann
+stimmt der Code von selbst.
 
 ---
 

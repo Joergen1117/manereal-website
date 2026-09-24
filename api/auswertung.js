@@ -113,15 +113,17 @@ function datumOder(wert) {
 }
 
 // Trennzeichen aus der Kopfzeile ableiten: Excel in deutscher Einstellung
-// schreibt Semikolon, fast alles andere Komma.
+// schreibt Semikolon, fast alles andere Komma. Die Spaltennamen bleiben in
+// ihrer Originalschreibweise erhalten -- sie werden unverändert nach Instantly
+// durchgereicht, dort sind Variablennamen groß-/kleinschreibungsempfindlich.
 function csvLesen(roh) {
   const t = String(roh || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n').trim();
-  if (!t) return [];
+  if (!t) return { spalten: [], saetze: [] };
   const kopfzeile = t.split('\n')[0];
   const trenner = kopfzeile.split(';').length > kopfzeile.split(',').length ? ';' : ',';
 
   const zeilen = [];
-  let feld = '';
+  let wert = '';
   let zeile = [];
   let inAnfuehrung = false;
 
@@ -129,35 +131,76 @@ function csvLesen(roh) {
     const c = t[i];
     if (inAnfuehrung) {
       if (c === '"') {
-        if (t[i + 1] === '"') { feld += '"'; i += 1; } else inAnfuehrung = false;
-      } else feld += c;
+        if (t[i + 1] === '"') { wert += '"'; i += 1; } else inAnfuehrung = false;
+      } else wert += c;
     } else if (c === '"') inAnfuehrung = true;
-    else if (c === trenner) { zeile.push(feld); feld = ''; }
-    else if (c === '\n') { zeile.push(feld); zeilen.push(zeile); zeile = []; feld = ''; }
-    else feld += c;
+    else if (c === trenner) { zeile.push(wert); wert = ''; }
+    else if (c === '\n') { zeile.push(wert); zeilen.push(zeile); zeile = []; wert = ''; }
+    else wert += c;
   }
-  zeile.push(feld);
+  zeile.push(wert);
   zeilen.push(zeile);
 
-  const kopf = zeilen.shift().map((s) => s.trim().toLowerCase());
-  return zeilen
+  const spalten = zeilen.shift().map((s) => s.trim()).filter(Boolean);
+  const saetze = zeilen
     .filter((z) => z.some((f) => f.trim()))
     .map((z) => {
       const satz = {};
-      kopf.forEach((k, i) => { satz[k] = (z[i] || '').trim(); });
+      spalten.forEach((k, i) => { satz[k] = (z[i] || '').trim(); });
       return satz;
     });
+  return { spalten, saetze };
 }
 
-function csvFeld(wert) {
+// Zwei Ausgabeformate, weil zwei Ziele. Excel in deutscher Einstellung erwartet
+// Semikolon und braucht das BOM, sonst zerfallen die Umlaute. Instantly
+// verlangt Komma und reines UTF-8 -- ein BOM würde dort die erste Spalte zu
+// "﻿Email" machen und das Zuordnen der Felder scheitern lassen.
+const CSV_FORMAT = {
+  excel: { trenner: ';', bom: true },
+  instantly: { trenner: ',', bom: false },
+};
+
+function csvFeld(wert, trenner) {
   const s = String(wert == null ? '' : wert);
-  return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  return s.indexOf(trenner) >= 0 || /["\n\r]/.test(s)
+    ? '"' + s.replace(/"/g, '""') + '"'
+    : s;
 }
 
-function csvSchreiben(kopf, zeilen) {
-  return '﻿' + [kopf.join(';')]
-    .concat(zeilen.map((z) => z.map(csvFeld).join(';')))
-    .join('\r\n');
+function csvSchreiben(kopf, zeilen, art) {
+  const f = CSV_FORMAT[art] || CSV_FORMAT.excel;
+  const zeile = (felder) => felder.map((w) => csvFeld(w, f.trenner)).join(f.trenner);
+  return (f.bom ? '﻿' : '')
+    + [zeile(kopf)].concat(zeilen.map(zeile)).join('\r\n');
+}
+
+// Spalten werden unabhängig von Schreibweise, Bindestrichen und Leerzeichen
+// erkannt, dazu unter den gängigen deutschen Namen. Wer "E-Mail" oder
+// "Vorname" in der Kopfzeile stehen hat, muss nichts umbenennen.
+const ALIASE = {
+  email: ['email', 'mail', 'emailaddress', 'emailadresse'],
+  firstname: ['firstname', 'vorname'],
+  lastname: ['lastname', 'surname', 'nachname', 'familienname'],
+  company: ['company', 'companyname', 'firma', 'unternehmen'],
+  sent_at: ['sentat', 'senddate', 'versendet', 'versandt'],
+};
+
+function normal(s) {
+  return String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+// Liefert den Originalnamen der Spalte, die zu einem bekannten Feld gehört.
+function spalteFuer(spalten, feld) {
+  const namen = ALIASE[feld];
+  return spalten.find((s) => namen.indexOf(normal(s)) >= 0) || null;
+}
+
+// Instantly verlangt Spaltennamen mit großem Anfangsbuchstaben und höchstens
+// 20 Zeichen. Sonderzeichen fallen weg, damit der Variablenname gültig bleibt.
+function instantlySpalte(roh) {
+  const s = String(roh == null ? '' : roh).replace(/[^\p{L}\p{N}_]/gu, '').slice(0, 20);
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 }
 
 function seitenUrl(req) {
@@ -251,7 +294,7 @@ async function uebersicht(sql, kampagne, von, bis) {
 // damit die Klickrate ohne Rechnen vor Augen steht.
 async function personen(sql, kampagne) {
   return sql.query(`
-    select c.token, c.name, c.company, c.campaign, c.sent_at,
+    select c.token, c.email, c.firstname, c.lastname, c.company, c.campaign, c.sent_at,
            coalesce(b.besuche, 0)::int   as besuche,
            b.erster, b.letzter,
            coalesce(b.mensch, false)     as mensch,
@@ -282,13 +325,14 @@ async function personen(sql, kampagne) {
       group by v.token
     ) b on b.token = c.token
     where ($1::text is null or c.campaign = $1)
-    order by (b.besuche is null), b.lesezeit desc nulls last, c.name
+    order by (b.besuche is null), b.lesezeit desc nulls last, c.lastname, c.firstname, c.email
   `, [kampagne]);
 }
 
 async function person(sql, token) {
   const [kontakt] = await sql.query(
-    'select token, name, company, email, campaign, sent_at, optout_at from contacts where token = $1',
+    `select token, email, firstname, lastname, company, campaign, sent_at, optout_at, extra
+     from contacts where token = $1`,
     [token],
   );
   if (!kontakt) return null;
@@ -355,58 +399,127 @@ async function seiten(sql, kampagne) {
   return { routen, faq, cta, signale };
 }
 
-// Legt die Kontakte an und gibt dieselbe Liste mit Link-Spalte zurück -- die
-// wandert als CSV zurück ins GMass-Sheet.
-async function importieren(sql, csv, basis) {
-  const saetze = csvLesen(csv).slice(0, MAX_IMPORT);
+// Legt die Kontakte an und gibt die Liste der Kampagne als Datei für Instantly
+// zurück -- mit der Spalte "Token", aus der dort der Link zusammengebaut wird.
+//
+// Die Tokens in der Datei stammen immer aus der Datenbank, nie aus dem gerade
+// erzeugten Satz. Ein versehentlich wiederholter Upload legt deshalb nichts
+// doppelt an und liefert dieselben Tokens wie beim ersten Mal -- sonst zeigten
+// die neuen Links auf Kontakte, die es gar nicht gibt.
+async function importieren(sql, csv, kampagne) {
+  if (!kampagne) {
+    return { fehler: 'Es fehlt die Angabe, zu welcher Kampagne die Kontakte gehören.' };
+  }
+
+  const { spalten, saetze } = csvLesen(csv);
   if (!saetze.length) return { fehler: 'Die Datei enthält keine Zeilen.' };
 
-  const fehlt = ['name', 'campaign'].filter((s) => !(s in saetze[0]));
-  if (fehlt.length) {
-    return { fehler: 'Diese Spalten fehlen in der Kopfzeile: ' + fehlt.join(', ') };
+  const sEmail = spalteFuer(spalten, 'email');
+  if (!sEmail) {
+    return {
+      fehler: 'Es gibt keine Spalte mit E-Mail-Adressen. Sie ist Pflicht — auch Instantly '
+        + 'verlangt sie. Erkannt werden unter anderem: email, E-Mail, mail.',
+    };
   }
 
-  const zeilen = [];
+  const sVor = spalteFuer(spalten, 'firstname');
+  const sNach = spalteFuer(spalten, 'lastname');
+  const sFirma = spalteFuer(spalten, 'company');
+  const sDatum = spalteFuer(spalten, 'sent_at');
+
+  // Alles Übrige wird unverändert durchgereicht, damit in Instantly beliebig
+  // personalisiert werden kann, ohne dass hier etwas anzupassen wäre.
+  const bekannt = [sEmail, sVor, sNach, sFirma, sDatum].filter(Boolean);
+  const zusatzSpalten = spalten.filter((s) => bekannt.indexOf(s) < 0);
+
   const werte = [];
   const params = [];
+  let ohneAdresse = 0;
 
-  for (const satz of saetze) {
-    const name = text(satz.name, 120);
-    const campaign = text(satz.campaign, 80);
-    if (!name || !campaign) continue;
+  for (const satz of saetze.slice(0, MAX_IMPORT)) {
+    const email = text(satz[sEmail], 200).toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) { ohneAdresse += 1; continue; }
 
-    const token = neuerToken();
-    const sent = datumOder(satz.sent_at);
+    const extra = {};
+    zusatzSpalten.forEach((s) => { if (satz[s]) extra[s] = text(satz[s], 300); });
+
     const n = params.length;
-    werte.push(`($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5}, $${n + 6}::date)`);
-    params.push(token, name, text(satz.company, 160), text(satz.email, 200), campaign, sent);
-    zeilen.push([name, satz.company || '', satz.email || '', campaign, token, basis + '/?m=' + token]);
+    werte.push(
+      `($${n + 1}, $${n + 2}, $${n + 3}, $${n + 4}, $${n + 5}, $${n + 6}, $${n + 7}::date, $${n + 8}::jsonb)`,
+    );
+    params.push(
+      neuerToken(),
+      email,
+      sVor ? text(satz[sVor], 120) : null,
+      sNach ? text(satz[sNach], 120) : null,
+      sFirma ? text(satz[sFirma], 160) : null,
+      kampagne,
+      sDatum ? datumOder(satz[sDatum]) : null,
+      Object.keys(extra).length ? JSON.stringify(extra) : null,
+    );
   }
 
-  if (!werte.length) return { fehler: 'Keine verwertbare Zeile gefunden (name und campaign sind Pflicht).' };
+  if (!werte.length) {
+    return { fehler: 'Keine einzige Zeile enthielt eine gültige E-Mail-Adresse.' };
+  }
+
+  const [vorher] = await sql.query(
+    'select count(*)::int as n from contacts where campaign = $1', [kampagne],
+  );
 
   await sql.query(
-    `insert into contacts (token, name, company, email, campaign, sent_at)
-     values ${werte.join(', ')} on conflict (token) do nothing`,
+    `insert into contacts (token, email, firstname, lastname, company, campaign, sent_at, extra)
+     values ${werte.join(', ')}
+     on conflict (email, campaign) do nothing`,
     params,
   );
 
+  const inDb = await sql.query(
+    `select token, email, firstname, lastname, company, extra
+     from contacts where campaign = $1 order by created_at, email`,
+    [kampagne],
+  );
+
+  // Spaltenreihenfolge: erst die der hochgeladenen Datei, dann alles, was aus
+  // einem früheren Upload derselben Kampagne noch dazukommt.
+  const zusatz = zusatzSpalten.slice();
+  inDb.forEach((z) => {
+    Object.keys(z.extra || {}).forEach((k) => { if (zusatz.indexOf(k) < 0) zusatz.push(k); });
+  });
+
+  const kopf = ['Email', 'Firstname', 'Lastname', 'Company', 'Token']
+    .concat(zusatz.map(instantlySpalte).filter(Boolean));
+
+  const zeilen = inDb.map((z) => [
+    z.email, z.firstname || '', z.lastname || '', z.company || '', z.token,
+  ].concat(zusatz.map((k) => (z.extra && z.extra[k]) || '')));
+
+  const angelegt = inDb.length - vorher.n;
+
   return {
-    angelegt: zeilen.length,
-    uebersprungen: saetze.length - zeilen.length,
-    csv: csvSchreiben(['name', 'company', 'email', 'campaign', 'token', 'link'], zeilen),
+    angelegt,
+    schonVorhanden: werte.length - angelegt,
+    ohneAdresse,
+    gesamt: inDb.length,
+    spalten: kopf,
+    csv: csvSchreiben(kopf, zeilen, 'instantly'),
   };
 }
 
+// Ergebnisdatei zum Nachlesen, nicht für Instantly: Semikolon und BOM, damit
+// Excel sie ohne Umweg richtig öffnet.
 async function exportieren(sql, kampagne, basis) {
   const liste = await personen(sql, kampagne);
   return csvSchreiben(
-    ['name', 'company', 'campaign', 'token', 'link', 'besuche', 'mensch', 'lesezeit_sekunden', 'cta', 'formular'],
+    ['vorname', 'nachname', 'unternehmen', 'email', 'kampagne', 'token', 'link',
+      'besuche', 'mensch', 'lesezeit_sekunden', 'erstgespraech', 'formular'],
     liste.map((p) => [
-      p.name, p.company, p.campaign, p.token, basis + '/?m=' + p.token,
+      p.firstname || '', p.lastname || '', p.company || '', p.email, p.campaign,
+      p.token, basis + '/?m=' + p.token,
       p.besuche, p.mensch ? 'ja' : 'nein', Math.round(p.lesezeit / 1000),
       p.cta ? 'ja' : 'nein', p.formular ? 'ja' : 'nein',
     ]),
+    'excel',
   );
 }
 
@@ -485,7 +598,9 @@ module.exports = async function handler(req, res) {
     if (aktion === 'import') {
       if (req.method !== 'POST') return res.status(405).json({ fehler: 'Nur POST.' });
       const body = await leseBody(req);
-      return res.status(200).json(await importieren(sql, body.csv, seitenUrl(req)));
+      return res.status(200).json(
+        await importieren(sql, body.csv, text(body.kampagne, 80)),
+      );
     }
 
     if (aktion === 'loeschen') {
@@ -505,6 +620,11 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// Für die lokale Probe mit exportiert.
+// Mit exportiert für scripts/links-erzeugen.js und die lokalen Proben. Der
+// Kommandozeilenweg ruft dieselbe Funktion auf wie das Dashboard -- es gibt
+// keine zweite Umsetzung derselben Regeln, die auseinanderlaufen könnte.
+module.exports.importieren = importieren;
 module.exports.csvLesen = csvLesen;
 module.exports.csvSchreiben = csvSchreiben;
+module.exports.spalteFuer = spalteFuer;
+module.exports.instantlySpalte = instantlySpalte;

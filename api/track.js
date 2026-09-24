@@ -64,7 +64,7 @@ function deviceOf(ua) {
 }
 
 function sourceOf(raw, hasToken) {
-  if (hasToken) return 'gmass';
+  if (hasToken) return 'instantly';
   const value = text(raw, 100).toLowerCase();
   if (!value || !/^[a-z0-9.-]+$/.test(value)) return 'direkt';
   return value;

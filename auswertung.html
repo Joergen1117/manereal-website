@@ -41,7 +41,7 @@ header{background:#fff; border-bottom:1px solid var(--line)}
 
 .filter{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:0 0 16px}
 .filter label{font-size:13px; color:var(--ink-soft)}
-select,input[type=date],input[type=password]{
+select,input[type=date],input[type=password],input[type=text]{
   font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:8px;
   background:#fff; color:var(--navy);
 }
@@ -251,6 +251,13 @@ tr.trenner td{
     return wahr ? '<span class="marke ja">ja</span>' : '<span class="marke nein">nein</span>';
   }
 
+  // Vor- und Nachname stehen getrennt, damit die Anrede in Instantly gebaut
+  // werden kann. Fehlt beides, bleibt die Adresse als Erkennungsmerkmal.
+  function personName(p){
+    var n = [p.firstname, p.lastname].filter(Boolean).join(' ').trim();
+    return n || p.email || '–';
+  }
+
   /* --- Abfragen -------------------------------------------------------- */
 
   function abfrage(){
@@ -395,7 +402,7 @@ tr.trenner td{
 
     function zeile(p, grau){
       return '<tr class="klickbar' + (grau ? ' ohne' : '') + '" data-token="' + sicher(p.token) + '">' +
-        '<td>' + sicher(p.name) + '</td>' +
+        '<td>' + sicher(personName(p)) + '</td>' +
         '<td>' + sicher(p.company || '–') + '</td>' +
         '<td>' + sicher(p.campaign) + '</td>' +
         '<td class="n">' + (p.besuche || '–') + '</td>' +
@@ -451,7 +458,7 @@ tr.trenner td{
   function zeichneBlatt(d){
     var k = d.kontakt;
     var html = '<button class="knopf leise" style="float:right" data-zu>schließen</button>' +
-      '<h2 id="blattTitel">' + sicher(k.name) + '</h2>' +
+      '<h2 id="blattTitel">' + sicher(personName(k)) + '</h2>' +
       '<p class="firma">' + sicher(k.company || 'kein Unternehmen hinterlegt') + ' · ' +
       sicher(k.campaign) + (k.sent_at ? ' · Mail ' + tag(k.sent_at) : '') + '</p>';
 
@@ -503,7 +510,7 @@ tr.trenner td{
     blatt.innerHTML = html;
     blatt.querySelector('[data-zu]').addEventListener('click', schliesseBlatt);
     blatt.querySelector('[data-loeschen]').addEventListener('click', function(){
-      if(!confirm('„' + k.name + '“ endgültig löschen? Das lässt sich nicht rückgängig machen.')) return;
+      if(!confirm('„' + personName(k) + '“ endgültig löschen? Das lässt sich nicht rückgängig machen.')) return;
       schicke('loeschen', {token:k.token}).then(function(){ schliesseBlatt(); start(); });
     });
   }
@@ -567,19 +574,48 @@ tr.trenner td{
   function zeichneVerwaltung(){
     inhalt.innerHTML =
       '<section class="karte"><h2>Kontakte einspielen</h2>' +
-      '<p class="unter">CSV aus dem GMass-Sheet. Pflichtspalten: <b>name</b> und <b>campaign</b>. ' +
-      'Freiwillig: <b>company</b>, <b>email</b>, <b>sent_at</b> (JJJJ-MM-TT). Komma oder Semikolon, beides geht.</p>' +
-      '<input type="file" id="datei" accept=".csv,text/csv"> ' +
+      '<p class="unter">Deine Kontaktliste als CSV. Erkannt werden — unabhängig von Schreibweise, ' +
+      'Bindestrichen und Leerzeichen: <b>email</b> (Pflicht), <b>firstname</b>/<b>vorname</b>, ' +
+      '<b>lastname</b>/<b>nachname</b>, <b>company</b>/<b>firma</b>, <b>sent_at</b> (JJJJ-MM-TT). ' +
+      '<b>Alle weiteren Spalten werden unverändert durchgereicht</b> und stehen in Instantly als ' +
+      'Variablen zur Verfügung. Komma oder Semikolon, beides geht.</p>' +
+
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">' +
+      '<label for="kampagne">Kampagne</label>' +
+      '<input type="text" id="kampagne" placeholder="welle-2-wien" style="min-width:200px">' +
+      '<input type="file" id="datei" accept=".csv,text/csv">' +
       '<button class="knopf" id="einspielen" disabled>Einspielen</button>' +
+      '</div>' +
+      '<p class="unter" style="margin:0">Die Kampagne bleibt auf unserer Seite und steht nicht in der ' +
+      'Datei für Instantly — sie gruppiert nur die Auswertung. Dieselbe Adresse darf in mehreren ' +
+      'Wellen stehen, aber nicht zweimal in derselben: Ein wiederholter Upload legt deshalb nichts ' +
+      'doppelt an und liefert dieselben Tokens wie beim ersten Mal.</p>' +
       '<p id="importErgebnis" style="margin-top:16px"></p>' +
-      '<p class="unter" style="margin-top:20px">Danach lädt sich eine Datei mit der zusätzlichen Spalte ' +
-      '<b>link</b> herunter. Diese Spalte ins GMass-Sheet einfügen und in der Mail ' +
-      '<code>{link}</code> schreiben — als sichtbaren Linktext <b>manereal.at</b>, nicht „hier klicken“. ' +
-      'Die Abweichung zwischen Anzeigetext und Ziel ist ein Phishing-Merkmal und kostet Zustellrate.</p>' +
       '</section>' +
 
-      '<section class="karte"><h2>Ausgeben</h2>' +
-      '<p class="unter">Alle Kontakte der gewählten Kampagne samt Link und Ergebnis, als CSV.</p>' +
+      '<section class="karte"><h2>Und dann in Instantly</h2>' +
+      '<p class="unter">Die heruntergeladene Datei ist komma-getrennt und ohne BOM — genau so, wie ' +
+      'Instantly sie braucht.</p>' +
+      '<ol style="margin:0 0 4px;padding-left:20px;line-height:1.9">' +
+      '<li>Leads importieren, Datei hochladen.</li>' +
+      '<li>Beim Zuordnen: <b>Email</b> → Email, <b>Token</b> → <b>Custom Variable</b>. ' +
+      'Der Rest nach Bedarf.</li>' +
+      '<li>In der Sequenz die Code-Ansicht <code>&lt;&gt;</code> öffnen und den Link in die ' +
+      'Signatur setzen:</li>' +
+      '</ol>' +
+      '<pre style="background:var(--flaeche);padding:12px 14px;border-radius:9px;overflow-x:auto;' +
+      'font-size:13px;margin:10px 0 14px">&lt;a href="https://www.manereal.at/?m={{Token}}"&gt;' +
+      'www.manereal.at&lt;/a&gt;</pre>' +
+      '<p class="unter" style="margin:0"><b>Drei Schalter müssen dafür aus sein</b>, sonst entfernt ' +
+      'Instantly das HTML, der Link fällt weg und niemand ist mehr zuzuordnen — ohne dass man es ' +
+      'merkt: <i>Send emails as text-only</i>, <i>Send first email as text-only</i> und global ' +
+      '<i>Always send first email as text-only</i>. Ebenso aus: <i>Link Tracking</i> und ' +
+      '<i>Open Tracking</i>.</p>' +
+      '</section>' +
+
+      '<section class="karte"><h2>Ergebnisse ausgeben</h2>' +
+      '<p class="unter">Alle Kontakte der oben gewählten Kampagne samt Link, Lesezeit und Ergebnis. ' +
+      'Semikolon und BOM, damit Excel die Umlaute richtig anzeigt.</p>' +
       '<button class="knopf leise" id="ausgeben">CSV herunterladen</button></section>' +
 
       '<section class="karte"><h2>Personenbezug abschalten</h2>' +
@@ -589,26 +625,35 @@ tr.trenner td{
       'Person mehr zugeordnet. Bestehende Daten bleiben unverändert.</p></section>';
 
     var datei = document.getElementById('datei');
+    var kampagne = document.getElementById('kampagne');
     var knopf = document.getElementById('einspielen');
     var ergebnis = document.getElementById('importErgebnis');
 
-    datei.addEventListener('change', function(){ knopf.disabled = !datei.files.length; });
+    function pruefeBereit(){
+      knopf.disabled = !datei.files.length || !kampagne.value.trim();
+    }
+    datei.addEventListener('change', pruefeBereit);
+    kampagne.addEventListener('input', pruefeBereit);
 
     knopf.addEventListener('click', function(){
-      if(!datei.files.length) return;
+      if(knopf.disabled) return;
       knopf.disabled = true;
       ergebnis.textContent = 'wird eingespielt …';
       datei.files[0].text().then(function(csv){
-        return schicke('import', {csv:csv});
+        return schicke('import', {csv:csv, kampagne:kampagne.value.trim()});
       }).then(function(d){
         if(d.fehler){ ergebnis.innerHTML = '<span class="fehler">' + sicher(d.fehler) + '</span>'; return; }
-        ergebnis.textContent = d.angelegt + ' Kontakte angelegt' +
-          (d.uebersprungen ? ', ' + d.uebersprungen + ' Zeilen übersprungen' : '') +
-          '. Die Datei mit den Links lädt gerade herunter.';
-        lade(d.csv, 'gmass-mit-links.csv');
+        var teile = [d.angelegt + ' neu angelegt'];
+        if(d.schonVorhanden) teile.push(d.schonVorhanden + ' waren schon in dieser Kampagne');
+        if(d.ohneAdresse) teile.push(d.ohneAdresse + ' ohne gültige E-Mail-Adresse übersprungen');
+        ergebnis.innerHTML = sicher(teile.join(', ')) + '.<br>' +
+          'Die Datei enthält alle <b>' + d.gesamt + '</b> Kontakte der Kampagne und lädt gerade ' +
+          'herunter. Spalten: <code>' + sicher(d.spalten.join(', ')) + '</code>';
+        lade(d.csv, 'instantly-' + kampagne.value.trim().replace(/[^a-z0-9-]+/gi,'-') + '.csv');
+        kampagnenGefuellt = false;
       }).catch(function(e){
         ergebnis.innerHTML = '<span class="fehler">' + sicher(e.message) + '</span>';
-      }).then(function(){ knopf.disabled = false; });
+      }).then(pruefeBereit);
     });
 
     document.getElementById('ausgeben').addEventListener('click', function(){

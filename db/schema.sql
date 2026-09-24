@@ -7,16 +7,26 @@
 -- wie lange gelesen" sind Abfragen darüber, keine gespeicherten Datensätze --
 -- so lassen sich auch Fragen beantworten, die heute noch niemand stellt.
 
--- Empfängerliste des Outreach. Wird aus dem GMass-Sheet befüllt.
+-- Empfängerliste des Outreach. Wird aus der Kontaktliste befüllt und als
+-- Datei für Instantly wieder ausgegeben.
 create table if not exists contacts (
   token      text primary key,     -- 10 Zeichen Crockford-Base32, zufällig
-  name       text not null,
+  email      text not null,
+  firstname  text,
+  lastname   text,
   company    text,
-  email      text,
-  campaign   text not null,        -- z. B. 'welle-2-wien'
+  campaign   text not null,        -- z. B. 'welle-2-wien'; bleibt auf unserer Seite
   sent_at    date,
+  -- Alle weiteren Spalten der hochgeladenen Datei, unverändert. Sie werden
+  -- nicht ausgewertet, sondern nur durchgereicht, damit in Instantly beliebig
+  -- personalisiert werden kann, ohne dass hier etwas anzupassen wäre.
+  extra      jsonb,
   optout_at  timestamptz,          -- gesetzt => keine Zuordnung mehr
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- Dieselbe Adresse darf in mehreren Wellen stehen, aber nicht zweimal in
+  -- derselben. Damit ist ein versehentlich wiederholter Upload harmlos:
+  -- er legt nichts doppelt an, statt die Liste zu verdoppeln.
+  unique (email, campaign)
 );
 
 -- Ein Besuch. Wegen des Hash-Routings der Website deckt ein Seitenaufruf
@@ -25,7 +35,7 @@ create table if not exists visits (
   id         uuid primary key,     -- im Browser erzeugt, nirgends am Gerät gespeichert
   token      text references contacts(token) on delete set null,
   campaign   text,
-  source     text,                 -- 'gmass' | Referrer-Host | 'direkt'
+  source     text,                 -- 'instantly' | Referrer-Host | 'direkt'
   device     text,                 -- 'mobil' | 'desktop'
   country    text,                 -- aus x-vercel-ip-country, die IP wird nie gespeichert
   started_at timestamptz not null default now(),
