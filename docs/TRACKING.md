@@ -96,12 +96,22 @@ Datei legt nichts doppelt an und liefert dieselben Tokens wie beim ersten Mal.
 **3. In Instantly importieren.** Beim Zuordnen: `Email` → Email,
 **`Token` → Custom Variable**. Der Rest nach Bedarf.
 
-**4. Den Link in die Signatur setzen.** In der Sequenz die Code-Ansicht
-`<>` öffnen:
+**4. Den Link in die Signatur setzen — in der Code-Ansicht `<>`.**
 
 ```html
 <a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>
 ```
+
+**Die Code-Ansicht ist Pflicht, nicht Geschmackssache.** Im normalen Editor
+wird die Variable nicht ersetzt; am 24.09.2026 in Instantly geprüft. Das deckt
+sich mit dem offenen Feature-Wunsch auf Instantlys Board: Der betrifft die
+Link-Maske des normalen Editors, die keine Variablen anbietet. Die Ersetzung
+selbst läuft über den Quelltext und greift dort auch in Attributen.
+
+**Und danach nicht mehr im normalen Editor öffnen.** Wer den Schritt später
+dort bearbeitet, riskiert, dass der Editor den Link beim Zurückwechseln
+umschreibt. Nach jeder Änderung an dieser Sequenz also in der Code-Ansicht
+nachsehen, ob `{{Token}}` noch dasteht.
 
 Sichtbar steht die Domain, dahinter liegt der persönliche Code. Weil Anzeige
 und Ziel dieselbe Domain haben, ist das für Spam-Filter unauffällig — ein

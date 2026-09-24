@@ -1,34 +1,52 @@
 # Testmail für Instantly
 
-Zum Kopieren. Klärt die eine Frage, an der alles hängt: **Ersetzt Instantly
-eine Lead-Variable auch innerhalb eines `href`?**
-
-Empfänger: `Julian@pils.cc`
+Zum Kopieren. Empfänger: `Julian@pils.cc`
 
 ---
 
-## Zwei Varianten, zwei verschiedene Fragen
+## Was schon geklärt ist
 
-Beide verschicken, nacheinander. Sie beantworten Unterschiedliches.
+**Instantly ersetzt `{{Token}}` auch mitten in einem `href` — aber nur in der
+Code-Ansicht `<>`.** Im normalen Editor funktioniert es nicht. Am 24.09.2026 in
+Instantly geprüft.
 
-| | prüft | Antwort sagt aus |
-|---|---|---|
-| **Variante 1** — feste Adresse | Kommt eine HTML-Mail an, deren sichtbarer Text eine andere Domain zeigt als das Ziel? | Zustellbarkeit unter **erschwerten** Bedingungen |
-| **Variante 2** — mit Variable | Wird `{{Token}}` mitten im `href` ersetzt? | **Die eigentliche Frage.** Ohne ein Ja bleibt der Code in der Mail stehen |
+Damit ist die Frage beantwortet, an der vorher alles hing. Der Code bleibt
+hinter `www.manereal.at` verborgen, `?m=` bleibt wie es ist, und am Tracking war
+keine Änderung nötig.
 
-Variante 1 ist strenger als die spätere Praxis: Sichtbar steht
-`www.jpprocessautomation.de`, das Ziel ist `manereal-website.vercel.app` —
-**zwei verschiedene Domains**. Instantly warnt selbst davor, und im Echtbetrieb
-wird beides `manereal.at` sein.
+Zwei Regeln folgen daraus:
 
-Das macht den Test aber nicht wertlos, nur einseitig: **Kommt sie an, ist der
+1. **Den Link ausschließlich in der Code-Ansicht setzen.** Nicht über die
+   Link-Schaltfläche des normalen Editors — dort wird `{{Token}}` nicht ersetzt
+   und geht als Text hinaus.
+2. **Den Schritt danach nicht mehr im normalen Editor öffnen.** Ein
+   WYSIWYG-Editor schreibt HTML beim Zurückwechseln gern um. Nach jeder Änderung
+   an dieser Sequenz in der Code-Ansicht nachsehen, ob `{{Token}}` noch dasteht.
+
+---
+
+## Was die Testmail noch klären soll
+
+Drei Dinge, die die Vorschau im Editor nicht beantwortet:
+
+| | prüft |
+|---|---|
+| **Quelltext der empfangenen Mail** | Kommt die Ersetzung wirklich bis ins Postfach — oder nur bis zur Vorschau? |
+| **Posteingang oder Spam** | Wie schlägt sich eine HTML-Mail mit Link in der Signatur bei den drei großen Filtern? |
+| **Die ganze Kette** | Klick auf den Link → steht der Besuch im Dashboard bei der richtigen Person? |
+
+**Ein Hinweis zum Aufbau:** Sichtbar steht `www.jpprocessautomation.de`, das
+Ziel ist `manereal-website.vercel.app` — **zwei verschiedene Domains**. Instantly
+warnt selbst davor, und im Echtbetrieb wird beides `manereal.at` sein.
+
+Das macht den Test nicht wertlos, nur einseitig: **Kommt die Mail an, ist der
 Echtfall erst recht sicher.** Landet sie im Spam, weiß man nicht, ob es an der
 Domain-Abweichung lag oder an etwas anderem. Ein Bestehen zählt, ein Scheitern
 beweist nichts.
 
 ---
 
-## Variante 1 — feste Adresse
+## Die Mail
 
 **Betreff**
 
@@ -36,7 +54,7 @@ beweist nichts.
 Kurze Frage zu Ihren Prozessen, Julian
 ```
 
-**Text (Code-Ansicht `<>` im Sequenz-Editor)**
+**Text — in der Code-Ansicht `<>` einfügen, nicht im normalen Editor**
 
 ```html
 Hallo Julian,<br><br>
@@ -50,7 +68,7 @@ Hätten Sie diese Woche Zeit für einen kurzen, 5-minütigen Austausch dazu?<br>
 Beste Grüße<br>
 Max Mustermann<br>
 Prozessberater | JP Process Automation<br>
-<a href="https://manereal-website.vercel.app/">www.jpprocessautomation.de</a>
+<a href="https://manereal-website.vercel.app/?m={{Token}}">www.jpprocessautomation.de</a>
 ```
 
 **Zwei Abweichungen von der Vorlage des Support-Agenten, mit Absicht:**
@@ -62,44 +80,19 @@ Prozessberater | JP Process Automation<br>
 
 ---
 
-## Variante 2 — mit Variable (die entscheidende)
+## Die Leads dafür
 
-Diese läuft nur als **Kampagne mit Lead-Import**, nicht als Handversand — die
-Variable braucht eine Tabellenzeile.
-
-### CSV zum Hochladen
-
-Als `testlauf.csv` speichern, **UTF-8, komma-getrennt, ohne BOM** — oder
-einfacher: im Dashboard unter *Verwaltung* eine Zeile einspielen und die dort
-erzeugte Datei nehmen, dann stimmt das Format von selbst und der Kontakt liegt
-gleich in der Datenbank.
+Am einfachsten im Dashboard unter *Verwaltung* eine CSV mit einer Zeile
+einspielen — dann stimmt das Format von selbst, der Kontakt liegt in der
+Datenbank und der Code passt zum Link:
 
 ```
-Email,Firstname,Lastname,Company,Token
-Julian@pils.cc,Julian,Pils,JP Process Automation,K7F3M2QX9P
+email,firstname,lastname,company
+Julian@pils.cc,Julian,Pils,JP Process Automation
 ```
 
-Beim Import zuordnen: `Email` → Email, **`Token` → Custom Variable**,
-der Rest nach Bedarf.
-
-### Text (Code-Ansicht)
-
-Identisch zu Variante 1, nur die letzte Zeile:
-
-```html
-<a href="https://manereal-website.vercel.app/?m={{Token}}">www.jpprocessautomation.de</a>
-```
-
-**Das ist die heikelste Form, die es gibt** — die Variable steht *innerhalb*
-der URL, innerhalb eines Attributs. Manche Editoren prüfen beim Speichern, ob
-der `href` eine gültige Adresse ist, und kodieren die geschweiften Klammern zu
-`%7B%7BToken%7D%7D` um. Dann wird nichts ersetzt. Genau deshalb wird getestet.
-
-Fällt der Test hier durch, aber die Ersetzung funktioniert sonst: Dann muss die
-Spalte statt des Tokens den **vollständigen Link** enthalten
-(`https://manereal.at/?m=K7F3M2QX9P`) und in der Sequenz steht `{{Link}}` als
-ganzer `href`. Das ist in
-[`api/auswertung.js`](../api/auswertung.js) eine Zeile Änderung.
+Die zurückgegebene Datei geht direkt nach Instantly. Beim Import zuordnen:
+`Email` → Email, **`Token` → Custom Variable**, der Rest nach Bedarf.
 
 ---
 
@@ -113,10 +106,10 @@ Sonst misst der Test etwas anderes als gemeint:
 - [ ] Kampagne → Options → **Link Tracking: AUS**
 - [ ] Kampagne → Options → **Open Tracking: AUS**
 
-Die drei Text-only-Schalter sind der Kern: Ist einer davon an, wird das HTML
-entfernt, der Anchor fällt weg und übrig bleibt nur der sichtbare Text. Die
-Mail kommt an, sieht richtig aus — **und hat keinen Link mehr.** Genau dieses
-stille Versagen soll der Test sichtbar machen.
+**Die drei Text-only-Schalter sind jetzt das einzige verbliebene Risiko.** Ist
+einer davon an, wird das HTML entfernt, der Anchor fällt weg und übrig bleibt
+nur der sichtbare Text. Die Mail kommt an, sieht richtig aus — **und hat keinen
+Link mehr.** Genau dieses stille Versagen soll der Test sichtbar machen.
 
 Link Tracking muss aus sein, weil Instantly sonst die Adresse auf eine eigene
 Tracking-Domain umschreibt. Dann prüft man Instantlys Umleitung statt der
@@ -132,8 +125,8 @@ oder die Mail als `.eml` speichern und im Texteditor öffnen.
 
 | Befund im Quelltext | Bedeutung |
 |---|---|
-| `<a href="https://manereal-website.vercel.app/?m=K7F3M2QX9P">` | **Bestanden.** Der Weg funktioniert, nichts weiter zu tun |
-| `<a href="…?m={{Token}}">` | Ersetzung greift nicht im Attribut → Volllink-Spalte oder sichtbarer Pfad |
+| `<a href="https://manereal-website.vercel.app/?m=K7F3M2QX9P">` | **Bestanden.** Die Kette steht bis ins Postfach |
+| `<a href="…?m={{Token}}">` | Ersetzung greift nicht — wurde der Link im normalen Editor gesetzt? |
 | kein `<a>`, nur `www.jpprocessautomation.de` als Text | HTML wurde entfernt → Text-only-Schalter prüfen |
 | Ziel zeigt auf eine fremde Tracking-Domain | Link Tracking war noch an |
 
@@ -155,3 +148,12 @@ Wenn der Quelltext stimmt, dieselbe Kampagne an je eine Adresse bei
 Filterwelten, in denen österreichische Hausverwaltungen sitzen. Posteingang
 oder Spam — das entscheidet mehr über die Kampagne als alles andere in diesem
 System.
+
+---
+
+## Im laufenden Betrieb
+
+**Nach den ersten fünfzig Mails ins Dashboard sehen.** Stehen dort nur anonyme
+Aufrufe, ist der Code unterwegs verloren gegangen — dann wurde entweder im
+normalen Editor gearbeitet oder ein Text-only-Schalter ist an. Das ist die
+einzige Kontrolle, die greift, ohne dass jemand daran denken muss.

@@ -117,12 +117,47 @@ tr.trenner td{
 .tat div{margin-bottom:3px}
 
 /* Anmeldung */
-.tor{max-width:400px; margin:14vh auto; background:#fff; border:1px solid var(--line);
-     border-radius:14px; padding:32px; text-align:center}
-.tor img{height:36px; margin-bottom:22px}
-.tor input{width:100%; margin-bottom:12px; text-align:center}
-.tor .knopf{width:100%}
+.tor-hinter{
+  position:fixed; inset:0; background:var(--navy);
+  display:grid; place-items:center; padding:24px; overflow:auto;
+}
+/* Der Grundriss aus der Bildwelt der Seite, sehr leise. Invertiert, weil seine
+   Linien navy sind und hier auf navy liegen. */
+.tor-hinter::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:url('assets/images/brand/blueprint.svg') center / 620px repeat;
+  filter:invert(1); opacity:.05;
+}
+.tor{
+  position:relative; width:min(420px,100%); background:#fff;
+  border-radius:18px; padding:40px 36px 30px; text-align:center;
+  box-shadow:0 24px 70px rgba(0,0,0,.38);
+}
+.tor img{height:38px; width:auto; margin-bottom:26px}
+.tor .eyebrow{
+  display:block; font-size:12px; font-weight:700; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--teal); margin-bottom:6px;
+}
+.tor h1{font-size:24px; margin-bottom:8px}
+.tor .sub{margin:0 0 26px; color:var(--ink-soft); font-size:15px; line-height:1.5}
+.tor input[type=password]{
+  width:100%; text-align:center; padding:12px 14px; font-size:16px;
+  letter-spacing:.04em; margin-bottom:12px;
+}
+.tor input[type=password]:focus{
+  outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(15,108,124,.16);
+}
+.tor .knopf{width:100%; padding:12px}
 .fehler{color:var(--warn); font-size:14px; min-height:20px; margin-top:10px}
+.tor-fuss{
+  position:relative; margin:22px auto 0; max-width:420px; text-align:center;
+  color:rgba(255,255,255,.55); font-size:13px; line-height:1.6;
+}
+
+@media (max-width:480px){
+  .tor{padding:32px 22px 26px}
+  .tor h1{font-size:21px}
+}
 
 .leer{color:var(--ink-soft); padding:26px 0; text-align:center}
 .fuss{color:var(--ink-soft); font-size:13px; padding:0 0 40px; line-height:1.7}
@@ -144,18 +179,26 @@ tr.trenner td{
 </head>
 <body>
 
-<div id="tor" class="tor" hidden>
-  <img src="assets/images/brand/logo.png" alt="Manereal">
-  <h1 style="font-size:19px;margin-bottom:18px">Auswertung</h1>
-  <form id="torForm">
-    <!-- Es gibt nur ein Passwort, keinen Benutzernamen. Das versteckte Feld ist
-         da, damit Passwortverwaltungen den Eintrag sauber zuordnen können. -->
-    <input type="text" name="username" value="auswertung" autocomplete="username"
-           hidden aria-hidden="true" tabindex="-1" readonly>
-    <input id="passwort" type="password" placeholder="Passwort" autocomplete="current-password" required>
-    <button class="knopf" type="submit">Anmelden</button>
-  </form>
-  <p class="fehler" id="torFehler"></p>
+<div id="tor" class="tor-hinter" hidden>
+  <div>
+    <div class="tor">
+      <img src="assets/images/brand/logo.png" alt="Manereal">
+      <span class="eyebrow">Interner Bereich</span>
+      <h1>Auswertung</h1>
+      <p class="sub">Wer aus dem Outreach den Link öffnet — und was er liest.</p>
+      <form id="torForm">
+        <!-- Es gibt nur ein Passwort, keinen Benutzernamen. Das versteckte Feld ist
+             da, damit Passwortverwaltungen den Eintrag sauber zuordnen können. -->
+        <input type="text" name="username" value="auswertung" autocomplete="username"
+               hidden aria-hidden="true" tabindex="-1" readonly>
+        <input id="passwort" type="password" placeholder="Passwort"
+               autocomplete="current-password" required>
+        <button class="knopf" type="submit">Anmelden</button>
+      </form>
+      <p class="fehler" id="torFehler"></p>
+    </div>
+    <p class="tor-fuss">Diese Seite ist nicht verlinkt und für Suchmaschinen gesperrt.</p>
+  </div>
 </div>
 
 <div id="app" hidden>
@@ -297,7 +340,13 @@ tr.trenner td{
 
   /* --- Anmeldung -------------------------------------------------------- */
 
-  function zeigeTor(){ tor.hidden = false; app.hidden = true; }
+  function zeigeTor(){
+    tor.hidden = false; app.hidden = true;
+    // Eine Meldung von vorhin gehört nicht auf eine frisch gezeigte Maske.
+    document.getElementById('torFehler').textContent = '';
+    var feld = document.getElementById('passwort');
+    if(feld) setTimeout(function(){ feld.focus(); }, 0);
+  }
   function zeigeApp(){ tor.hidden = true;  app.hidden = false; }
 
   document.getElementById('torForm').addEventListener('submit', function(e){
@@ -600,12 +649,16 @@ tr.trenner td{
       '<li>Leads importieren, Datei hochladen.</li>' +
       '<li>Beim Zuordnen: <b>Email</b> → Email, <b>Token</b> → <b>Custom Variable</b>. ' +
       'Der Rest nach Bedarf.</li>' +
-      '<li>In der Sequenz die Code-Ansicht <code>&lt;&gt;</code> öffnen und den Link in die ' +
-      'Signatur setzen:</li>' +
+      '<li><b>In der Code-Ansicht <code>&lt;&gt;</code></b> — nicht im normalen Editor — den ' +
+      'Link in die Signatur setzen:</li>' +
       '</ol>' +
       '<pre style="background:var(--flaeche);padding:12px 14px;border-radius:9px;overflow-x:auto;' +
       'font-size:13px;margin:10px 0 14px">&lt;a href="https://www.manereal.at/?m={{Token}}"&gt;' +
       'www.manereal.at&lt;/a&gt;</pre>' +
+      '<p class="unter" style="margin:0 0 14px">Die Code-Ansicht ist Pflicht: Im normalen Editor ' +
+      'wird die Variable nicht ersetzt (24.09.2026 geprüft). Und wer den Schritt später wieder im ' +
+      'normalen Editor öffnet, riskiert, dass der Link dabei umgeschrieben wird — danach also ' +
+      'immer in der Code-Ansicht nachsehen, ob <code>{{Token}}</code> noch dasteht.</p>' +
       '<p class="unter" style="margin:0"><b>Drei Schalter müssen dafür aus sein</b>, sonst entfernt ' +
       'Instantly das HTML, der Link fällt weg und niemand ist mehr zuzuordnen — ohne dass man es ' +
       'merkt: <i>Send emails as text-only</i>, <i>Send first email as text-only</i> und global ' +

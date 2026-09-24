@@ -4,60 +4,75 @@ Was am Tracking geändert werden muss, weil der Outreach über
 [Instantly](https://instantly.ai) statt über GMass läuft — und wie der Link in
 der Signatur aussehen sollte.
 
-Stand 24.09.2026. **Umgesetzt ist alles, was in beiden Fällen nötig ist** —
-siehe unten. Offen bleibt nur, was von der Testmail abhängt. Enthält die
-Auskunft des Instantly-Support-Agenten vom 24.09.2026.
+Stand 24.09.2026. **Umgesetzt und in Instantly geprüft.** Enthält die Auskunft
+des Instantly-Support-Agenten und das Ergebnis des Praxistests, beides vom
+24.09.2026.
 
 ---
 
-## Die Lage in drei Sätzen
+## Die entscheidende Frage ist beantwortet
 
-Es gibt zwei Wege, den persönlichen Code in die Mail zu bekommen. **Weg A**
-versteckt ihn hinter dem Text `www.manereal.at` — gebaut und einsatzbereit.
-**Weg B** zeigt einen kurzen Pfad (`manereal.at/k7f3mq`), kann nicht
-fehlschlagen, kostet aber einen halben Arbeitstag Umbau und ist noch nicht
-gebaut.
+**Instantly ersetzt eine Lead-Variable auch mitten in einem `href` — aber nur,
+wenn man sie in der Code-Ansicht `<>` einträgt. Im normalen Editor funktioniert
+es nicht.** Julia hat das am 24.09.2026 in Instantly geprüft.
 
-Welcher es wird, entscheidet **eine einzige Testmail**. Siehe
-[testmail-instantly.md](testmail-instantly.md).
+Damit löst sich der Widerspruch auf, der vorher im Raum stand: Der offene
+[Feature-Wunsch](https://feedback.instantly.ai/p/insert-link-variable-in-hyperlink-format)
+betrifft die **Link-Maske des normalen Editors**, die keine Variablen anbietet.
+Die Ersetzung selbst läuft über den Quelltext und greift dort auch in
+Attributen. Beide Aussagen stimmen, sie reden nur von verschiedenen Dingen.
 
-### Umgesetzt am 24.09.2026
+**Folge:** Der Code bleibt hinter `www.manereal.at` verborgen, `?m=` bleibt wie
+es ist, und der Umbau auf kurze sichtbare Pfade wird nicht gebraucht.
 
-- Kontakte tragen **Vor- und Nachname getrennt** (`firstname`, `lastname`)
+### Zwei Regeln, die daraus folgen
+
+1. **Der Link wird ausschließlich in der Code-Ansicht gesetzt.** Nicht über die
+   Link-Schaltfläche des normalen Editors — dort wird `{{Token}}` nicht ersetzt
+   und geht als Text hinaus.
+2. **Den Schritt danach nicht mehr im normalen Editor öffnen.** Ein
+   WYSIWYG-Editor schreibt HTML beim Zurückwechseln gern um. Nach jeder
+   Änderung an dieser Sequenz in der Code-Ansicht nachsehen, ob `{{Token}}`
+   noch dasteht.
+
+### Was damit noch offen ist
+
+Nur noch eines, und es ist das gefährlichere: **Die drei Text-only-Schalter.**
+Ist einer davon an, wird das HTML entfernt, der Anchor fällt weg und übrig
+bleibt `www.manereal.at` als bloßer Text. Die Kampagne läuft, die Mails kommen
+an, alles sieht richtig aus — und kein Klick ist zuzuordnen. Siehe unten.
+
+Und der letzte Beleg bleibt der **Quelltext einer empfangenen Mail**: Steht dort
+die fertige Adresse statt `{{Token}}`, ist die Kette vom Editor bis zum Postfach
+bewiesen und nicht nur bis zur Vorschau.
+
+---
+
+
+## Was umgebaut wurde
+
+Am 24.09.2026 umgesetzt und mit 38 Proben gegen eine echte Postgres geprüft:
+
+- Kontakte tragen **Vor- und Nachname getrennt** (`firstname`, `lastname`),
+  damit die Anrede in Instantly gebaut werden kann. „Sehr geehrter Herr Max
+  Mustermann" wäre falsch, und aus einem Namensfeld lässt sich das nicht
+  zuverlässig auseinandernehmen.
 - **Beliebige weitere Spalten** der hochgeladenen Datei werden unverändert
-  durchgereicht und stehen in Instantly als Variablen bereit
+  durchgereicht (`contacts.extra`) und stehen in Instantly als Variablen bereit.
 - Spalten werden **unabhängig von Schreibweise erkannt**, auch deutsch:
-  `E-Mail`, `Vorname`, `Nachname`, `Firma`
+  `E-Mail`, `Vorname`, `Nachname`, `Firma`.
 - Die Datei für Instantly ist **komma-getrennt, ohne BOM**, mit den Spalten
-  `Email, Firstname, Lastname, Company, Token` plus Zusatzspalten
-- Die Spalte heißt **`Token`** und enthält nur den Code, nicht die Adresse —
-  der Link wird in Instantly daraus gebaut
-- Die **Kampagne bleibt auf unserer Seite** und steht nicht in der Datei
-- Ein **wiederholter Upload** legt nichts doppelt an und liefert dieselben
-  Tokens (`unique (email, campaign)`)
-- Der Ergebnis-Export für Excel behält Semikolon und BOM
-- `scripts/links-erzeugen.js` ruft dieselbe Funktion auf wie das Dashboard —
-  es gibt keine zweite Umsetzung derselben Regeln
-
-### Die Entscheidung zur Token-Spalte
-
-Julia hat festgelegt, dass die Spalte **nur das Token** enthält und der Link in
-Instantly zusammengebaut wird:
-
-```html
-<a href="https://www.manereal.at/?m={{Token}}">www.manereal.at</a>
-```
-
-Das ist die heiklere von zwei Formen: Die Variable steht *innerhalb* der URL,
-innerhalb eines Attributs. Manche Editoren prüfen beim Speichern, ob der `href`
-eine gültige Adresse ist, und kodieren die geschweiften Klammern zu
-`%7B%7BToken%7D%7D` um — dann wird nichts ersetzt. Eine Spalte mit dem
-**vollständigen Link** hätte dieses Risiko nicht, weil die Ersetzung dann den
-ganzen Attributwert austauscht.
-
-Die Testmail deckt genau diese Form ab. Fällt sie durch, ist der Wechsel auf
-eine Volllink-Spalte eine Zeile in
-[`api/auswertung.js`](../api/auswertung.js).
+  `Email, Firstname, Lastname, Company, Token` plus Zusatzspalten. Der
+  Ergebnis-Export für Excel behält Semikolon und BOM.
+- Die Spalte heißt **`Token`** und enthält nur den Code. Der Link wird in
+  Instantly daraus gebaut — Julias Entscheidung, in der Praxis bestätigt.
+- Die **Kampagne bleibt auf unserer Seite** und steht nicht in der Datei.
+- `unique (email, campaign)`: Dieselbe Adresse darf in mehreren Wellen stehen,
+  aber nicht zweimal in derselben. Die Tokens der Ausgabedatei stammen immer
+  aus der Datenbank — sonst zeigten die Links nach einem wiederholten Upload
+  auf Kontakte, die es gar nicht gibt.
+- `scripts/links-erzeugen.js` ruft dieselbe Funktion auf wie das Dashboard. Es
+  gibt keine zweite Umsetzung derselben Regeln, die auseinanderlaufen könnte.
 
 ---
 
@@ -80,10 +95,8 @@ die **Link-Maske im Editor**, die keine Variablen anbietet. Die
 Ersetzung selbst läuft offenbar als Textersetzung über die ganze Mail und
 greift damit auch in Attributen. Das passt zusammen.
 
-**Trotzdem bleibt die Testmail Pflicht.** Die Auskunft kommt von einem
-KI-Support-Agenten, nicht aus der Dokumentation, und widerspricht einem Eintrag
-im eigenen Feature-Board. Zwei Minuten Test gegen eine Welle ohne Zuordnung —
-das Verhältnis ist eindeutig.
+**Am 24.09.2026 in Instantly bestätigt** — mit der Einschränkung, dass es nur
+in der Code-Ansicht funktioniert. Siehe oben.
 
 ### Geklärt: Gleiche Domain, anderer Parameter ist unproblematisch
 
@@ -141,8 +154,9 @@ Das Bittere: Genau diese Einstellung ist die für Zustellbarkeit empfohlene. Die
 Instantly-Dokumentation schreibt wörtlich, Plain-Text-Mails schneiden besser ab
 als HTML.
 
-**Das ist und bleibt das Hauptargument gegen Weg A.** Der Support-Agent hat es
-nicht angesprochen.
+**Das ist jetzt das einzige verbliebene Risiko.** Der Support-Agent hat es
+nicht angesprochen, und es ist das einzige, das man nicht sieht, wenn es
+eintritt.
 
 ### Die Signatur liegt am Sendekonto, nicht am Empfänger
 
@@ -164,15 +178,15 @@ Das ist auch das, was die Testmail prüft.
 | in der Signatur | `www.manereal.at` | `manereal.at/k7f3mq` |
 | dahinter | `https://www.manereal.at/?m=K7F3M2QX9P` | dasselbe wie sichtbar |
 | Codeänderungen | **keine** (nur CSV-Format) | sieben Stellen, ca. ½ Tag |
+| Stand | **geprüft, im Einsatz** | nicht gebaut |
 | Mailformat | HTML nötig | Plain Text genügt |
 | Zustellbarkeit | etwas schlechter | beste |
 | Fehlerfall | **still** — Code weg, niemand merkt es | keiner möglich |
 | Voraussetzung | Testmail muss bestehen; alle drei Text-only-Schalter aus | keine |
 
-**Meine Empfehlung: Weg A testen, Weg B in der Hinterhand.** Besteht die
-Testmail, ist Weg A klar überlegen — er kostet nichts und die Signatur sieht
-aus wie jede andere. Besteht sie nicht, ist Weg B schon beschrieben und in
-einem halben Tag gebaut.
+**Es ist Weg A geworden.** Die Variablenersetzung funktioniert, der Code bleibt
+unsichtbar, und es war keine Codeänderung am Link nötig. Weg B bleibt
+beschrieben, falls die Mails eines Tages ohne HTML auskommen müssen.
 
 Was in beiden Fällen gilt: **Nach den ersten fünfzig Mails ins Dashboard
 sehen.** Stehen dort nur anonyme Aufrufe, ist der Code unterwegs verloren
@@ -217,7 +231,7 @@ den Instantly-Weg. GMass kommt nirgends mehr vor.
 
 ---
 
-## Zusätzliche Änderungen nur für Weg B *(noch nicht gebaut)*
+## Zusätzliche Änderungen nur für Weg B *(nicht gebaut, nicht gebraucht)*
 
 Falls die Testmail scheitert und der Code sichtbar werden muss.
 
