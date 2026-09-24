@@ -162,9 +162,13 @@ section{padding:var(--s-section) 0}
 @media(max-width:900px){.angebot-grid{grid-template-columns:1fr;gap:var(--s-grid)}.angebot-head{max-width:none}.angebot-photo{grid-column:1;grid-row:auto;height:320px;min-height:0}}
 
 /* Kontakt-Dialog */
-.modal-back{position:fixed;inset:0;background:rgba(14,42,71,.55);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;z-index:200;padding:48px 24px;overflow-y:auto}
+.modal-back{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;z-index:200;padding:48px 24px;overflow-y:auto}
 .modal-back.open{display:flex}
-.modal{background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 40px 32px;position:relative;box-shadow:0 24px 64px rgba(14,42,71,.28)}
+.modal-scrim{position:fixed;inset:0;background:rgba(14,42,71,.55);backdrop-filter:blur(3px);opacity:0}
+.modal{background:#fff;border-radius:24px;max-width:560px;width:100%;padding:40px 40px 32px;position:relative;box-shadow:0 24px 64px rgba(14,42,71,.28);will-change:clip-path,transform}
+/* Inhalt blendet erst ein, wenn das Fenster fast ausgewachsen ist */
+.modal-body{opacity:1}
+.modal-back.animating .modal-body{opacity:0}
 .modal h3{font-size:25px;font-weight:700;letter-spacing:-.01em;margin-bottom:var(--s-tight)}
 .modal .modal-intro{color:var(--ink-soft);font-size:15.5px;margin-bottom:var(--s-card)}
 .modal-close{position:absolute;top:20px;right:20px;background:none;border:0;font-size:26px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:4px 8px;border-radius:8px}
@@ -495,8 +499,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   .m-acc details p{margin:0 0 var(--s-text);font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
 
   /* Personen nebeneinander */
-  .m-people2{display:grid;grid-template-columns:1fr 1fr;
-    column-gap:var(--s-text);row-gap:var(--s-grid);margin-top:40px}
+  .m-people2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-text);margin-top:40px}
   .m-people2 .avatar{width:112px;height:112px;border-radius:50%;overflow:hidden;
     margin:0 auto var(--s-tight);box-shadow:0 16px 40px rgba(14,42,71,.16)}
   .m-people2 img{width:100%;height:100%;object-fit:cover}
@@ -1071,7 +1074,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 </footer>
 
 <div class="modal-back" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+  <div class="modal-scrim" data-close=""></div>
   <div class="modal">
+   <div class="modal-body">
     <button class="modal-close" type="button" aria-label="Schließen" data-close="">×</button>
     <div id="contactFormWrap">
       <h3 id="contactModalTitle">Vertrauliches Erstgespräch</h3>
@@ -1107,6 +1112,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       <p class="modal-intro">Vielen Dank! Wir melden uns innerhalb von 24 Stunden persönlich bei Ihnen.</p>
       <button type="button" class="btn btn-ghost-dark" data-close="">Schließen</button>
     </div>
+   </div>
   </div>
 </div>
 
@@ -1163,15 +1169,100 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   var done = document.getElementById('contactDone');
   var form = document.getElementById('contactForm');
 
+  var box = modal.querySelector('.modal');
+  var scrim = modal.querySelector('.modal-scrim');
+  var body = modal.querySelector('.modal-body');
+  var origin = null;          // Button, aus dem sich der Dialog oeffnet
+  var running = null;         // laufende Animation, damit Klicks sich nicht ueberlagern
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  var DUR_IN = 380, DUR_OUT = 260;
+  var EASE_IN = 'cubic-bezier(.22,.78,.2,1)';
+  var EASE_OUT = 'cubic-bezier(.4,0,.7,.3)';
+
+  // Start-Geometrie: Dialog liegt mittig ueber dem Button und ist auf dessen
+  // Groesse beschnitten. Kein Scale - der Text wird dadurch nie verzerrt.
+  function fromButton(){
+    if(!origin) return null;
+    var b = origin.getBoundingClientRect();
+    var m = box.getBoundingClientRect();
+    if(!b.width || !m.width) return null;
+    // Button ausserhalb des Sichtfelds: kein Herauswachsen, sondern ruhiges Einblenden
+    if(b.bottom < 0 || b.top > window.innerHeight) return null;
+    var dx = (b.left + b.width/2) - (m.left + m.width/2);
+    var dy = (b.top + b.height/2) - (m.top + m.height/2);
+    var insetX = Math.max(0, (m.width - b.width)/2);
+    var insetY = Math.max(0, (m.height - b.height)/2);
+    var r = Math.min(b.height/2, 999);
+    return {
+      transform: 'translate(' + Math.round(dx) + 'px,' + Math.round(dy) + 'px)',
+      clipPath: 'inset(' + insetY + 'px ' + insetX + 'px round ' + r + 'px)',
+      boxShadow: '0 6px 18px rgba(14,42,71,.18)'
+    };
+  }
+  var END = {
+    transform: 'translate(0,0)',
+    clipPath: 'inset(0px 0px round 24px)',
+    boxShadow: '0 24px 64px rgba(14,42,71,.28)'
+  };
+
   function openModal(){
     formWrap.hidden = false; done.hidden = true;
+    if(running){ running.cancel(); running = null; }
     modal.classList.add('open');
-    setTimeout(function(){ document.getElementById('cf-name').focus(); }, 60);
+
+    var start = reduce.matches ? null : fromButton();
+    if(!start){
+      modal.classList.remove('animating');
+      scrim.style.opacity = 1;
+      focusFirst();
+      return;
+    }
+    modal.classList.add('animating');
+    scrim.animate([{opacity:0},{opacity:1}], {duration:DUR_IN, easing:EASE_IN, fill:'forwards'});
+    body.animate(
+      [{opacity:0, transform:'translateY(6px)'},{opacity:0, transform:'translateY(6px)', offset:.45},{opacity:1, transform:'none'}],
+      {duration:DUR_IN, easing:'ease-out', fill:'both'}
+    );
+    running = box.animate([start, END], {duration:DUR_IN, easing:EASE_IN});
+    running.onfinish = running.oncancel = function(){
+      running = null;
+      modal.classList.remove('animating');
+      body.getAnimations().forEach(function(a){ a.cancel(); });
+      focusFirst();
+    };
   }
-  function closeModal(){ modal.classList.remove('open'); }
+
+  function focusFirst(){
+    var f = document.getElementById('cf-name');
+    if(f && !formWrap.hidden) f.focus();
+  }
+
+  function closeModal(){
+    if(running){ running.cancel(); running = null; }
+    var start = reduce.matches ? null : fromButton();
+    if(!start){
+      modal.classList.remove('open','animating');
+      scrim.style.opacity = 0;
+      if(origin) origin.focus();
+      return;
+    }
+    modal.classList.add('animating');
+    scrim.animate([{opacity:1},{opacity:0}], {duration:DUR_OUT, easing:EASE_OUT, fill:'forwards'});
+    body.animate([{opacity:1},{opacity:0}], {duration:140, easing:'ease-in', fill:'forwards'});
+    running = box.animate([END, start], {duration:DUR_OUT, easing:EASE_OUT});
+    running.onfinish = running.oncancel = function(){
+      running = null;
+      modal.classList.remove('open','animating');
+      scrim.style.opacity = 0;
+      box.getAnimations().forEach(function(a){ a.cancel(); });
+      body.getAnimations().forEach(function(a){ a.cancel(); });
+      if(origin) origin.focus();
+    };
+  }
 
   document.querySelectorAll('a[href*="subject=Vertrauliches"]').forEach(function(a){
-    a.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+    a.addEventListener('click', function(e){ e.preventDefault(); origin = a; openModal(); });
   });
   modal.addEventListener('click', function(e){
     if(e.target === modal || e.target.closest('[data-close]')) closeModal();
