@@ -24,3 +24,6 @@ _tmp/
 # Zugangsdaten
 .env
 .env.*
+
+# Testlisten mit echten Adressen -- bleiben lokal
+docs/*.lokal.csv
