@@ -495,7 +495,8 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   .m-acc details p{margin:0 0 var(--s-text);font-size:14.5px;line-height:1.5;color:var(--ink-soft)}
 
   /* Personen nebeneinander */
-  .m-people2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-text);margin-top:40px}
+  .m-people2{display:grid;grid-template-columns:1fr 1fr;
+    column-gap:var(--s-text);row-gap:var(--s-grid);margin-top:40px}
   .m-people2 .avatar{width:112px;height:112px;border-radius:50%;overflow:hidden;
     margin:0 auto var(--s-tight);box-shadow:0 16px 40px rgba(14,42,71,.16)}
   .m-people2 img{width:100%;height:100%;object-fit:cover}

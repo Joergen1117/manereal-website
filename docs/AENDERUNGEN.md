@@ -28,7 +28,12 @@ wurden ergänzt:
   Portraits in einer Reihe. Eine Reihe statt zwei mal zwei, damit keine
   Rangfolge entsteht: Die Portraits tragen hier nur Namen, keine Texte.
 - **Handy:** `.m-people2` bleibt zweispaltig und füllt sich mit den zwei
-  weiteren Personen zu einem 2×2-Raster, 156 px je Spalte.
+  weiteren Personen zu einem 2×2-Raster, 156 px je Spalte. Der
+  Zeilenabstand steht auf `--s-grid` (48 px) statt auf `--s-text`
+  (16 px): Mit 16 px klebten die Namen von Jörgen und Lorenz an den
+  Portraits der zweiten Reihe und lasen sich wie deren Bildunterschrift.
+  Der Spaltenabstand bleibt bei 16 px, damit die Paare als Reihe
+  zusammenhängen.
 
 Geprüft auf 1440 px und 390 px: Spalten gleich breit, Reihen bündig, kein
 Name bricht um, kein horizontaler Overflow.
