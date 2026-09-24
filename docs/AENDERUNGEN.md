@@ -13,6 +13,34 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 35 — Alle vier Personen auf der Startseite (24.09.2026)
+
+Der Abschnitt „Wer dahinter steht“ zeigte bisher nur Jörgen Oberkofler
+und Lorenz Ambrosius. Niklas Gruber und Julian Pils standen ausschließlich
+auf „Über uns“. Jetzt stehen auf beiden Seiten dieselben vier Personen.
+
+Die Startseite führt zwei getrennte Fassungen des Blocks, eine für den
+Desktop und eine für das Handy (`.m-people2`, seit Schritt 29). Beide
+wurden ergänzt:
+
+- **Desktop:** aus `.team-2` (zwei Spalten, max. 820 px) wird die neue
+  Klasse `.team-4` — vier Spalten à 218 px auf 1040 px Breite, alle vier
+  Portraits in einer Reihe. Eine Reihe statt zwei mal zwei, damit keine
+  Rangfolge entsteht: Die Portraits tragen hier nur Namen, keine Texte.
+- **Handy:** `.m-people2` bleibt zweispaltig und füllt sich mit den zwei
+  weiteren Personen zu einem 2×2-Raster, 156 px je Spalte.
+
+Geprüft auf 1440 px und 390 px: Spalten gleich breit, Reihen bündig, kein
+Name bricht um, kein horizontaler Overflow.
+
+### Geändert
+
+- `index.html` — Abschnitt `#wer-dahinter`, beide Fassungen; CSS `.team-4`
+  neu, die Handy-Regel blendet jetzt `.team-4` statt `.team-2` aus
+- `content/inhalte.md` — Zeile 111, Namen der Startseite
+
+---
+
 ## 34 — Eigener Text für Julian Pils (24.09.2026)
 
 Unter dem Portrait von Julian Pils stand seit dem 23.09.2026 wortgleich

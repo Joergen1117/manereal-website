@@ -108,7 +108,9 @@ Link: So läuft die Übergabe →
 
 ### Wer dahinter steht
 - H2: Unternehmer mit Handschlagqualität
-- Namen: Jörgen Oberkofler · Lorenz Ambrosius
+- Namen: Jörgen Oberkofler · Lorenz Ambrosius · Niklas Gruber · Julian Pils
+  *(Bis 24.09.2026 zeigte die Startseite nur die ersten beiden. Auf Julias
+  Anweisung stehen dort jetzt alle vier Personen, wie auf „Über uns“.)*
 - Link: Mehr über uns →
 
 ---

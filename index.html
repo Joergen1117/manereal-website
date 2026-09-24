@@ -296,6 +296,7 @@ footer a:hover{color:var(--teal)}
 
 .team-2{grid-template-columns:repeat(2,1fr);max-width:820px;margin-left:auto;margin-right:auto}
 .team-1{grid-template-columns:1fr;max-width:280px;margin-left:auto;margin-right:auto}
+.team-4{grid-template-columns:repeat(4,1fr);max-width:1040px;margin-left:auto;margin-right:auto}
 #wer-dahinter .avatar{width:150px;height:150px}
 
 /* Schaltflaeche am Ende einer Sektion - ueberall derselbe Abstand */
@@ -459,7 +460,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
      Die vier Vision-Punkte entfallen am Handy ganz,
      ebenso der ganze Abschnitt „Unser Anliegen" (.tinted). */
   #vision .cw-keywords, #angebot .promises,
-  #wer-dahinter .team-2, .tinted{display:none}
+  #wer-dahinter .team-4, .tinted{display:none}
 
   /* Kopf der Unterseiten: weniger Luft ueber der Eyebrow.
      Steht hier am Ende, weil .page-hero-inner weiter oben definiert ist. */
@@ -691,7 +692,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <div class="container center">
     <span class="eyebrow">Wer dahinter steht</span>
     <h2>Unternehmer mit Handschlagsqualität</h2>
-    <div class="team team-2">
+    <div class="team team-4">
       <div class="member">
         <div class="avatar"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div>
         <h3>Jörgen Oberkofler</h3>
@@ -700,12 +701,22 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
         <div class="avatar"><img src="assets/images/people/lorenz-ambrosius.jpg" alt="Lorenz Ambrosius"></div>
         <h3>Lorenz Ambrosius</h3>
       </div>
+      <div class="member">
+        <div class="avatar"><img src="assets/images/people/niklas-gruber.jpg" alt="Niklas Gruber"></div>
+        <h3>Niklas Gruber</h3>
+      </div>
+      <div class="member">
+        <div class="avatar"><img src="assets/images/people/julian-pils.jpg" alt="Julian Pils"></div>
+        <h3>Julian Pils</h3>
+      </div>
     </div>
 
     <!-- Nur am Handy: nebeneinander statt untereinander -->
     <div class="m-people2">
       <div><div class="avatar"><img src="assets/images/people/joergen-oberkofler.jpg" alt="Jörgen Oberkofler"></div><h3>Jörgen Oberkofler</h3></div>
       <div><div class="avatar"><img src="assets/images/people/lorenz-ambrosius.jpg" alt="Lorenz Ambrosius"></div><h3>Lorenz Ambrosius</h3></div>
+      <div><div class="avatar"><img src="assets/images/people/niklas-gruber.jpg" alt="Niklas Gruber"></div><h3>Niklas Gruber</h3></div>
+      <div><div class="avatar"><img src="assets/images/people/julian-pils.jpg" alt="Julian Pils"></div><h3>Julian Pils</h3></div>
     </div>
     <p class="section-action"><a href="#ueber-uns" class="btn btn-primary">Mehr über uns →</a></p>
   </div>
