@@ -237,6 +237,24 @@ footer a:hover{color:var(--teal)}
   .hero-media::after{background:linear-gradient(to bottom,
     rgba(9,26,44,.82) 0%,rgba(9,26,44,.40) 32%,
     rgba(9,26,44,.32) 56%,rgba(9,26,44,.80) 100%)}
+  /* Ecken zusaetzlich uebermalen statt nur clippen. Greift auch dann,
+     wenn der Browser die Video-Ebene gar nicht am runden Rand
+     beschneidet (Firefox am Handy, alte Versionen und manche
+     GPU-Treiber): vier Viertelkreis-Keile in Seitenweiss decken den
+     Zwickel zwischen Rechteckecke und Rundung ab. Nur hier am Handy,
+     weil der Grundriss (body::before) ab 900px abgeschaltet ist und
+     der Grund dahinter deshalb rein weiss ist — am Desktop wuerde
+     Weiss die Zeichnung ausstanzen. Die Keile liegen innerhalb der
+     Box, weil overflow:hidden alles abschneiden wuerde, was nach
+     aussen ragt. */
+  .hero-media::before{content:"";position:absolute;inset:0;z-index:3;
+    pointer-events:none;background-repeat:no-repeat;background-size:24px 24px;
+    background-position:top left,top right,bottom left,bottom right;
+    background-image:
+      radial-gradient(circle 24px at bottom right,transparent 0 23.5px,#fff 24.5px),
+      radial-gradient(circle 24px at bottom left,transparent 0 23.5px,#fff 24.5px),
+      radial-gradient(circle 24px at top right,transparent 0 23.5px,#fff 24.5px),
+      radial-gradient(circle 24px at top left,transparent 0 23.5px,#fff 24.5px)}
 
   /* Abschluss-Block: schmalere Raender, kleinere Ueberschrift,
      Schaltflaeche ueber die volle Breite statt dreizeilig */
