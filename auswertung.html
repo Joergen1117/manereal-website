@@ -121,6 +121,10 @@ tr.trenner td{
   position:fixed; inset:0; background:var(--navy);
   display:grid; place-items:center; padding:24px; overflow:auto;
 }
+/* display:grid im Autorenstylesheet schlägt [hidden]{display:none} des
+   Browsers. Ohne diese Zeile bleibt die Maske nach erfolgreicher Anmeldung
+   über dem Dashboard stehen. */
+.tor-hinter[hidden]{display:none}
 /* Der Grundriss aus der Bildwelt der Seite, sehr leise. Invertiert, weil seine
    Linien navy sind und hier auf navy liegen. */
 .tor-hinter::before{
