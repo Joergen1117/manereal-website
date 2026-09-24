@@ -20,3 +20,7 @@ dist/
 _tmp/
 .playwright-mcp/
 .gstack/
+
+# Zugangsdaten
+.env
+.env.*

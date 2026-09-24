@@ -3,6 +3,23 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+/* Zuordnung des Outreach-Links. Steht bewusst ganz vorn, direkt hinter der
+   Zeichensatzangabe: Der Code aus der E-Mail wird gelesen und sofort aus der
+   Adresszeile entfernt, damit er dort nie aufblitzt. Ersetzt auch den
+   Verlaufseintrag und legt nichts am Endgeraet ab. Wer die Adresse danach
+   kopiert und weitergibt, erzeugt keine Fehlzuordnung mehr. Preis dafuer:
+   Ein Neuladen verliert die Zuordnung. */
+window.__mr = (function () {
+  var code = null;
+  try { code = new URLSearchParams(location.search).get('m'); } catch (e) {}
+  if (code) {
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+  }
+  return { code: code };
+})();
+</script>
 <title>Manereal Hausverwaltung – Ihr Lebenswerk. Unsere Verantwortung.</title>
 <meta name="description" content="Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.">
 <style>
@@ -1060,8 +1077,16 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <p>Für den technischen Versand der Formularnachricht setzen wir Brevo (Brevo SAS, vormals Sendinblue SAS, 106 boulevard Haussmann, 75008 Paris, Frankreich) als Auftragsverarbeiter gemäß Art. 28 DSGVO ein. Die Verarbeitung erfolgt auf Servern innerhalb der Europäischen Union; eine Übermittlung in ein Drittland findet dabei nicht statt. Weitere Informationen: <a href="https://www.brevo.com/legal/privacypolicy/" target="_blank" rel="noopener">brevo.com/legal/privacypolicy</a>.</p>
   <p>Zum Schutz vor automatisierten Massenzusendungen verarbeiten wir beim Absenden des Formulars vorübergehend Ihre IP-Adresse. Sie wird ausschließlich zur Begrenzung der Anfragezahl verwendet, nicht gespeichert und nicht mit Ihren übrigen Angaben zusammengeführt (Art. 6 Abs. 1 lit. f DSGVO).</p>
   <p>Ihre Anfrage und die zugehörige Korrespondenz bewahren wir auf, solange das zur Bearbeitung erforderlich ist, und löschen sie spätestens 24 Monate nach dem letzten Kontakt, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
-  <h2>4. Cookies und Tracking</h2>
-  <p>Diese Website verwendet keine Cookies zu Analyse- oder Marketingzwecken.</p>
+  <!-- ENTWURF, rechtlich noch zu bestaetigen. Offene Punkte siehe
+       content/inhalte.md unter "Hinweise zur Weitergabe" und docs/TRACKING.md:
+       Firmierung und Anschrift des Datenbankanbieters, Aufbewahrungsfrist,
+       Nennung im Verarbeitungsverzeichnis. -->
+  <h2>4. Cookies und Reichweitenmessung</h2>
+  <p>Diese Website setzt keine Cookies und legt keine Daten im Speicher Ihres Browsers ab. Ein Einwilligungsbanner ist daher nicht erforderlich.</p>
+  <p>Um zu verstehen, welche Informationen auf dieser Seite gebraucht werden, erfassen wir beim Besuch: die aufgerufenen Seiten und ihre Reihenfolge, die jeweilige Verweildauer, wie weit gescrollt wurde, welche Fragen aufgeklappt wurden, Klicks auf Schaltflächen und E-Mail-Adressen sowie das Absenden des Kontaktformulars. Dazu kommen eine grobe Geräteeinstufung (mobil oder Desktop), das Herkunftsland und die verweisende Website. <strong>Ihre IP-Adresse wird dabei nicht gespeichert.</strong> Rechtsgrundlage ist unser berechtigtes Interesse an einer verständlichen und wirksamen Website (Art. 6 Abs. 1 lit. f DSGVO).</p>
+  <p>Haben Sie von uns eine E-Mail mit einem persönlichen Link auf diese Website erhalten, so enthält dieser Link eine Kennung. Über sie ordnen wir die oben genannten Angaben Ihrer Person zu. Wir verwenden das ausschließlich, um zu erkennen, welche Fragen Sie beschäftigen, und um unsere Ansprache daran auszurichten (Art. 6 Abs. 1 lit. f DSGVO). Sie können dieser Zuordnung jederzeit formlos an <a href="mailto:kontakt@manereal.at">kontakt@manereal.at</a> widersprechen. Wir löschen die Zuordnung dann; die verbleibenden Angaben lassen sich danach keiner Person mehr zuordnen.</p>
+  <p>Für die Speicherung setzen wir Neon als Auftragsverarbeiter gemäß Art. 28 DSGVO ein. Die Datenbank liegt in der Europäischen Union (Standort Frankfurt am Main). Da es sich um ein US-amerikanisches Unternehmen handelt, kann es zu einer Übermittlung in die USA kommen; der Anbieter stützt sich hierfür auf das EU-U.S. Data Privacy Framework, ergänzend auf EU-Standardvertragsklauseln (Art. 46 DSGVO). Weitere Informationen: <a href="https://neon.com/dpa" target="_blank" rel="noopener">neon.com/dpa</a>.</p>
+  <p>Die Messdaten werden spätestens 24 Monate nach ihrer Erhebung gelöscht. Eine Weitergabe an Dritte zu Werbezwecken findet nicht statt.</p>
   <h2>5. Ihre Rechte</h2>
   <p>Ihnen stehen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch zu. Sie können sich zudem bei der österreichischen Datenschutzbehörde (dsb.gv.at) beschweren.</p>
 </div>
@@ -1330,6 +1355,204 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       submitBtn.textContent = 'Anfrage senden';
     });
   });
+})();
+</script>
+
+<script>
+/* Messung des Outreach.
+
+   Erfasst Seitenaufrufe, Verweildauer je Route und die Wege zum Erstgespraech.
+   Legt nichts am Endgeraet ab: kein Cookie, kein localStorage, kein
+   sessionStorage. Die Zuordnung lebt nur in dieser Funktion, solange die Seite
+   offen ist - das Hash-Routing macht daraus eine einzige Sitzung.
+
+   Ein Aufruf wird immer gezaehlt, gilt aber erst als Mensch, wenn ein
+   Interaktionssignal eintrifft. Die Link-Scanner der Mail-Gateways rufen jeden
+   Link schon beim Zustellen auf; sie bewegen keine Maus, scrollen nicht und
+   wechseln keine Route. Ohne diese Trennung waeren die Klickraten um
+   zweistellige Prozentsaetze zu hoch. */
+(function(){
+  var PERSONENBEZUG  = true;   // false: der Code aus dem Mail-Link wird nie gesendet
+  var MENSCH_NACH_MS = 10000;  // so lange sichtbar ohne Eingabe gilt auch als Mensch
+  var PAKET_MS       = 1500;   // Sammelzeit, bevor ein Paket rausgeht
+  var ENDPUNKT       = '/api/track';
+
+  if(!navigator.sendBeacon) return;
+
+  var ROUTEN = ['start','nachfolge','ueber-uns','impressum','datenschutz'];
+
+  function uuid(){
+    if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+      var r = (Math.random()*16)|0;
+      return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+    });
+  }
+
+  var besuch = uuid();
+  var code = (PERSONENBEZUG && window.__mr) ? window.__mr.code : null;
+  var herkunft = 'direkt';
+  if(code){
+    herkunft = 'gmass';
+  } else if(document.referrer){
+    try {
+      var host = new URL(document.referrer).hostname;
+      if(host && host !== location.hostname) herkunft = host;
+    } catch(e){}
+  }
+
+  /* --- Paketversand --------------------------------------------------- */
+
+  var puffer = [];
+  var timer = null;
+
+  function melde(typ, route, dauer, extra){
+    puffer.push({ t:typ, r:route || undefined, d:dauer || undefined, x:extra || undefined });
+    if(!timer) timer = setTimeout(sende, PAKET_MS);
+  }
+
+  function sende(){
+    if(timer){ clearTimeout(timer); timer = null; }
+    if(!puffer.length) return;
+    var paket = JSON.stringify({ v:besuch, m:code, s:herkunft, e:puffer });
+    puffer = [];
+    try {
+      // sendBeacon feuert auch noch, wenn der Tab geschlossen wird - fetch nicht.
+      // text/plain, damit der Browser keine Vorab-Anfrage stellt.
+      navigator.sendBeacon(ENDPUNKT, new Blob([paket], {type:'text/plain;charset=UTF-8'}));
+    } catch(e){}
+  }
+
+  /* --- Zeit je Route --------------------------------------------------- */
+
+  function aktuelleRoute(){
+    var h = (location.hash || '#start').replace('#','');
+    if(h === 'versprechen') h = 'ueber-uns';          // alte Links, wie im Router oben
+    return ROUTEN.indexOf(h) < 0 ? 'start' : h;
+  }
+
+  var route = aktuelleRoute();
+  var sichtbar = document.visibilityState === 'visible';
+  var seit = Date.now();
+  var aufRoute = 0;   // sichtbare Zeit auf der laufenden Route
+  var gesamt = 0;     // sichtbare Zeit im ganzen Besuch
+
+  // Rechnet den Abschnitt seit dem letzten Aufruf ab. Zeit im Hintergrund
+  // zaehlt nicht mit - sonst misst man 45 Minuten, weil jemand den Tab offen
+  // liegen liess.
+  function abrechnen(){
+    var jetzt = Date.now();
+    if(sichtbar){ aufRoute += jetzt - seit; gesamt += jetzt - seit; }
+    seit = jetzt;
+  }
+
+  function routeVerlassen(){
+    abrechnen();
+    if(aufRoute > 0) melde('route_leave', route, aufRoute);
+    aufRoute = 0;
+  }
+
+  /* --- Mensch oder Maschine -------------------------------------------- */
+
+  var istMensch = false;
+
+  function mensch(signal){
+    if(istMensch) return;
+    istMensch = true;
+    melde('human', null, null, {signal:signal});
+    sende();
+  }
+
+  var mausX = null, mausY = null;
+  document.addEventListener('pointermove', function(e){
+    // Der erste Punkt dient nur als Bezug - erst echte Bewegung zaehlt.
+    if(mausX === null){ mausX = e.clientX; mausY = e.clientY; return; }
+    if(Math.abs(e.clientX - mausX) + Math.abs(e.clientY - mausY) > 12) mensch('pointer');
+  }, {passive:true});
+
+  document.addEventListener('touchstart', function(){ mensch('touch'); }, {passive:true});
+  document.addEventListener('keydown', function(){ mensch('key'); });
+  document.addEventListener('click', function(){ mensch('click'); });
+
+  var wache = setInterval(function(){
+    if(istMensch){ clearInterval(wache); return; }
+    abrechnen();
+    if(gesamt >= MENSCH_NACH_MS){ mensch('dwell'); clearInterval(wache); }
+  }, 1000);
+
+  /* --- Was gemessen wird ------------------------------------------------ */
+
+  var scroll50 = false, scroll90 = false;
+
+  window.addEventListener('scroll', function(){
+    if(window.scrollY <= 0) return;   // der Router springt beim Routenwechsel auf 0
+    mensch('scroll');
+    var hoehe = document.documentElement.scrollHeight - window.innerHeight;
+    if(hoehe <= 0) return;
+    var anteil = (window.scrollY / hoehe) * 100;
+    if(!scroll50 && anteil >= 50){ scroll50 = true; melde('scroll', route, null, {pct:50}); }
+    if(!scroll90 && anteil >= 90){ scroll90 = true; melde('scroll', route, null, {pct:90}); }
+  }, {passive:true});
+
+  window.addEventListener('hashchange', function(){
+    routeVerlassen();
+    route = aktuelleRoute();
+    scroll50 = scroll90 = false;
+    melde('route_enter', route);
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    abrechnen();
+    sichtbar = document.visibilityState === 'visible';
+    if(!sichtbar){ routeVerlassen(); sende(); }
+  });
+
+  window.addEventListener('pagehide', function(){ routeVerlassen(); sende(); });
+
+  function ctaName(a, i){
+    if(a.closest('header')) return 'kopfzeile';
+    var s = a.closest('section');
+    if(s) return s.id || (s.className || '').split(' ')[0] || ('cta' + i);
+    return 'cta' + i;
+  }
+
+  document.querySelectorAll('a[href*="subject=Vertrauliches"]').forEach(function(a, i){
+    var name = ctaName(a, i);
+    a.addEventListener('click', function(){ melde('cta_click', route, null, {cta:name}); sende(); });
+  });
+
+  document.querySelectorAll('a[href^="mailto:"]:not([href*="subject=Vertrauliches"])').forEach(function(a){
+    a.addEventListener('click', function(){ melde('mail_click', route); sende(); });
+  });
+
+  document.querySelectorAll('details').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if(!d.open) return;
+      var s = d.querySelector('summary');
+      melde('faq_open', route, null, {q: s ? s.textContent.trim().slice(0,150) : ''});
+    });
+  });
+
+  // Das bestehende Formular-Skript bleibt unberuehrt. Ob der Versand geklappt
+  // hat, verraet es dadurch, welcher der beiden Bloecke sichtbar wird.
+  function beobachte(el, typ){
+    if(!el || !window.MutationObserver) return;
+    var gemeldet = false;
+    new MutationObserver(function(){
+      if(el.hidden || gemeldet) return;
+      gemeldet = true;
+      melde(typ, route);
+      sende();
+    }).observe(el, {attributes:true, attributeFilter:['hidden']});
+  }
+  beobachte(document.getElementById('contactDone'), 'form_submit');
+  beobachte(document.getElementById('contactError'), 'form_error');
+
+  // Sofort raus, nicht erst nach der Sammelzeit: Damit ist der Aufruf auch
+  // dann erfasst, wenn die Seite gleich wieder geschlossen wird.
+  melde('visit');
+  melde('route_enter', route);
+  sende();
 })();
 </script>
 

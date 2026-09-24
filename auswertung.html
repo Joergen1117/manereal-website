@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="de"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Auswertung – Manereal</title>
+<style>
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url('assets/fonts/inter-latin.woff2') format('woff2');
+}
+
+:root{
+  --navy:#0E2A47;
+  --teal:#0F6C7C;
+  --teal-bright:#6FBECB;
+  --ink-soft:#5B6B7A;
+  --line:#E8E5E0;
+  --flaeche:#F5F7F8;
+  --warn:#9A3B22;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--flaeche); color:var(--navy);
+  font:400 16px/1.55 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+h1,h2,h3{margin:0; font-weight:700; letter-spacing:-.01em}
+a{color:var(--teal)}
+button{font:inherit}
+
+.huelle{max-width:1180px; margin:0 auto; padding:0 24px}
+
+/* Kopfzeile */
+header{background:#fff; border-bottom:1px solid var(--line)}
+.kopf{display:flex; align-items:center; gap:20px; padding:16px 0; flex-wrap:wrap}
+.kopf img{height:30px; width:auto; display:block}
+.kopf .titel{font-size:15px; font-weight:600; color:var(--ink-soft); letter-spacing:.06em; text-transform:uppercase}
+.kopf .schub{margin-left:auto}
+
+.filter{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:0 0 16px}
+.filter label{font-size:13px; color:var(--ink-soft)}
+select,input[type=date],input[type=password]{
+  font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:8px;
+  background:#fff; color:var(--navy);
+}
+.knopf{
+  padding:8px 16px; border:1px solid var(--teal); border-radius:8px;
+  background:var(--teal); color:#fff; cursor:pointer; font-weight:600; font-size:15px;
+}
+.knopf.leise{background:#fff; color:var(--teal)}
+.knopf.gefahr{background:#fff; color:var(--warn); border-color:var(--warn)}
+.knopf:disabled{opacity:.5; cursor:default}
+
+/* Reiter */
+nav.reiter{display:flex; gap:2px; border-bottom:1px solid var(--line); background:#fff}
+nav.reiter button{
+  padding:13px 20px; border:0; border-bottom:3px solid transparent; background:none;
+  color:var(--ink-soft); cursor:pointer; font-size:15px; font-weight:600;
+}
+nav.reiter button[aria-current]{color:var(--navy); border-bottom-color:var(--teal)}
+
+main{padding:28px 0 72px}
+section.karte{background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px; margin-bottom:20px}
+section.karte > h2{font-size:19px; margin-bottom:4px}
+section.karte > p.unter{margin:0 0 20px; color:var(--ink-soft); font-size:14px}
+
+/* Trichter */
+.stufe{display:grid; grid-template-columns:200px 1fr 130px; gap:14px; align-items:center; margin-bottom:9px}
+.stufe .name{font-size:15px; font-weight:600}
+.balken{height:34px; background:var(--flaeche); border-radius:7px; overflow:hidden}
+.balken i{display:block; height:100%; background:var(--teal); border-radius:7px}
+.stufe .zahl{text-align:right; font-variant-numeric:tabular-nums}
+.stufe .zahl b{font-size:18px}
+.stufe .zahl span{color:var(--ink-soft); font-size:13px; margin-left:7px}
+
+.hinweis{
+  margin-top:18px; padding:13px 16px; background:var(--flaeche); border-radius:10px;
+  font-size:14px; color:var(--ink-soft);
+}
+.hinweis b{color:var(--navy)}
+
+/* Tabellen */
+table{width:100%; border-collapse:collapse; font-size:15px}
+th,td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; white-space:nowrap}
+td.n,th.n{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+tbody tr.klickbar{cursor:pointer}
+tbody tr.klickbar:hover{background:var(--flaeche)}
+tr.ohne td{color:var(--ink-soft)}
+tr.trenner td{
+  background:var(--flaeche); font-size:13px; color:var(--ink-soft); font-weight:600;
+  border-bottom:1px solid var(--line);
+}
+.marke{display:inline-block; padding:1px 8px; border-radius:20px; font-size:12px; font-weight:600}
+.marke.ja{background:#E3F0EE; color:#0B5B4E}
+.marke.nein{background:var(--flaeche); color:var(--ink-soft)}
+
+/* Personenblatt */
+.blatt-hinter{position:fixed; inset:0; background:rgba(14,42,71,.4); display:none; z-index:20}
+.blatt-hinter.offen{display:block}
+.blatt{
+  position:fixed; top:0; right:0; bottom:0; width:min(620px,100%); background:#fff;
+  overflow-y:auto; padding:28px; box-shadow:-10px 0 40px rgba(14,42,71,.2); z-index:21;
+  transform:translateX(100%); transition:transform .22s ease;
+}
+.blatt-hinter.offen .blatt{transform:none}
+@media (prefers-reduced-motion: reduce){ .blatt{transition:none} }
+.blatt h2{font-size:22px}
+.blatt .firma{color:var(--ink-soft); margin:2px 0 18px}
+.besuch{border:1px solid var(--line); border-radius:11px; padding:16px; margin-bottom:14px}
+.besuch .kopfzeile{font-size:13px; color:var(--ink-soft); margin-bottom:10px}
+.verlauf{display:grid; grid-template-columns:1fr auto; gap:4px 16px; font-size:15px}
+.verlauf .ms{font-variant-numeric:tabular-nums; color:var(--ink-soft)}
+.tat{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:14px}
+.tat div{margin-bottom:3px}
+
+/* Anmeldung */
+.tor{max-width:400px; margin:14vh auto; background:#fff; border:1px solid var(--line);
+     border-radius:14px; padding:32px; text-align:center}
+.tor img{height:36px; margin-bottom:22px}
+.tor input{width:100%; margin-bottom:12px; text-align:center}
+.tor .knopf{width:100%}
+.fehler{color:var(--warn); font-size:14px; min-height:20px; margin-top:10px}
+
+.leer{color:var(--ink-soft); padding:26px 0; text-align:center}
+.fuss{color:var(--ink-soft); font-size:13px; padding:0 0 40px; line-height:1.7}
+
+@media (max-width:760px){
+  .huelle{padding:0 16px}
+  .stufe{grid-template-columns:1fr; gap:4px}
+  .stufe .zahl{text-align:left}
+  /* Reiter umbrechen lassen statt seitlich scrollen: ein Balken, dessen Ende
+     man erst durch Wischen findet, versteckt die Hälfte der Ansichten. */
+  nav.reiter{flex-wrap:wrap}
+  nav.reiter button{padding:12px 14px; font-size:14px}
+  section.karte{padding:18px}
+  .blatt{padding:20px}
+}
+/* Breite Tabellen scrollen in sich selbst, nicht die ganze Seite. */
+.waage{overflow-x:auto; -webkit-overflow-scrolling:touch}
+</style>
+</head>
+<body>
+
+<div id="tor" class="tor" hidden>
+  <img src="assets/images/brand/logo.png" alt="Manereal">
+  <h1 style="font-size:19px;margin-bottom:18px">Auswertung</h1>
+  <form id="torForm">
+    <!-- Es gibt nur ein Passwort, keinen Benutzernamen. Das versteckte Feld ist
+         da, damit Passwortverwaltungen den Eintrag sauber zuordnen können. -->
+    <input type="text" name="username" value="auswertung" autocomplete="username"
+           hidden aria-hidden="true" tabindex="-1" readonly>
+    <input id="passwort" type="password" placeholder="Passwort" autocomplete="current-password" required>
+    <button class="knopf" type="submit">Anmelden</button>
+  </form>
+  <p class="fehler" id="torFehler"></p>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="huelle">
+      <div class="kopf">
+        <img src="assets/images/brand/logo.png" alt="Manereal">
+        <span class="titel">Auswertung</span>
+        <div class="schub"><button class="knopf leise" id="abmelden">Abmelden</button></div>
+      </div>
+      <div class="filter">
+        <label for="fKampagne">Kampagne</label>
+        <select id="fKampagne"><option value="alle">alle</option></select>
+        <label for="fVon">von</label><input type="date" id="fVon">
+        <label for="fBis">bis</label><input type="date" id="fBis">
+        <button class="knopf leise" id="fZuruecksetzen">zurücksetzen</button>
+      </div>
+    </div>
+    <div class="huelle">
+      <nav class="reiter" id="reiter">
+        <button data-tab="uebersicht" aria-current="true">Übersicht</button>
+        <button data-tab="personen">Personen</button>
+        <button data-tab="seiten">Seiten</button>
+        <button data-tab="verwaltung">Verwaltung</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="huelle" id="inhalt"></main>
+
+  <div class="huelle fuss">
+    <p>
+      Ein weitergeleiteter Link zeigt die falsche Person: Leitet jemand die E-Mail an
+      seinen Berater weiter, laufen dessen Klicks auf sein Konto.<br>
+      Aufrufe ohne menschliches Signal sind mit hoher Wahrscheinlichkeit Link-Scanner
+      der Mail-Gateways. Sie werden gezählt, aber aus allen Raten herausgerechnet.
+    </p>
+  </div>
+</div>
+
+<div class="blatt-hinter" id="blattHinter">
+  <div class="blatt" id="blatt" role="dialog" aria-modal="true" aria-labelledby="blattTitel"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var Z = { kampagne:'alle', von:'', bis:'', tab:'uebersicht' };
+
+  var tor      = document.getElementById('tor');
+  var app      = document.getElementById('app');
+  var inhalt   = document.getElementById('inhalt');
+  var blattHin = document.getElementById('blattHinter');
+  var blatt    = document.getElementById('blatt');
+
+  /* --- Formate --------------------------------------------------------- */
+
+  // Lesezeiten sind das Herz der Auswertung, deshalb m:ss statt Sekunden.
+  function dauer(ms){
+    if(!ms) return '–';
+    var s = Math.round(ms/1000);
+    var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), r = s%60;
+    var mm = (h ? String(m).padStart(2,'0') : String(m));
+    return (h ? h + ':' : '') + mm + ':' + String(r).padStart(2,'0');
+  }
+
+  function datum(iso){
+    if(!iso) return '–';
+    var d = new Date(iso);
+    // de-AT liefert bereits "12.10." samt Punkt am Ende - keinen zweiten anhängen.
+    return d.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function tag(iso){
+    if(!iso) return '–';
+    return new Date(iso).toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit',year:'numeric'});
+  }
+
+  function quote(zaehler, nenner){
+    if(!nenner) return '–';
+    return (zaehler/nenner*100).toLocaleString('de-AT',{maximumFractionDigits:1}) + ' %';
+  }
+
+  function sicher(s){
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+
+  function marke(wahr){
+    return wahr ? '<span class="marke ja">ja</span>' : '<span class="marke nein">nein</span>';
+  }
+
+  /* --- Abfragen -------------------------------------------------------- */
+
+  function abfrage(){
+    var p = new URLSearchParams();
+    if(Z.kampagne && Z.kampagne !== 'alle') p.set('kampagne', Z.kampagne);
+    if(Z.von) p.set('von', Z.von);
+    if(Z.bis) p.set('bis', Z.bis);
+    return p;
+  }
+
+  function hole(aktion, extra){
+    var p = abfrage();
+    p.set('a', aktion);
+    if(extra) Object.keys(extra).forEach(function(k){ p.set(k, extra[k]); });
+    return fetch('/api/auswertung?' + p.toString(), {credentials:'same-origin'})
+      .then(function(r){
+        if(r.status === 401){ zeigeTor(); throw new Error('nicht angemeldet'); }
+        return r.json().then(function(d){
+          if(!r.ok) throw new Error(d.fehler || 'Abfrage fehlgeschlagen');
+          return d;
+        });
+      });
+  }
+
+  function schicke(aktion, koerper){
+    var p = abfrage();
+    p.set('a', aktion);
+    return fetch('/api/auswertung?' + p.toString(), {
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(koerper || {})
+    }).then(function(r){
+      if(r.status === 401){ zeigeTor(); throw new Error('nicht angemeldet'); }
+      return r.json();
+    });
+  }
+
+  /* --- Anmeldung -------------------------------------------------------- */
+
+  function zeigeTor(){ tor.hidden = false; app.hidden = true; }
+  function zeigeApp(){ tor.hidden = true;  app.hidden = false; }
+
+  document.getElementById('torForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var feld = document.getElementById('passwort');
+    var meldung = document.getElementById('torFehler');
+    meldung.textContent = '';
+    fetch('/api/auswertung?a=login', {
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({passwort: feld.value})
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok, d:d}; }); })
+      .then(function(a){
+        if(!a.ok){ meldung.textContent = a.d.fehler || 'Anmeldung fehlgeschlagen.'; return; }
+        feld.value = '';
+        zeigeApp();
+        start();
+      })
+      .catch(function(){ meldung.textContent = 'Die Anmeldung war nicht möglich.'; });
+  });
+
+  document.getElementById('abmelden').addEventListener('click', function(){
+    fetch('/api/auswertung?a=logout', {method:'POST', credentials:'same-origin'})
+      .then(zeigeTor).catch(zeigeTor);
+  });
+
+  /* --- Übersicht -------------------------------------------------------- */
+
+  function zeichneUebersicht(d){
+    var t = d.trichter || {};
+    var stufen = [
+      ['E-Mails versendet',        d.versendet,     null],
+      ['Link aufgerufen',          t.aufgerufen,    d.versendet],
+      ['davon Mensch',             t.mensch,        t.aufgerufen],
+      ['zwei Seiten oder mehr',    t.mehrseitig,    t.mensch],
+      ['Erstgespräch angeklickt',  t.cta,           t.mensch],
+      ['Formular abgeschickt',     t.formular,      t.mensch]
+    ];
+    var groesste = d.versendet || t.aufgerufen || 1;
+
+    var html = '<section class="karte"><h2>Trichter</h2>' +
+      '<p class="unter">Gezählt werden Personen, nicht Besuche — wer dreimal wiederkommt, ' +
+      'verdreifacht die Klickrate nicht.</p>';
+
+    stufen.forEach(function(s){
+      var wert = s[1] || 0;
+      html += '<div class="stufe">' +
+        '<div class="name">' + s[0] + '</div>' +
+        '<div class="balken"><i style="width:' + Math.max(1.5, wert/groesste*100) + '%"></i></div>' +
+        '<div class="zahl"><b>' + wert.toLocaleString('de-AT') + '</b>' +
+        (s[2] != null ? '<span>' + quote(wert, s[2]) + '</span>' : '') +
+        '</div></div>';
+    });
+
+    html += '<div class="hinweis">' +
+      '<b>' + (t.besuche || 0) + '</b> zugeordnete Aufrufe insgesamt, davon <b>' +
+      (t.scanner || 0) + '</b> ohne menschliches Signal (vermutlich Link-Scanner). ' +
+      'Dazu <b>' + (d.ohneZuordnung.besuche || 0) + '</b> Aufrufe ohne Zuordnung — ' +
+      'Suche, Direkteingabe oder ein Link, der nicht aus der Kampagne stammt.' +
+      '</div></section>';
+
+    html += '<section class="karte"><h2>Kampagnen</h2>' +
+      '<p class="unter">Jede Welle einzeln. Die Lesezeit ist die Summe aller zugeordneten Besuche.</p>' +
+      '<div class="waage"><table><thead><tr>' +
+      '<th>Kampagne</th><th class="n">versendet</th><th class="n">aufgerufen</th>' +
+      '<th class="n">Rate</th><th class="n">Mensch</th><th class="n">Erstgespräch</th>' +
+      '<th class="n">Formular</th><th class="n">Lesezeit</th>' +
+      '</tr></thead><tbody>';
+
+    if(!d.kampagnen.length){
+      html += '<tr><td colspan="8" class="leer">Noch keine Kontakte angelegt.</td></tr>';
+    }
+    d.kampagnen.forEach(function(k){
+      html += '<tr><td>' + sicher(k.campaign) + '</td>' +
+        '<td class="n">' + k.versendet + '</td>' +
+        '<td class="n">' + k.aufgerufen + '</td>' +
+        '<td class="n">' + quote(k.aufgerufen, k.versendet) + '</td>' +
+        '<td class="n">' + k.mensch + '</td>' +
+        '<td class="n">' + k.cta + '</td>' +
+        '<td class="n">' + k.formular + '</td>' +
+        '<td class="n">' + dauer(k.lesezeit) + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    inhalt.innerHTML = html;
+    fuelleKampagnen(d.kampagnen.map(function(k){ return k.campaign; }));
+  }
+
+  /* --- Personen --------------------------------------------------------- */
+
+  function zeichnePersonen(d){
+    var mit = d.personen.filter(function(p){ return p.besuche > 0; });
+    var ohne = d.personen.filter(function(p){ return !p.besuche; });
+
+    var html = '<section class="karte"><h2>Personen</h2>' +
+      '<p class="unter">Alle Angeschriebenen. Oben die mit Besuch, nach Lesezeit sortiert — ' +
+      'darunter die ohne. <b>' + mit.length + ' von ' + d.personen.length + '</b> haben den Link aufgerufen.</p>' +
+      '<div class="waage"><table><thead><tr>' +
+      '<th>Name</th><th>Unternehmen</th><th>Kampagne</th><th class="n">Besuche</th>' +
+      '<th class="n">Lesezeit</th><th class="n">zuletzt</th><th class="n">Erstgespräch</th>' +
+      '<th class="n">Formular</th></tr></thead><tbody>';
+
+    function zeile(p, grau){
+      return '<tr class="klickbar' + (grau ? ' ohne' : '') + '" data-token="' + sicher(p.token) + '">' +
+        '<td>' + sicher(p.name) + '</td>' +
+        '<td>' + sicher(p.company || '–') + '</td>' +
+        '<td>' + sicher(p.campaign) + '</td>' +
+        '<td class="n">' + (p.besuche || '–') + '</td>' +
+        '<td class="n">' + dauer(p.lesezeit) + '</td>' +
+        '<td class="n">' + (p.letzter ? datum(p.letzter) : '–') + '</td>' +
+        '<td class="n">' + (p.besuche ? marke(p.cta) : '–') + '</td>' +
+        '<td class="n">' + (p.besuche ? marke(p.formular) : '–') + '</td></tr>';
+    }
+
+    if(!d.personen.length){
+      html += '<tr><td colspan="8" class="leer">Noch keine Kontakte angelegt. Unter „Verwaltung“ eine CSV einspielen.</td></tr>';
+    }
+    mit.forEach(function(p){ html += zeile(p, false); });
+    if(ohne.length){
+      html += '<tr class="trenner"><td colspan="8">' + ohne.length +
+        ' ohne Besuch — angeschrieben, aber der Link wurde nie aufgerufen</td></tr>';
+      ohne.forEach(function(p){ html += zeile(p, true); });
+    }
+
+    html += '</tbody></table></div></section>';
+    inhalt.innerHTML = html;
+
+    inhalt.querySelectorAll('tr.klickbar').forEach(function(tr){
+      tr.addEventListener('click', function(){ oeffneBlatt(tr.getAttribute('data-token')); });
+    });
+  }
+
+  /* --- Personenblatt ---------------------------------------------------- */
+
+  function oeffneBlatt(token){
+    blattHin.classList.add('offen');
+    blatt.innerHTML = '<p class="leer">wird geladen …</p>';
+    hole('person', {token:token}).then(function(d){ zeichneBlatt(d); }).catch(function(e){
+      blatt.innerHTML = '<p class="leer">' + sicher(e.message) + '</p>';
+    });
+  }
+
+  function schliesseBlatt(){ blattHin.classList.remove('offen'); }
+
+  blattHin.addEventListener('click', function(e){ if(e.target === blattHin) schliesseBlatt(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') schliesseBlatt(); });
+
+  var TATNAME = {
+    cta_click:'Erstgespräch angeklickt', form_submit:'Formular abgeschickt',
+    form_error:'Formular fehlgeschlagen', faq_open:'Frage aufgeklappt',
+    mail_click:'E-Mail-Adresse angeklickt'
+  };
+  var ROUTENNAME = {
+    start:'Start', nachfolge:'Unser Ansatz', 'ueber-uns':'Über Manereal',
+    impressum:'Impressum', datenschutz:'Datenschutz'
+  };
+
+  function zeichneBlatt(d){
+    var k = d.kontakt;
+    var html = '<button class="knopf leise" style="float:right" data-zu>schließen</button>' +
+      '<h2 id="blattTitel">' + sicher(k.name) + '</h2>' +
+      '<p class="firma">' + sicher(k.company || 'kein Unternehmen hinterlegt') + ' · ' +
+      sicher(k.campaign) + (k.sent_at ? ' · Mail ' + tag(k.sent_at) : '') + '</p>';
+
+    if(!d.besuche.length){
+      html += '<p class="leer">Der Link wurde nie aufgerufen.</p>';
+    }
+
+    d.besuche.forEach(function(b, i){
+      var routen = d.routen.filter(function(r){ return r.visit_id === b.id; });
+      var taten  = d.ereignisse.filter(function(t){ return t.visit_id === b.id; });
+
+      html += '<div class="besuch"><div class="kopfzeile">' +
+        (i === 0 ? 'Erster Aufruf' : (i + 1) + '. Aufruf') + ' · ' + datum(b.started_at) + ' · ' +
+        (b.human ? 'Mensch (' + sicher(b.signal || 'ohne Angabe') + ')'
+                 : '<b>ohne menschliches Signal — vermutlich Link-Scanner</b>') +
+        ' · ' + sicher(b.device || '?') + (b.country ? ' · ' + sicher(b.country) : '') + '</div>';
+
+      if(routen.length){
+        html += '<div class="verlauf">';
+        routen.forEach(function(r){
+          html += '<div>' + (ROUTENNAME[r.route] || sicher(r.route)) + '</div>' +
+                  '<div class="ms">' + dauer(r.ms) + '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="verlauf"><div>keine messbare Lesezeit</div><div class="ms">–</div></div>';
+      }
+
+      if(taten.length){
+        html += '<div class="tat">';
+        taten.forEach(function(t){
+          var zusatz = '';
+          if(t.meta && t.meta.q) zusatz = ' „' + sicher(t.meta.q) + '“';
+          else if(t.meta && t.meta.cta) zusatz = ' (' + sicher(t.meta.cta) + ')';
+          html += '<div>' + datum(t.ts) + ' — ' + (TATNAME[t.type] || sicher(t.type)) + zusatz + '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    html += '<p style="margin-top:26px;font-size:13px;color:var(--ink-soft)">Code: ' +
+      sicher(k.token) + '</p>' +
+      '<button class="knopf gefahr" data-loeschen="' + sicher(k.token) + '">Kontakt löschen</button>' +
+      '<p style="font-size:13px;color:var(--ink-soft);margin-top:8px">' +
+      'Löscht Name, Unternehmen und E-Mail. Die Besuche bleiben anonym in der Statistik erhalten — ' +
+      'damit ist eine Löschaufforderung nach DSGVO erfüllt, ohne dass die Zahlen springen.</p>';
+
+    blatt.innerHTML = html;
+    blatt.querySelector('[data-zu]').addEventListener('click', schliesseBlatt);
+    blatt.querySelector('[data-loeschen]').addEventListener('click', function(){
+      if(!confirm('„' + k.name + '“ endgültig löschen? Das lässt sich nicht rückgängig machen.')) return;
+      schicke('loeschen', {token:k.token}).then(function(){ schliesseBlatt(); start(); });
+    });
+  }
+
+  /* --- Seiten ----------------------------------------------------------- */
+
+  function zeichneSeiten(d){
+    var html = '<section class="karte"><h2>Seiten</h2>' +
+      '<p class="unter">Nur Aufrufe mit menschlichem Signal.</p>' +
+      '<div class="waage"><table><thead><tr><th>Seite</th><th class="n">Besuche</th>' +
+      '<th class="n">Lesezeit gesamt</th><th class="n">im Mittel</th></tr></thead><tbody>';
+    if(!d.routen.length) html += '<tr><td colspan="4" class="leer">Noch keine Daten.</td></tr>';
+    d.routen.forEach(function(r){
+      html += '<tr><td>' + (ROUTENNAME[r.route] || sicher(r.route)) + '</td>' +
+        '<td class="n">' + r.besuche + '</td><td class="n">' + dauer(r.summe) + '</td>' +
+        '<td class="n">' + dauer(r.mittel) + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    html += '<section class="karte"><h2>Wo das Erstgespräch angeklickt wird</h2>' +
+      '<div class="waage"><table><thead><tr><th>Stelle</th><th>Seite</th><th class="n">Klicks</th>' +
+      '</tr></thead><tbody>';
+    if(!d.cta.length) html += '<tr><td colspan="3" class="leer">Noch kein Klick.</td></tr>';
+    d.cta.forEach(function(c){
+      html += '<tr><td>' + sicher(c.stelle) + '</td><td>' +
+        (ROUTENNAME[c.route] || sicher(c.route || '–')) + '</td>' +
+        '<td class="n">' + c.anzahl + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    html += '<section class="karte"><h2>Aufgeklappte Fragen</h2>' +
+      '<p class="unter">Was die Leute wirklich wissen wollen.</p>' +
+      '<div class="waage"><table><thead><tr><th>Frage</th><th class="n">aufgeklappt</th>' +
+      '</tr></thead><tbody>';
+    if(!d.faq.length) html += '<tr><td colspan="2" class="leer">Noch keine.</td></tr>';
+    d.faq.forEach(function(f){
+      html += '<tr><td>' + sicher(f.frage) + '</td><td class="n">' + f.anzahl + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    html += '<section class="karte"><h2>Woran ein Mensch erkannt wurde</h2>' +
+      '<p class="unter">Kommt fast alles über den Zeitweg herein und kaum etwas über Maus oder ' +
+      'Scroll, stimmt etwas nicht — dann sind vermutlich Scanner unter den gezählten Menschen.</p>' +
+      '<div class="waage"><table><thead><tr><th>Signal</th><th class="n">Aufrufe</th>' +
+      '</tr></thead><tbody>';
+    var SIGNALNAME = {
+      pointer:'Maus bewegt', scroll:'gescrollt', key:'Taste gedrückt', click:'geklickt',
+      touch:'berührt (Touch)', dwell:'10 Sekunden sichtbar geblieben', keins:'kein Signal — Scanner'
+    };
+    d.signale.forEach(function(s){
+      html += '<tr><td>' + (SIGNALNAME[s.signal] || sicher(s.signal)) + '</td>' +
+        '<td class="n">' + s.anzahl + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    inhalt.innerHTML = html;
+  }
+
+  /* --- Verwaltung ------------------------------------------------------- */
+
+  function zeichneVerwaltung(){
+    inhalt.innerHTML =
+      '<section class="karte"><h2>Kontakte einspielen</h2>' +
+      '<p class="unter">CSV aus dem GMass-Sheet. Pflichtspalten: <b>name</b> und <b>campaign</b>. ' +
+      'Freiwillig: <b>company</b>, <b>email</b>, <b>sent_at</b> (JJJJ-MM-TT). Komma oder Semikolon, beides geht.</p>' +
+      '<input type="file" id="datei" accept=".csv,text/csv"> ' +
+      '<button class="knopf" id="einspielen" disabled>Einspielen</button>' +
+      '<p id="importErgebnis" style="margin-top:16px"></p>' +
+      '<p class="unter" style="margin-top:20px">Danach lädt sich eine Datei mit der zusätzlichen Spalte ' +
+      '<b>link</b> herunter. Diese Spalte ins GMass-Sheet einfügen und in der Mail ' +
+      '<code>{link}</code> schreiben — als sichtbaren Linktext <b>manereal.at</b>, nicht „hier klicken“. ' +
+      'Die Abweichung zwischen Anzeigetext und Ziel ist ein Phishing-Merkmal und kostet Zustellrate.</p>' +
+      '</section>' +
+
+      '<section class="karte"><h2>Ausgeben</h2>' +
+      '<p class="unter">Alle Kontakte der gewählten Kampagne samt Link und Ergebnis, als CSV.</p>' +
+      '<button class="knopf leise" id="ausgeben">CSV herunterladen</button></section>' +
+
+      '<section class="karte"><h2>Personenbezug abschalten</h2>' +
+      '<p class="unter">Zwei Schalter, weil einer im Zweifel vergessen wird. In Vercel die Variable ' +
+      '<b>TRACKING_PERSONENBEZUG</b> auf <b>0</b> setzen, und in <b>index.html</b> im Messblock ' +
+      '<b>PERSONENBEZUG</b> auf <b>false</b>. Danach werden Besuche weiter gezählt, aber keiner ' +
+      'Person mehr zugeordnet. Bestehende Daten bleiben unverändert.</p></section>';
+
+    var datei = document.getElementById('datei');
+    var knopf = document.getElementById('einspielen');
+    var ergebnis = document.getElementById('importErgebnis');
+
+    datei.addEventListener('change', function(){ knopf.disabled = !datei.files.length; });
+
+    knopf.addEventListener('click', function(){
+      if(!datei.files.length) return;
+      knopf.disabled = true;
+      ergebnis.textContent = 'wird eingespielt …';
+      datei.files[0].text().then(function(csv){
+        return schicke('import', {csv:csv});
+      }).then(function(d){
+        if(d.fehler){ ergebnis.innerHTML = '<span class="fehler">' + sicher(d.fehler) + '</span>'; return; }
+        ergebnis.textContent = d.angelegt + ' Kontakte angelegt' +
+          (d.uebersprungen ? ', ' + d.uebersprungen + ' Zeilen übersprungen' : '') +
+          '. Die Datei mit den Links lädt gerade herunter.';
+        lade(d.csv, 'gmass-mit-links.csv');
+      }).catch(function(e){
+        ergebnis.innerHTML = '<span class="fehler">' + sicher(e.message) + '</span>';
+      }).then(function(){ knopf.disabled = false; });
+    });
+
+    document.getElementById('ausgeben').addEventListener('click', function(){
+      var p = abfrage(); p.set('a','export');
+      location.href = '/api/auswertung?' + p.toString();
+    });
+  }
+
+  function lade(text, name){
+    var blob = new Blob([text], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  /* --- Gerüst ----------------------------------------------------------- */
+
+  var kampagnenGefuellt = false;
+
+  function fuelleKampagnen(liste){
+    if(kampagnenGefuellt) return;
+    var w = document.getElementById('fKampagne');
+    liste.filter(Boolean).forEach(function(k){
+      var o = document.createElement('option');
+      o.value = k; o.textContent = k;
+      w.appendChild(o);
+    });
+    kampagnenGefuellt = true;
+  }
+
+  function start(){
+    inhalt.innerHTML = '<p class="leer">wird geladen …</p>';
+    if(Z.tab === 'verwaltung'){ zeichneVerwaltung(); return; }
+    var aktion = Z.tab === 'personen' ? 'personen' : (Z.tab === 'seiten' ? 'seiten' : 'uebersicht');
+    hole(aktion).then(function(d){
+      if(Z.tab === 'personen') zeichnePersonen(d);
+      else if(Z.tab === 'seiten') zeichneSeiten(d);
+      else zeichneUebersicht(d);
+    }).catch(function(e){
+      inhalt.innerHTML = '<section class="karte"><p class="fehler">' + sicher(e.message) + '</p></section>';
+    });
+  }
+
+  document.getElementById('reiter').addEventListener('click', function(e){
+    var b = e.target.closest('button[data-tab]');
+    if(!b) return;
+    Z.tab = b.getAttribute('data-tab');
+    document.querySelectorAll('#reiter button').forEach(function(x){
+      if(x === b) x.setAttribute('aria-current','true'); else x.removeAttribute('aria-current');
+    });
+    start();
+  });
+
+  document.getElementById('fKampagne').addEventListener('change', function(e){ Z.kampagne = e.target.value; start(); });
+  document.getElementById('fVon').addEventListener('change', function(e){ Z.von = e.target.value; start(); });
+  document.getElementById('fBis').addEventListener('change', function(e){ Z.bis = e.target.value; start(); });
+  document.getElementById('fZuruecksetzen').addEventListener('click', function(){
+    Z.kampagne = 'alle'; Z.von = ''; Z.bis = '';
+    document.getElementById('fKampagne').value = 'alle';
+    document.getElementById('fVon').value = '';
+    document.getElementById('fBis').value = '';
+    start();
+  });
+
+  // Erst prüfen, ob der Cookie noch gilt - sonst gleich die Anmeldung zeigen.
+  fetch('/api/auswertung?a=uebersicht', {credentials:'same-origin'}).then(function(r){
+    if(r.status === 401){ zeigeTor(); return; }
+    zeigeApp();
+    start();
+  }).catch(function(){ zeigeTor(); });
+})();
+</script>
+</body></html>

@@ -467,3 +467,27 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     Person. Die drei übrigen Portraits sind ruhige Aufnahmen vor neutralem
     Grund. Im Kreis nebeneinander fällt der Unterschied auf. Ein Portrait
     im Stil der anderen wäre die bessere Wahl.
+23. **Datenschutzerklärung, Abschnitt 4 neu gefasst** (24.09.2026) — Die Seite
+    misst seit 24.09.2026 das Verhalten der Besucher und ordnet es bei
+    Aufrufen über einen Outreach-Link der angeschriebenen Person zu (siehe
+    [docs/TRACKING.md](../docs/TRACKING.md)). Der bisherige Satz „Diese
+    Website verwendet keine Cookies zu Analyse- oder Marketingzwecken" wurde
+    dadurch **sachlich falsch** und musste ersetzt werden — die einzige
+    Änderung an einem Rechtstext, die im Zuge dieser Arbeit vorgenommen
+    wurde. Der neue Abschnitt 4 ist ein **Entwurf und rechtlich zu
+    bestätigen**. Offene Punkte darin:
+    - **Firmierung und Anschrift des Datenbankanbieters** — im Entwurf steht
+      nur „Neon", ohne Rechtsform und Sitz. Der Anbieter gehört seit 2025 zu
+      Databricks; welche Gesellschaft Vertragspartner ist, ist zu klären.
+      Auftragsverarbeitungsvertrag: neon.com/dpa.
+    - **Aufbewahrungsfrist** — der Entwurf nennt 24 Monate, analog zur
+      bestehenden Frist für Kontaktanfragen. Nicht geprüft.
+    - **Rechtsgrundlage der Personenzuordnung** — der Entwurf stützt sie auf
+      Art. 6 Abs. 1 lit. f DSGVO. Eine dokumentierte Interessenabwägung
+      liegt nicht vor.
+    - **Verarbeitungsverzeichnis** — die neue Verarbeitung ist dort
+      aufzunehmen.
+    Technisch gilt: Die Seite setzt **keine** Cookies und legt nichts im
+    Browserspeicher ab; ein Einwilligungsbanner ist deshalb nicht nötig, und
+    die IP-Adresse wird nicht gespeichert. Diese drei Zusagen sind im Code
+    umgesetzt und geprüft.
