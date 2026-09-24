@@ -42,6 +42,14 @@ Vercel → Projekt → Settings → Environment Variables:
 | `AUSWERTUNG_SECRET` | langer Zufallsstring, 40+ Zeichen | signiert die Anmeldung |
 | `SEITEN_URL` | `https://manereal.at` | baut die Links |
 | `TRACKING_PERSONENBEZUG` | leer lassen | `0` schaltet die Personenzuordnung ab |
+| `AUSWERTUNG_TIMEOUT_MIN` | leer lassen | Minuten Ruhe bis zur erneuten Anmeldung, Standard 10 |
+
+**Zur Ruhezeit:** Das Dashboard meldet nach zehn Minuten ohne Mausbewegung,
+Tippen oder Scrollen von selbst ab -- danach ist das Passwort wieder nötig.
+Wer länger angemeldet bleiben will, setzt `AUSWERTUNG_TIMEOUT_MIN` höher:
+`60` ist eine Stunde, `480` ein Arbeitstag. Nach oben ist bei 30 Tagen Schluss,
+unsinnige Einträge fallen auf die zehn Minuten zurück. Die Änderung greift erst
+nach dem nächsten Deployment.
 
 `AUSWERTUNG_SECRET` erzeugen:
 `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`

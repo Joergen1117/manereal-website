@@ -321,9 +321,10 @@ tr.trenner td{
     if(extra) Object.keys(extra).forEach(function(k){ p.set(k, extra[k]); });
     return fetch('/api/auswertung?' + p.toString(), {credentials:'same-origin'})
       .then(function(r){
-        if(r.status === 401){ zeigeTor(); throw new Error('nicht angemeldet'); }
+        if(r.status === 401){ zeigeTor(ABGELAUFEN); throw new Error('nicht angemeldet'); }
         return r.json().then(function(d){
           if(!r.ok) throw new Error(d.fehler || 'Abfrage fehlgeschlagen');
+          if(d.ruheMinuten) setzeRuhezeit(d.ruheMinuten);
           return d;
         });
       });
@@ -337,21 +338,25 @@ tr.trenner td{
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(koerper || {})
     }).then(function(r){
-      if(r.status === 401){ zeigeTor(); throw new Error('nicht angemeldet'); }
+      if(r.status === 401){ zeigeTor(ABGELAUFEN); throw new Error('nicht angemeldet'); }
       return r.json();
     });
   }
 
   /* --- Anmeldung -------------------------------------------------------- */
 
-  function zeigeTor(){
+  function zeigeTor(meldung){
     tor.hidden = false; app.hidden = true;
-    // Eine Meldung von vorhin gehört nicht auf eine frisch gezeigte Maske.
-    document.getElementById('torFehler').textContent = '';
+    // Eine Meldung von vorhin gehört nicht auf eine frisch gezeigte Maske --
+    // der Grund des Hinauswurfs dagegen schon.
+    document.getElementById('torFehler').textContent = meldung || '';
     var feld = document.getElementById('passwort');
     if(feld) setTimeout(function(){ feld.focus(); }, 0);
   }
-  function zeigeApp(){ tor.hidden = true;  app.hidden = false; }
+  function zeigeApp(){
+    tor.hidden = true;  app.hidden = false;
+    letzteTat = Date.now(); letzterPing = Date.now();
+  }
 
   document.getElementById('torForm').addEventListener('submit', function(e){
     e.preventDefault();
@@ -373,9 +378,57 @@ tr.trenner td{
   });
 
   document.getElementById('abmelden').addEventListener('click', function(){
+    // Ohne die Hülle bekäme zeigeTor die Antwort als Meldung untergeschoben.
     fetch('/api/auswertung?a=logout', {method:'POST', credentials:'same-origin'})
-      .then(zeigeTor).catch(zeigeTor);
+      .then(function(){ zeigeTor(); }).catch(function(){ zeigeTor(); });
   });
+
+  /* --- Ruhezeit --------------------------------------------------------- */
+  // Nach einer Weile ohne jedes Lebenszeichen wird abgemeldet. Die Frist gibt
+  // der Server vor (AUSWERTUNG_TIMEOUT_MIN), bis zur ersten Antwort gilt der
+  // Standard. Geprüft wird gegen die Uhr statt per Timer -- ein zugeklappter
+  // Laptop hält Timer an, die Uhr läuft weiter.
+  // Der Ping muss deutlich innerhalb der Frist liegen, sonst trifft er erst ein,
+  // wenn der Cookie schon abgelaufen ist -- dann flöge man trotz Aktivität
+  // hinaus. Ein Viertel der Frist lässt reichlich Luft und hält die Zahl der
+  // Anfragen klein: bei zehn Minuten alle zweieinhalb.
+  function takt(ms){ return Math.max(10000, Math.round(ms / 4)); }
+
+  var ABGELAUFEN  = 'Die Sitzung ist abgelaufen. Bitte erneut anmelden.';
+  var RUHE_MS     = 10 * 60 * 1000;
+  var PING_MS     = takt(RUHE_MS);
+  var letzteTat   = Date.now();
+  var letzterPing = Date.now();
+
+  function setzeRuhezeit(minuten){
+    var n = Number(minuten);
+    if(!isFinite(n) || n < 1) return;
+    RUHE_MS = n * 60 * 1000;
+    PING_MS = takt(RUHE_MS);
+  }
+
+  // Mausbewegung, Tippen, Scrollen: Wer liest, ohne zu klicken, soll nicht
+  // hinausfliegen. Der Ping verlängert den Cookie, höchstens einmal je Takt.
+  function lebenszeichen(){
+    letzteTat = Date.now();
+    if(app.hidden || letzteTat - letzterPing < PING_MS) return;
+    letzterPing = letzteTat;
+    fetch('/api/auswertung?a=ping', {credentials:'same-origin'})
+      .then(function(r){ if(r.status === 401) zeigeTor(ABGELAUFEN); })
+      .catch(function(){});
+  }
+
+  ['pointerdown','pointermove','keydown','wheel','scroll','touchstart'].forEach(function(name){
+    window.addEventListener(name, lebenszeichen, {passive:true, capture:true});
+  });
+
+  setInterval(function(){
+    if(app.hidden || Date.now() - letzteTat < RUHE_MS) return;
+    letzteTat = Date.now();   // sonst feuert der nächste Durchlauf sofort nach
+    fetch('/api/auswertung?a=logout', {method:'POST', credentials:'same-origin'})
+      .then(function(){ zeigeTor(ABGELAUFEN); })
+      .catch(function(){ zeigeTor(ABGELAUFEN); });
+  }, 15000);
 
   /* --- Übersicht -------------------------------------------------------- */
 

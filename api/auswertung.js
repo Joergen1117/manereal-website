@@ -14,13 +14,27 @@
 //   AUSWERTUNG_PASSWORT   Passwort für die Anmeldung (Pflicht)
 //   AUSWERTUNG_SECRET     langer Zufallsstring zum Signieren (Pflicht)
 //   SEITEN_URL            z. B. https://manereal.at (optional, sonst aus der Anfrage)
+//   AUSWERTUNG_TIMEOUT_MIN  Minuten Ruhe bis zur erneuten Anmeldung (optional, Standard 10)
 
 const crypto = require('crypto');
 const { db } = require('./_db');
 const { neuerToken } = require('./_token');
 
 const COOKIE = 'auswertung';
-const GUELTIG_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Ruhezeit bis zur erneuten Anmeldung. Der Cookie wird bei jeder Abfrage neu
+// gesetzt, die Frist läuft also ab der letzten Tätigkeit und nicht ab der
+// Anmeldung. Über AUSWERTUNG_TIMEOUT_MIN in Vercel änderbar: 480 sind acht
+// Stunden. Unsinnige Werte fallen auf den Standard zurück, nach oben ist bei
+// 30 Tagen Schluss.
+function minutenOder(wert, standard) {
+  const n = Number(String(wert == null ? '' : wert).trim());
+  if (!Number.isFinite(n) || n < 1) return standard;
+  return Math.min(Math.floor(n), 30 * 24 * 60);
+}
+
+const RUHE_MINUTEN = minutenOder(process.env.AUSWERTUNG_TIMEOUT_MIN, 10);
+const GUELTIG_MS = RUHE_MINUTEN * 60 * 1000;
 const MAX_CSV = 2 * 1024 * 1024;
 const MAX_IMPORT = 5000;
 
@@ -556,6 +570,14 @@ module.exports = async function handler(req, res) {
 
   if (!angemeldet(req)) return res.status(401).json({ fehler: 'Nicht angemeldet.' });
 
+  // Gleitendes Fenster: Jede Abfrage schiebt die Frist nach vorn. Wer arbeitet,
+  // bleibt angemeldet -- wer aufhört, gibt nach RUHE_MINUTEN das Passwort neu ein.
+  setzeCookie(res, req, signiere(Date.now() + GUELTIG_MS), Math.floor(GUELTIG_MS / 1000));
+
+  // Anwesenheit ohne Abfrage: Das Dashboard meldet damit Mausbewegung, Tippen
+  // und Scrollen, ohne dafür die Datenbank zu behelligen.
+  if (aktion === 'ping') return res.status(204).end();
+
   let sql;
   try {
     sql = db();
@@ -570,7 +592,10 @@ module.exports = async function handler(req, res) {
 
   try {
     if (aktion === 'uebersicht') {
-      return res.status(200).json(await uebersicht(sql, kampagne, von, bis));
+      // ruheMinuten reist mit, damit der Browser dieselbe Frist kennt wie der
+      // Server und die Zahl nur an einer Stelle gepflegt werden muss.
+      const daten = await uebersicht(sql, kampagne, von, bis);
+      return res.status(200).json(Object.assign({}, daten, { ruheMinuten: RUHE_MINUTEN }));
     }
 
     if (aktion === 'personen') {
