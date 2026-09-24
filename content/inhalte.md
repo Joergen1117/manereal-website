@@ -236,7 +236,7 @@ Link: So läuft die Übergabe →
 | Jörgen Oberkofler | Jörgen begleitet seit über 12 Jahren Unternehmerinnen und Unternehmer im DACH-Raum als Käufer, Entwickler und Sparringspartner bei der Übergabe ihres Betriebs. Sein Antrieb ist es, Lebenswerke weiterzuführen und Kontinuität in Unternehmen zu wahren. |
 | Lorenz Ambrosius | Lorenz begleitet seit über 5 Jahren mittelständische Unternehmen bei Finanzierungen, der strategischen Weiterentwicklung und Integration in Gruppen. Er hat dabei Betriebe durch unterschiedliche Phasen der Veränderung geführt und weiß, wie aus einer Übergabe ein stabiler Neustart wird. |
 | Niklas Gruber | Niklas baut seit über 10 Jahren Organisationen auf und führt sie durch den digitalen Wandel, von der Gründung der Grand Garage in Linz bis zur Digitalisierung bei Holcim in Europa. Sein Antrieb ist es, in stabilen Branchen, mit Technologie und den richtigen Menschen echten Fortschritt zu schaffen. *(Text von Julia, 23.09.2026 — ersetzt den Blindtext des Erstentwurfs. Am selben Tag von 466 auf 298 Zeichen gekürzt, ebenfalls von Julia.)* |
-| Julian Pils | **Kein eigener Text.** Auf der Website steht unter diesem Portrait derzeit wortgleich der Absatz von Niklas Gruber — auf Julias Anweisung vom 23.09.2026, bis der echte Text vorliegt. Siehe Hinweis 21. |
+| Julian Pils | Julian entwickelt Automatisierungen für Kleinbetriebe und baut die Datengrundlage, von der ihre Zuverlässigkeit am Ende abhängt. Sein Antrieb ist es, Technik dorthin zu bringen, wo sie den Arbeitsalltag spürbar entlastet und den Menschen Zeit für ihre eigentliche Arbeit zurückgibt. *(Text von Julia, 24.09.2026 — ersetzt den wortgleich übernommenen Absatz von Niklas Gruber. Gemeinsam erarbeitet; „Kleinbetriebe“ und der Verzicht auf die Nennung der TU München auf Julias Entscheidung.)* |
 
 #### Hausverwaltungsteam
 *Ersetzt die zwei Platzhalter „Hausverwalter/in" (Text von Julia, 22.09.2026;
@@ -448,11 +448,13 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     nennt jetzt ausdrücklich „zwei" Personen, aber weiterhin keine Namen und
     keine Portraits. Nach Regel 4 trägt die Seite über die Person, die
     verantwortet; ein namenloses Paar trägt diese Last nicht mit.
-21. **Julian Pils trägt Niklas Grubers Text** (23.09.2026) — **vor
+21. **[Erledigt 24.09.2026 — Julia hat den eigenen Text zu Julian Pils
+    geliefert; er steht seither unter dem Portrait.]** **Julian Pils trug
+    Niklas Grubers Text** (23.09.2026) — **war vor
     Veröffentlichung zwingend zu ersetzen.** Unter dem Portrait von Julian
-    Pils steht derzeit wortgleich derselbe Absatz wie unter Niklas Gruber.
+    Pils stand wortgleich derselbe Absatz wie unter Niklas Gruber.
     Julia hat das am 23.09.2026 ausdrücklich so angewiesen, bis der echte
-    Text vorliegt. Die Seite behauptet damit im jetzigen Stand, Julian Pils
+    Text vorliegt. Die Seite behauptete damit zwischenzeitlich, Julian Pils
     habe die Grand Garage gegründet und bei Holcim die Digitalisierung
     verantwortet. Gegenüber einer Zielgruppe, die prüft, ob hier seriös
     gearbeitet wird, ist ein solcher Fehler schwerer als ein Blindtext:

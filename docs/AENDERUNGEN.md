@@ -13,6 +13,49 @@ Pfade nennen, sind die neuen gemeint.
 
 ---
 
+## 34 — Eigener Text für Julian Pils (24.09.2026)
+
+Unter dem Portrait von Julian Pils stand seit dem 23.09.2026 wortgleich
+der Absatz von Niklas Gruber — eine Übergangslösung auf Julias
+Anweisung. Die Seite behauptete damit, Julian Pils habe die Grand Garage
+gegründet. Jetzt steht dort sein eigener Text:
+
+> Julian entwickelt Automatisierungen für Kleinbetriebe und baut die
+> Datengrundlage, von der ihre Zuverlässigkeit am Ende abhängt. Sein
+> Antrieb ist es, Technik dorthin zu bringen, wo sie den Arbeitsalltag
+> spürbar entlastet und den Menschen Zeit für ihre eigentliche Arbeit
+> zurückgibt.
+
+282 Zeichen und damit im Korridor der anderen drei (Jörgen 249, Lorenz
+285, Niklas 298). Der Text lässt die Eröffnung „seit über X Jahren“
+bewusst weg, die alle anderen tragen: eine kleinere Zahl neben 12, 10 und
+5 hätte die Aufmerksamkeit auf die Berufsjahre gelenkt statt auf die
+Arbeit.
+
+Zwei Entscheidungen von Julia während der Formulierung: Die Technische
+Universität München wird **nicht** genannt — mit Studium und
+Datenarchitektur wäre der Absatz auf 335 Zeichen gewachsen und sichtbar
+aus der Reihe geragt. Und „Klein- und Mittelbetriebe“ wurde zu
+„Kleinbetriebe“: Die Zielgruppe der Seite ist selbst einer. Der Begriff
+„Datenarchitektur“ wurde verworfen, weil er gegenüber dieser Zielgruppe
+Distanz schafft; „Datengrundlage“ sagt dasselbe ohne Fachvokabular.
+
+Der Name des Datenanbieters, bei dem Julian Pils an der Aufbereitung von
+Datenbeständen für KI gearbeitet hat, kommt im Text nicht vor. Ein
+nachschlagbarer Firmenname wäre nach dem Vorbild von Niklas Grubers
+Absatz das stärkere Signal; er kann jederzeit ergänzt werden.
+
+Damit ist Hinweis 21 in `content/inhalte.md` erledigt. Offen bleibt
+Hinweis 20 (zwei namenlose Fachleute im Hausverwaltungsteam) und Hinweis
+22 (das Portrait ist ein Bühnenfoto).
+
+### Geändert
+
+- `index.html`, Zeile 885 — Absatz unter dem Portrait Julian Pils
+- `content/inhalte.md` — Zeile 239 und Hinweis 21
+
+---
+
 ## 33 — Vierte Person im Team, Trennstrich, Niklas gekürzt (23.09.2026)
 
 ### Julian Pils kommt dazu
