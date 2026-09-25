@@ -11,6 +11,48 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 37 — Reiter „Verkehr" im Dashboard (24.09.2026)
+
+An der Website selbst nur eine Zeile geändert, der Rest betrifft das
+Dashboard.
+
+Die bisherigen Reiter zeigen ausschließlich, was aus dem Outreach kommt: Der
+Trichter und die Personenliste filtern auf Besuche mit Mail-Code. Wer über
+Google, LinkedIn oder direkt hereinkommt, war bis auf eine Zahl in der
+Übersicht unsichtbar. Der neue Reiter zeigt den gesamten Verkehr.
+
+| Datei | Änderung |
+|---|---|
+| [`auswertung.html`](../auswertung.html) | neuer Reiter zwischen „Seiten" und „Verwaltung": Kurve über 7/14/30 Tage, Kennzahlen, Herkunft, Gerät und Land, Log der jüngsten 200 Besuche |
+| [`api/auswertung.js`](../api/auswertung.js) | neue Abfrage `a=verkehr`. Die bestehenden Abfragen sind unverändert. |
+| [`db/schema.sql`](../db/schema.sql) | Index `visits_started_at`, dazu ein Nachzug für alte `gmass`-Zeilen |
+| [`index.html`](../index.html) | `herkunft = 'gmass'` → `'instantly'` |
+
+**Das Chart ist selbst gezeichnetes SVG.** Keine Chart-Bibliothek: Sie wäre
+für zwei Linien die mit Abstand größte Abhängigkeit des Projekts, und das
+Dashboard ist eine einzelne Datei ohne Build-Schritt. Am Handy wechselt die
+Zeichenfläche das Format, weil ein 760 Punkte breiter Kasten sonst auf die
+Hälfte zusammenschrumpft und die Achsenbeschriftung unlesbar wird.
+
+**Abgelesen wird ohne Hover.** Ein Tippen auf eine Tagesspalte schreibt die
+Zahlen in eine Zeile unter dem Chart, statt sie in einem Kasten am Mauszeiger
+zu zeigen. Am Finger ist das die einzige Art, die funktioniert.
+
+**`gmass` ist weg.** Der Versand läuft seit Schritt 35 über Instantly, das
+Mess-Snippet trug aber noch den alten Namen ein. Sichtbar wurde das erst
+durch die neue Herkunfts-Tabelle. Bestehende Zeilen zieht die letzte Zeile in
+`db/schema.sql` nach.
+
+### Offen
+
+- `db/schema.sql` muss einmal gegen die Neon-Datenbank laufen, sonst fehlt
+  der Index und die alten `gmass`-Zeilen bleiben stehen.
+- Die Abfragen sind nicht gegen echte Daten gelaufen: `DATABASE_URL` ist
+  lokal leer, und es gibt kein Postgres auf dem Rechner. Geprüft sind die
+  Oberfläche gegen erfundene Daten und die Chart-Mathematik.
+
+---
+
 ## 36 — Ordner aufgeräumt (24.09.2026)
 
 Kein Eingriff an der Website: `index.html`, `assets/`, `api/` und

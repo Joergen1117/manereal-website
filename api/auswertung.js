@@ -413,6 +413,125 @@ async function seiten(sql, kampagne) {
   return { routen, faq, cta, signale };
 }
 
+/* --- Verkehr ------------------------------------------------------------ */
+
+// Was auf der Seite überhaupt los ist -- nicht nur das, was aus dem Outreach
+// kommt. Gezählt werden ausschließlich Besuche mit menschlichem Signal: Das
+// Log zeigt keine Scanner, also darf die Kurve darüber sie auch nicht zählen,
+// sonst widersprechen sich Linie und Liste. Wie viele aussortiert wurden,
+// steht als eigene Zahl daneben.
+
+const VERKEHR_TAGE = [7, 14, 30];
+
+function tageOder(wert, standard) {
+  const n = Number(String(wert == null ? '' : wert).trim());
+  return VERKEHR_TAGE.indexOf(n) >= 0 ? n : standard;
+}
+
+// Tagesgrenzen in Wiener Zeit. Die Datenbank rechnet in UTC; ein Aufruf um
+// 23:30 Uhr fiele dort auf den Folgetag, und die Kurve zeigte Verkehr an
+// Abenden, an denen niemand da war. $1 ist überall die Zahl der Tage.
+const HEUTE = "(now() at time zone 'Europe/Vienna')::date";
+const AB = `((${HEUTE} - ($1::int - 1))::timestamp at time zone 'Europe/Vienna')`;
+const TAG_VON = "(v.started_at at time zone 'Europe/Vienna')::date";
+
+// 'instantly' bleibt stehen, auch wenn der Kontakt nach DSGVO gelöscht wird
+// und token dabei auf null fällt. Über token allein wanderten diese Besuche
+// rückwirkend in den übrigen Verkehr -- die Vergangenheit im Chart änderte
+// sich also nachträglich, ohne dass jemand die Seite besucht hätte.
+//
+// 'gmass' ist der alte Name desselben Wegs. Er wird hier nur noch aufgefangen,
+// solange der Nachzug aus db/schema.sql auf einer Datenbank nicht gelaufen ist;
+// coalesce hält den Ausdruck dabei von null frei, sonst zählte "not" solche
+// Zeilen weder auf die eine noch auf die andere Seite.
+const AUS_KAMPAGNE =
+  "(v.token is not null or coalesce(v.source, '') in ('instantly', 'gmass'))";
+
+const QUELLE =
+  "case when v.source = 'gmass' then 'instantly' else coalesce(v.source, 'unbekannt') end";
+
+async function verkehr(sql, tage) {
+  const p = [tage];
+
+  // Ein Tag ohne Besuch ist eine Null, keine Lücke: generate_series liefert
+  // die Reihe, der left join hängt an, was da war. Sonst zöge die Kurve eine
+  // gerade Linie über eine ruhige Woche hinweg.
+  const verlauf = await sql.query(`
+    with reihe as (
+      select generate_series(${HEUTE} - ($1::int - 1), ${HEUTE}, interval '1 day')::date as tag
+    ),
+    b as (
+      select ${TAG_VON} as tag, ${AUS_KAMPAGNE} as kampagne
+      from visits v
+      where v.human and v.started_at >= ${AB}
+    )
+    select r.tag,
+           count(*) filter (where b.kampagne)::int          as kampagne,
+           count(*) filter (where b.kampagne = false)::int  as uebrig
+    from reihe r left join b on b.tag = r.tag
+    group by r.tag order by r.tag
+  `, p);
+
+  const [summe] = await sql.query(`
+    select count(*) filter (where v.human)::int                         as besuche,
+           count(*) filter (where v.human and ${AUS_KAMPAGNE})::int     as kampagne,
+           count(*) filter (where v.human and not ${AUS_KAMPAGNE})::int as uebrig,
+           count(*) filter (where not v.human)::int                     as scanner
+    from visits v
+    where v.started_at >= ${AB}
+  `, p);
+
+  const herkunft = await sql.query(`
+    select ${QUELLE} as quelle,
+           count(*)::int                                 as besuche,
+           count(*) filter (where ${AUS_KAMPAGNE})::int  as kampagne
+    from visits v
+    where v.human and v.started_at >= ${AB}
+    group by 1 order by 2 desc limit 20
+  `, p);
+
+  const geraete = await sql.query(`
+    select coalesce(v.device, 'unbekannt') as geraet, count(*)::int as besuche
+    from visits v
+    where v.human and v.started_at >= ${AB}
+    group by 1 order by 2 desc
+  `, p);
+
+  const laender = await sql.query(`
+    select coalesce(v.country, '??') as land, count(*)::int as besuche
+    from visits v
+    where v.human and v.started_at >= ${AB}
+    group by 1 order by 2 desc limit 12
+  `, p);
+
+  // Das Log. Der Name steht dabei, wo es einen gibt -- die Zeile führt dann in
+  // dasselbe Personenblatt wie der Reiter "Personen". Die Lesezeiten kommen aus
+  // einer Unterabfrage, die über denselben Zeitraum eingegrenzt ist: sonst
+  // fasste sie bei jedem Aufruf des Reiters die gesamte Ereignistabelle an.
+  const log = await sql.query(`
+    select v.id, v.started_at, ${QUELLE} as quelle, ${AUS_KAMPAGNE} as kampagne,
+           v.device, v.country, v.signal, v.token,
+           c.firstname, c.lastname, c.company, c.email,
+           coalesce(x.seiten, 0)::int   as seiten,
+           coalesce(x.lesezeit, 0)::int as lesezeit
+    from visits v
+    left join contacts c on c.token = v.token
+    left join (
+      select e.visit_id,
+             count(distinct e.route) filter (where e.type = 'route_enter') as seiten,
+             sum(e.dwell_ms) filter (where e.type = 'route_leave')         as lesezeit
+      from events e
+      join visits w on w.id = e.visit_id and w.human and w.started_at >= ${AB}
+      group by e.visit_id
+    ) x on x.visit_id = v.id
+    where v.human and v.started_at >= ${AB}
+    order by v.started_at desc
+    limit 200
+  `, p);
+
+  return { tage, verlauf, summe, herkunft, geraete, laender, log };
+}
+
 // Legt die Kontakte an und gibt die Liste der Kampagne als Datei für Instantly
 // zurück -- mit der Spalte "Token", aus der dort der Link zusammengebaut wird.
 //
@@ -611,6 +730,15 @@ module.exports = async function handler(req, res) {
 
     if (aktion === 'seiten') {
       return res.status(200).json(await seiten(sql, kampagne));
+    }
+
+    // Der Verkehrs-Reiter kennt weder Kampagne noch Von/Bis: Sein Zeitraum kommt
+    // allein aus den Knöpfen 7/14/30, damit Kurve und Log stets denselben
+    // Ausschnitt zeigen.
+    if (aktion === 'verkehr') {
+      return res.status(200).json(
+        await verkehr(sql, tageOder(url.searchParams.get('tage'), 14)),
+      );
     }
 
     if (aktion === 'export') {

@@ -57,8 +57,17 @@ create index if not exists events_visit_ts   on events (visit_id, ts);
 create index if not exists events_type       on events (type);
 create index if not exists visits_token      on visits (token);
 create index if not exists visits_campaign   on visits (campaign, started_at);
+-- Der Verkehrs-Reiter fragt nach Tagen über alle Besuche hinweg, ohne
+-- Kampagne davor. Der Index oben greift dafür nicht: Sein erster Schlüssel ist
+-- campaign, und über alle Kampagnen hinweg ist das kein Bereich mehr.
+create index if not exists visits_started_at  on visits (started_at);
 create index if not exists contacts_campaign on contacts (campaign);
 
 -- Löschung nach DSGVO: eine Zeile genügt. Durch "on delete set null" fällt
 -- der Personenbezug weg, die Verhaltensdaten bleiben anonym in der Statistik.
 --   delete from contacts where token = 'K7F3M2QX9P';
+
+-- Nachzug: Vor der Umstellung auf Instantly trug jeder Besuch aus einem
+-- Mail-Link die Herkunft 'gmass'. Der Dienst ist abgelöst, der Weg derselbe.
+-- Die Zeile ist harmlos, wenn sie ein zweites Mal läuft.
+update visits set source = 'instantly' where source = 'gmass';

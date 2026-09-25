@@ -248,6 +248,36 @@ Systems: Kommt fast alles über „10 Sekunden sichtbar geblieben" herein und
 kaum etwas über Maus oder Scroll, sitzen vermutlich Scanner unter den
 gezählten Menschen. Dann gehört der Schwellwert nach oben.
 
+### Verkehr
+
+Die ersten drei Reiter sehen nur, was aus dem Outreach kommt. Dieser sieht
+**alles** — auch die Aufrufe, hinter denen kein Kontakt steht.
+
+Die Kurve zeigt zwei Linien über 7, 14 oder 30 Tage: die gefüllte Fläche sind
+die Besuche aus der Kampagne, die dünne Linie darüber ist der übrige Verkehr.
+Ein Tippen oder Zeigen auf einen Tag schreibt dessen Zahlen unter das Chart.
+
+**Gezählt wird nur, was ein menschliches Signal gesendet hat** — in der Kurve,
+in den Kennzahlen und im Log darunter gleichermaßen. Wie viele Aufrufe dabei
+aussortiert wurden, steht als eigene Zeile unter dem Chart. Ohne diese Regel
+zeigte die Linie eine Zahl, zu der die Liste darunter nicht passt.
+
+Als **aus der Kampagne** gilt ein Besuch, dessen Herkunft `instantly` ist oder
+an dem ein Kontakt hängt. Die Herkunft bleibt auch dann stehen, wenn der
+Kontakt später nach DSGVO gelöscht wird — sonst änderte sich die Vergangenheit
+im Chart, ohne dass jemand die Seite besucht hätte.
+
+Die Tagesgrenzen liegen in **Wiener Zeit**. Die Datenbank rechnet in UTC, ein
+Aufruf um 23:30 Uhr fiele dort sonst auf den nächsten Tag.
+
+Der Filter im Kopf (Kampagne, von, bis) ist in diesem Reiter ausgeblendet: Der
+Zeitraum kommt allein aus den drei Knöpfen, und eine Kampagnenauswahl würde
+die halbe Ansicht wegfiltern.
+
+Das **Log** listet die jüngsten 200 Besuche mit Zeitpunkt, Herkunft, Gerät,
+Land, Signal, gelesenen Seiten und Lesezeit. Wo ein Kontakt dahintersteht,
+führt sein Name in dasselbe Personenblatt wie der Reiter **Personen**.
+
 ---
 
 ## Einen Kontakt löschen

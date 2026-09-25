@@ -41,6 +41,9 @@ header{background:#fff; border-bottom:1px solid var(--line)}
 
 .filter{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:0 0 16px}
 .filter label{font-size:13px; color:var(--ink-soft)}
+/* display:flex oben schlaegt [hidden]{display:none} des Browsers -- ohne diese
+   Zeile bliebe die Filterleiste im Verkehrs-Reiter stehen, wo sie nichts tut. */
+.filter[hidden]{display:none}
 select,input[type=date],input[type=password],input[type=text]{
   font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:8px;
   background:#fff; color:var(--navy);
@@ -96,6 +99,49 @@ tr.trenner td{
 .marke{display:inline-block; padding:1px 8px; border-radius:20px; font-size:12px; font-weight:600}
 .marke.ja{background:#E3F0EE; color:#0B5B4E}
 .marke.nein{background:var(--flaeche); color:var(--ink-soft)}
+
+/* Verkehr */
+.kartenkopf{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
+.umschalter{display:flex; gap:6px; margin-left:auto}
+.umschalter button{
+  padding:6px 14px; border:1px solid var(--line); border-radius:7px; background:#fff;
+  color:var(--ink-soft); cursor:pointer; font-size:14px; font-weight:600;
+}
+.umschalter button[aria-pressed=true]{border-color:var(--teal); background:var(--teal); color:#fff}
+
+.kennzahlen{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:20px 0 22px}
+.kennzahl{background:var(--flaeche); border-radius:11px; padding:14px 16px}
+.kennzahl b{display:block; font-size:27px; line-height:1.25; font-variant-numeric:tabular-nums}
+.kennzahl span{font-size:13px; color:var(--ink-soft)}
+
+.kurve{width:100%; height:auto; display:block; touch-action:manipulation}
+.kurve .netz{stroke:var(--line)}
+.kurve .achse{fill:var(--ink-soft); font-size:11px}
+.kurve .flaeche{fill:var(--teal); opacity:.13}
+.kurve .linie-k{fill:none; stroke:var(--teal); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round}
+.kurve .linie-u{fill:none; stroke:var(--navy); stroke-width:1.5; stroke-linejoin:round; stroke-linecap:round; opacity:.5}
+.kurve .griff{fill:transparent; cursor:pointer}
+.kurve .lot{stroke:var(--navy); stroke-width:1; opacity:.3}
+.kurve .punkt-k{fill:var(--teal); stroke:#fff; stroke-width:2}
+.kurve .punkt-u{fill:var(--navy); stroke:#fff; stroke-width:2}
+
+.legende{display:flex; gap:20px; flex-wrap:wrap; font-size:14px; color:var(--ink-soft); margin-top:10px}
+.legende i{display:inline-block; width:13px; height:13px; border-radius:3px; margin-right:7px; vertical-align:-1px}
+.legende i.k{background:var(--teal)}
+.legende i.u{background:var(--navy); opacity:.5}
+
+/* Der abgelesene Tag steht als Zeile unter dem Chart, nicht als schwebender
+   Kasten am Zeiger: So ist er auch am Handy und ohne Maus zu erreichen. */
+.ablesung{
+  margin:14px 0 0; padding:11px 14px; background:var(--flaeche); border-radius:9px;
+  font-size:14px; color:var(--ink-soft);
+}
+.ablesung b{color:var(--navy)}
+
+.verweis{
+  border:0; background:none; padding:0; font:inherit; text-align:left; cursor:pointer;
+  color:var(--teal); text-decoration:underline; text-underline-offset:2px;
+}
 
 /* Personenblatt */
 .blatt-hinter{position:fixed; inset:0; background:rgba(14,42,71,.4); display:none; z-index:20}
@@ -174,6 +220,8 @@ tr.trenner td{
      man erst durch Wischen findet, versteckt die Hälfte der Ansichten. */
   nav.reiter{flex-wrap:wrap}
   nav.reiter button{padding:12px 14px; font-size:14px}
+  .kennzahlen{grid-template-columns:1fr; gap:10px}
+  .umschalter{margin-left:0}
   section.karte{padding:18px}
   .blatt{padding:20px}
 }
@@ -226,6 +274,7 @@ tr.trenner td{
         <button data-tab="uebersicht" aria-current="true">Übersicht</button>
         <button data-tab="personen">Personen</button>
         <button data-tab="seiten">Seiten</button>
+        <button data-tab="verkehr">Verkehr</button>
         <button data-tab="verwaltung">Verwaltung</button>
       </nav>
     </div>
@@ -251,7 +300,7 @@ tr.trenner td{
 (function(){
   'use strict';
 
-  var Z = { kampagne:'alle', von:'', bis:'', tab:'uebersicht' };
+  var Z = { kampagne:'alle', von:'', bis:'', tab:'uebersicht', tage:14 };
 
   var tor      = document.getElementById('tor');
   var app      = document.getElementById('app');
@@ -675,6 +724,292 @@ tr.trenner td{
     inhalt.innerHTML = html;
   }
 
+  /* --- Verkehr ---------------------------------------------------------- */
+
+  var QUELLENNAME = {
+    instantly:'Kampagne (Instantly)',
+    direkt:'direkt aufgerufen',
+    unbekannt:'ohne Angabe'
+  };
+
+  var SIGNALKURZ = {
+    pointer:'Maus', scroll:'Scroll', key:'Taste', click:'Klick',
+    touch:'Touch', dwell:'10 s sichtbar'
+  };
+
+  // Der Tag kommt als 'JJJJ-MM-TT' oder als vollständiger Zeitpunkt. Gelesen
+  // werden nur die ersten zehn Zeichen, daraus wird ein lokales Datum gebaut —
+  // über new Date(text) könnte eine Zeitzone den Tag um einen verschieben.
+  function tagAus(wert){
+    var t = String(wert || '').slice(0, 10).split('-');
+    return new Date(Number(t[0]), Number(t[1]) - 1, Number(t[2]));
+  }
+  function tagKurz(wert){
+    return tagAus(wert).toLocaleDateString('de-AT', {day:'2-digit', month:'2-digit'});
+  }
+  function tagLang(wert){
+    return tagAus(wert).toLocaleDateString('de-AT', {weekday:'short', day:'2-digit', month:'2-digit'});
+  }
+
+  // Ein Maßstab, dessen Zahlen man vorlesen kann: 1, 2, 4, 5, 8 und deren
+  // Zehnerschritte. Ein krummer Höchstwert wie 37 macht die Achse unlesbar.
+  function schoenesMax(n){
+    if(n <= 1) return 1;
+    var stelle = Math.pow(10, Math.floor(Math.log(n)/Math.LN10));
+    var r = n/stelle;
+    var f = r <= 1 ? 1 : r <= 2 ? 2 : r <= 4 ? 4 : r <= 5 ? 5 : r <= 8 ? 8 : 10;
+    return Math.round(f*stelle);
+  }
+
+  // Das Chart wird als SVG selbst gezeichnet. Eine Chart-Bibliothek wäre für
+  // zwei Linien die mit Abstand größte Abhängigkeit dieses Projekts — und das
+  // Dashboard ist eine einzelne Datei ohne Build-Schritt.
+  // Am Handy steht die Zeichenfläche hoch statt breit. Ein 760 Punkte breiter
+  // Kasten schrumpft auf einem 390 Punkte breiten Schirm auf die Hälfte
+  // zusammen — die Beschriftung der Achse wäre danach fünf Punkt groß.
+  // B/H sind der viewBox, L/R/O/U die Ränder, D die Zahl der Datumsangaben.
+  function kurveMasse(){
+    return window.innerWidth < 760
+      ? { B:380, H:265, L:28, R:8,  O:12, U:24, D:4 }
+      : { B:760, H:230, L:40, R:14, O:14, U:26, D:7 };
+  }
+
+  var kurveReihe = [];
+  var kurveMass = null;
+  var verkehrSumme = null;
+
+  function zeichneKurve(reihe){
+    var g = kurveMasse();
+    var n = reihe.length;
+    var breite = g.B - g.L - g.R;
+    var hoehe  = g.H - g.O - g.U;
+
+    var hoch = 0;
+    reihe.forEach(function(r){ hoch = Math.max(hoch, r.kampagne, r.uebrig); });
+    var max = schoenesMax(hoch);
+
+    function X(i){ return g.L + (n <= 1 ? breite/2 : i*breite/(n - 1)); }
+    function Y(w){ return g.O + hoehe*(1 - w/max); }
+    kurveMass = { X:X, Y:Y };
+
+    var boden = Y(0);
+    function pfad(feld){
+      return reihe.map(function(r, i){
+        return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(r[feld]).toFixed(1);
+      }).join(' ');
+    }
+
+    var s = '<svg class="kurve" viewBox="0 0 ' + g.B + ' ' + g.H + '" role="img" ' +
+      'aria-label="Besuche je Tag über ' + n + ' Tage">';
+
+    // Waagrechte Linien nur dort, wo die Beschriftung eine ganze Zahl ergibt.
+    [0, max/2, max].forEach(function(w){
+      if(w !== Math.round(w)) return;
+      var y = Y(w).toFixed(1);
+      s += '<line class="netz" x1="' + g.L + '" y1="' + y + '" x2="' + (g.B - g.R) + '" y2="' + y + '"></line>' +
+        '<text class="achse" x="' + (g.L - 8) + '" y="' + y + '" text-anchor="end" ' +
+        'dominant-baseline="middle">' + w + '</text>';
+    });
+
+    s += '<path class="flaeche" d="' + pfad('kampagne') +
+      ' L' + X(n - 1).toFixed(1) + ' ' + boden.toFixed(1) +
+      ' L' + X(0).toFixed(1) + ' ' + boden.toFixed(1) + ' Z"></path>' +
+      '<path class="linie-k" d="' + pfad('kampagne') + '"></path>' +
+      '<path class="linie-u" d="' + pfad('uebrig') + '"></path>';
+
+    // Der letzte Tag steht immer dabei, und was ihm zu nahe käme, fällt weg —
+    // zwei Daten übereinander sind keines.
+    var schritt = Math.max(1, Math.ceil(n/g.D));
+    reihe.forEach(function(r, i){
+      if(i !== n - 1 && (i % schritt !== 0 || i > n - 1 - schritt)) return;
+      var anker = i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle');
+      s += '<text class="achse" x="' + X(i).toFixed(1) + '" y="' + (g.H - 8) +
+        '" text-anchor="' + anker + '">' + tagKurz(r.tag) + '</text>';
+    });
+
+    s += '<g id="kurveZeiger" style="display:none">' +
+      '<line class="lot" y1="' + g.O + '" y2="' + boden.toFixed(1) + '"></line>' +
+      '<circle class="punkt-u" r="4"></circle>' +
+      '<circle class="punkt-k" r="4.5"></circle></g>';
+
+    // Ein Griff je Tag über die volle Höhe: Man muss die Linie nicht treffen,
+    // die Spalte genügt — am Finger die einzige Art, die funktioniert.
+    var gw = n <= 1 ? breite : breite/(n - 1);
+    reihe.forEach(function(r, i){
+      var x = Math.max(0, X(i) - gw/2);
+      s += '<rect class="griff" data-i="' + i + '" x="' + x.toFixed(1) + '" y="0" width="' +
+        Math.min(gw, g.B - x).toFixed(1) + '" height="' + g.H + '"></rect>';
+    });
+
+    return s + '</svg>';
+  }
+
+  function standardAblesung(){
+    var el = document.getElementById('ablesung');
+    if(!el) return;
+    var s = verkehrSumme || {};
+    var zeiger = document.getElementById('kurveZeiger');
+    if(zeiger) zeiger.style.display = 'none';
+    el.innerHTML = 'Im Zeitraum <b>' + (s.besuche || 0).toLocaleString('de-AT') +
+      '</b> Besuche — davon <b>' + (s.kampagne || 0).toLocaleString('de-AT') +
+      '</b> aus der Kampagne und <b>' + (s.uebrig || 0).toLocaleString('de-AT') +
+      '</b> übriger Verkehr. Ein Tippen auf einen Tag zeigt dessen Zahlen.';
+  }
+
+  function ablesen(i){
+    var r = kurveReihe[i];
+    var zeiger = document.getElementById('kurveZeiger');
+    if(!r || !zeiger || !kurveMass) return;
+    var x = kurveMass.X(i).toFixed(1);
+    var lot = zeiger.querySelector('.lot');
+    lot.setAttribute('x1', x); lot.setAttribute('x2', x);
+    var pk = zeiger.querySelector('.punkt-k');
+    pk.setAttribute('cx', x); pk.setAttribute('cy', kurveMass.Y(r.kampagne).toFixed(1));
+    var pu = zeiger.querySelector('.punkt-u');
+    pu.setAttribute('cx', x); pu.setAttribute('cy', kurveMass.Y(r.uebrig).toFixed(1));
+    zeiger.style.display = '';
+    document.getElementById('ablesung').innerHTML =
+      '<b>' + sicher(tagLang(r.tag)) + '</b> — <b>' + r.kampagne +
+      '</b> aus der Kampagne, <b>' + r.uebrig + '</b> übriger Verkehr';
+  }
+
+  function amGriff(e){
+    var r = e.target.closest ? e.target.closest('.griff') : null;
+    if(r) ablesen(Number(r.getAttribute('data-i')));
+  }
+
+  function bindeKurve(){
+    var svg = inhalt.querySelector('.kurve');
+    if(!svg) return;
+    svg.addEventListener('pointerdown', amGriff);
+    svg.addEventListener('pointermove', amGriff);
+    // Nur die Maus nimmt die Ablesung wieder zurück. Nach einer Berührung
+    // bliebe sonst nichts stehen, was man lesen könnte.
+    svg.addEventListener('pointerleave', function(e){
+      if(e.pointerType === 'mouse') standardAblesung();
+    });
+  }
+
+  // Beim Drehen des Geräts wechselt die Zeichenfläche das Format. Neu gezeichnet
+  // wird allein aus den Zahlen, die schon da sind — ohne zweite Abfrage.
+  var kurveTakt = null;
+  window.addEventListener('resize', function(){
+    if(Z.tab !== 'verkehr' || !kurveReihe.length) return;
+    clearTimeout(kurveTakt);
+    kurveTakt = setTimeout(function(){
+      var alt = inhalt.querySelector('.kurve');
+      if(!alt) return;
+      alt.outerHTML = zeichneKurve(kurveReihe);
+      bindeKurve();
+      standardAblesung();
+    }, 200);
+  });
+
+  function zeichneVerkehr(d){
+    kurveReihe   = d.verlauf || [];
+    verkehrSumme = d.summe || {};
+    Z.tage = d.tage;   // welcher Wert gilt, entscheidet der Server
+    var s = verkehrSumme;
+
+    var html = '<section class="karte">' +
+      '<div class="kartenkopf"><h2>Verkehr</h2><div class="umschalter" id="umschalter">' +
+      [7, 14, 30].map(function(t){
+        return '<button data-tage="' + t + '" aria-pressed="' + (t === Z.tage) + '">' +
+          t + ' Tage</button>';
+      }).join('') +
+      '</div></div>' +
+      '<p class="unter">Alle Aufrufe der Seite, nicht nur die aus dem Outreach. ' +
+      'Gezählt wird, was ein menschliches Signal gesendet hat.</p>' +
+
+      '<div class="kennzahlen">' +
+      '<div class="kennzahl"><b>' + (s.besuche || 0).toLocaleString('de-AT') +
+      '</b><span>Besuche gesamt</span></div>' +
+      '<div class="kennzahl"><b>' + (s.kampagne || 0).toLocaleString('de-AT') +
+      '</b><span>aus der Kampagne</span></div>' +
+      '<div class="kennzahl"><b>' + (s.uebrig || 0).toLocaleString('de-AT') +
+      '</b><span>übriger Verkehr</span></div></div>' +
+
+      zeichneKurve(kurveReihe) +
+
+      '<div class="legende"><span><i class="k"></i>aus der Kampagne</span>' +
+      '<span><i class="u"></i>übriger Verkehr</span></div>' +
+      '<p class="ablesung" id="ablesung"></p>' +
+
+      '<div class="hinweis">Nicht gezählt: <b>' + (s.scanner || 0).toLocaleString('de-AT') +
+      '</b> Aufrufe ohne menschliches Signal — mit hoher Wahrscheinlichkeit die Link-Scanner ' +
+      'der Mail-Gateways. Sie fehlen auch im Log weiter unten.</div></section>';
+
+    html += '<section class="karte"><h2>Woher sie kommen</h2>' +
+      '<p class="unter">Die verweisende Seite. &bdquo;direkt aufgerufen&ldquo; heißt: eingetippt, ' +
+      'aus einem Lesezeichen, oder aus einem Programm, das keinen Verweis mitschickt.</p>' +
+      '<div class="waage"><table><thead><tr><th>Herkunft</th><th class="n">Besuche</th>' +
+      '<th class="n">davon Kampagne</th></tr></thead><tbody>';
+    if(!d.herkunft.length) html += '<tr><td colspan="3" class="leer">Noch keine Daten.</td></tr>';
+    d.herkunft.forEach(function(h){
+      html += '<tr><td>' + (QUELLENNAME[h.quelle] || sicher(h.quelle)) + '</td>' +
+        '<td class="n">' + h.besuche + '</td>' +
+        '<td class="n">' + (h.kampagne || '–') + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    html += '<section class="karte"><h2>Womit und von wo</h2>' +
+      '<div class="waage"><table><thead><tr><th>Gerät</th><th class="n">Besuche</th>' +
+      '</tr></thead><tbody>';
+    if(!d.geraete.length) html += '<tr><td colspan="2" class="leer">Noch keine Daten.</td></tr>';
+    d.geraete.forEach(function(g){
+      html += '<tr><td>' + sicher(g.geraet) + '</td><td class="n">' + g.besuche + '</td></tr>';
+    });
+    html += '</tbody></table></div>' +
+      '<div class="waage" style="margin-top:20px"><table><thead><tr><th>Land</th>' +
+      '<th class="n">Besuche</th></tr></thead><tbody>';
+    if(!d.laender.length) html += '<tr><td colspan="2" class="leer">Noch keine Daten.</td></tr>';
+    d.laender.forEach(function(l){
+      html += '<tr><td>' + (l.land === '??' ? 'ohne Angabe' : sicher(l.land)) +
+        '</td><td class="n">' + l.besuche + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    html += '<section class="karte"><h2>Einzelne Aufrufe</h2>' +
+      '<p class="unter">Die jüngsten ' + d.log.length + ' Besuche mit menschlichem Signal, ' +
+      'neueste zuerst. Wo ein Kontakt dahintersteht, führt sein Name ins Personenblatt.</p>' +
+      '<div class="waage"><table><thead><tr><th>Zeitpunkt</th><th>Herkunft</th><th>Gerät</th>' +
+      '<th>Land</th><th>Signal</th><th class="n">Seiten</th><th class="n">Lesezeit</th>' +
+      '<th>Kontakt</th></tr></thead><tbody>';
+    if(!d.log.length){
+      html += '<tr><td colspan="8" class="leer">Im Zeitraum hat niemand die Seite besucht.</td></tr>';
+    }
+    d.log.forEach(function(b){
+      var wer = b.token
+        ? '<button class="verweis" data-token="' + sicher(b.token) + '">' +
+          sicher(personName(b)) + '</button>'
+        : '–';
+      html += '<tr><td>' + datum(b.started_at) + '</td>' +
+        '<td>' + (QUELLENNAME[b.quelle] || sicher(b.quelle)) + '</td>' +
+        '<td>' + sicher(b.device || '?') + '</td>' +
+        '<td>' + sicher(b.country || '–') + '</td>' +
+        '<td>' + (SIGNALKURZ[b.signal] || sicher(b.signal || '–')) + '</td>' +
+        '<td class="n">' + (b.seiten || '–') + '</td>' +
+        '<td class="n">' + dauer(b.lesezeit) + '</td>' +
+        '<td>' + wer + '</td></tr>';
+    });
+    html += '</tbody></table></div></section>';
+
+    inhalt.innerHTML = html;
+    standardAblesung();
+    bindeKurve();
+
+    document.getElementById('umschalter').addEventListener('click', function(e){
+      var b = e.target.closest('button[data-tage]');
+      if(!b) return;
+      Z.tage = Number(b.getAttribute('data-tage'));
+      start();
+    });
+
+    inhalt.querySelectorAll('button.verweis[data-token]').forEach(function(b){
+      b.addEventListener('click', function(){ oeffneBlatt(b.getAttribute('data-token')); });
+    });
+  }
+
   /* --- Verwaltung ------------------------------------------------------- */
 
   function zeichneVerwaltung(){
@@ -797,17 +1132,28 @@ tr.trenner td{
     kampagnenGefuellt = true;
   }
 
+  function scheitern(e){
+    inhalt.innerHTML = '<section class="karte"><p class="fehler">' + sicher(e.message) + '</p></section>';
+  }
+
   function start(){
     inhalt.innerHTML = '<p class="leer">wird geladen …</p>';
+    // Der Verkehrs-Reiter bringt seinen eigenen Zeitraum mit und kennt keine
+    // Kampagne. Die Filterleiste verspraeche dort etwas, das sie nicht haelt.
+    document.querySelector('.filter').hidden = (Z.tab === 'verkehr');
+
     if(Z.tab === 'verwaltung'){ zeichneVerwaltung(); return; }
+    if(Z.tab === 'verkehr'){
+      hole('verkehr', {tage:Z.tage}).then(zeichneVerkehr).catch(scheitern);
+      return;
+    }
+
     var aktion = Z.tab === 'personen' ? 'personen' : (Z.tab === 'seiten' ? 'seiten' : 'uebersicht');
     hole(aktion).then(function(d){
       if(Z.tab === 'personen') zeichnePersonen(d);
       else if(Z.tab === 'seiten') zeichneSeiten(d);
       else zeichneUebersicht(d);
-    }).catch(function(e){
-      inhalt.innerHTML = '<section class="karte"><p class="fehler">' + sicher(e.message) + '</p></section>';
-    });
+    }).catch(scheitern);
   }
 
   document.getElementById('reiter').addEventListener('click', function(e){
