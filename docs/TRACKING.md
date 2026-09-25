@@ -40,9 +40,26 @@ Vercel → Projekt → Settings → Environment Variables:
 | `DATABASE_URL` | setzt Neon selbst | Datenbank |
 | `AUSWERTUNG_PASSWORT` | frei wählbar | Anmeldung am Dashboard |
 | `AUSWERTUNG_SECRET` | langer Zufallsstring, 40+ Zeichen | signiert die Anmeldung |
-| `SEITEN_URL` | `https://manereal.at` | baut die Links |
+| `SEITEN_URL` | solange die Domain fehlt: leer lassen | baut die Links im Export |
 | `TRACKING_PERSONENBEZUG` | leer lassen | `0` schaltet die Personenzuordnung ab |
 | `AUSWERTUNG_TIMEOUT_MIN` | leer lassen | Minuten Ruhe bis zur erneuten Anmeldung, Standard 10 |
+
+**Zur Domain.** Die Website wird **`www.manereal.at`** heißen, sobald die Domain
+verfügbar ist. Bis dahin läuft sie unter `manereal-website.vercel.app`, und
+`manereal.at` ist nicht erreichbar. Deshalb bleibt `SEITEN_URL` vorerst **leer**:
+`api/auswertung.js` nimmt dann den Host der Anfrage, und die Links im
+Ergebnis-Export zeigen dorthin, wo die Seite wirklich steht. Ein festes
+`https://manereal.at` erzeugte stattdessen Links ins Leere.
+
+**Am Tag der Domain-Umstellung** sind drei Stellen nachzuziehen:
+
+| | |
+|---|---|
+| Vercel | `SEITEN_URL` auf `https://www.manereal.at` setzen, Redeploy |
+| Instantly | Signatur-Link in der Code-Ansicht auf `https://www.manereal.at/?m={{Token}}` |
+| Doku | [testmail-instantly.md](testmail-instantly.md) und der Anleitungstext im Dashboard (`auswertung.html`) nennen die Adresse ausgeschrieben |
+
+Mit `www.`, nicht ohne — so steht es auch in der Anleitung im Dashboard.
 
 **Zur Ruhezeit:** Das Dashboard meldet nach zehn Minuten ohne Mausbewegung,
 Tippen oder Scrollen von selbst ab -- danach ist das Passwort wieder nötig.
