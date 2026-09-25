@@ -13,6 +13,11 @@ docs/
 # Archiv: Erstentwurf, Rohmaterial, ausgemusterte Dateien (rund 80 MB)
 archive/
 
+# Datenbankschema und Kommandozeilenwerkzeuge -- werden nicht ausgeliefert.
+# Ohne diese beiden Zeilen wäre /db/schema.sql über die Domain abrufbar.
+db/
+scripts/
+
 # Werkzeuge und Sitzungsdateien
 .claude/
 _tmp/
