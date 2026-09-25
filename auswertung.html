@@ -42,7 +42,7 @@ header{background:#fff; border-bottom:1px solid var(--line)}
 .filter{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:0 0 16px}
 .filter label{font-size:13px; color:var(--ink-soft)}
 /* display:flex oben schlaegt [hidden]{display:none} des Browsers -- ohne diese
-   Zeile bliebe die Filterleiste im Verkehrs-Reiter stehen, wo sie nichts tut. */
+   Zeile bliebe die Filterleiste im Traffic-Reiter stehen, wo sie nichts tut. */
 .filter[hidden]{display:none}
 select,input[type=date],input[type=password],input[type=text]{
   font:inherit; padding:7px 10px; border:1px solid var(--line); border-radius:8px;
@@ -100,7 +100,7 @@ tr.trenner td{
 .marke.ja{background:#E3F0EE; color:#0B5B4E}
 .marke.nein{background:var(--flaeche); color:var(--ink-soft)}
 
-/* Verkehr */
+/* Traffic */
 .kartenkopf{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
 .umschalter{display:flex; gap:6px; margin-left:auto}
 .umschalter button{
@@ -274,7 +274,7 @@ tr.trenner td{
         <button data-tab="uebersicht" aria-current="true">Übersicht</button>
         <button data-tab="personen">Personen</button>
         <button data-tab="seiten">Seiten</button>
-        <button data-tab="verkehr">Verkehr</button>
+        <button data-tab="verkehr">Traffic</button>
         <button data-tab="verwaltung">Verwaltung</button>
       </nav>
     </div>
@@ -724,7 +724,7 @@ tr.trenner td{
     inhalt.innerHTML = html;
   }
 
-  /* --- Verkehr ---------------------------------------------------------- */
+  /* --- Traffic ---------------------------------------------------------- */
 
   var QUELLENNAME = {
     instantly:'Kampagne (Instantly)',
@@ -853,7 +853,7 @@ tr.trenner td{
     el.innerHTML = 'Im Zeitraum <b>' + (s.besuche || 0).toLocaleString('de-AT') +
       '</b> Besuche — davon <b>' + (s.kampagne || 0).toLocaleString('de-AT') +
       '</b> aus der Kampagne und <b>' + (s.uebrig || 0).toLocaleString('de-AT') +
-      '</b> übriger Verkehr. Ein Tippen auf einen Tag zeigt dessen Zahlen.';
+      '</b> übriger Traffic. Ein Tippen auf einen Tag zeigt dessen Zahlen.';
   }
 
   function ablesen(i){
@@ -870,7 +870,7 @@ tr.trenner td{
     zeiger.style.display = '';
     document.getElementById('ablesung').innerHTML =
       '<b>' + sicher(tagLang(r.tag)) + '</b> — <b>' + r.kampagne +
-      '</b> aus der Kampagne, <b>' + r.uebrig + '</b> übriger Verkehr';
+      '</b> aus der Kampagne, <b>' + r.uebrig + '</b> übriger Traffic';
   }
 
   function amGriff(e){
@@ -912,7 +912,7 @@ tr.trenner td{
     var s = verkehrSumme;
 
     var html = '<section class="karte">' +
-      '<div class="kartenkopf"><h2>Verkehr</h2><div class="umschalter" id="umschalter">' +
+      '<div class="kartenkopf"><h2>Traffic</h2><div class="umschalter" id="umschalter">' +
       [7, 14, 30].map(function(t){
         return '<button data-tage="' + t + '" aria-pressed="' + (t === Z.tage) + '">' +
           t + ' Tage</button>';
@@ -927,12 +927,12 @@ tr.trenner td{
       '<div class="kennzahl"><b>' + (s.kampagne || 0).toLocaleString('de-AT') +
       '</b><span>aus der Kampagne</span></div>' +
       '<div class="kennzahl"><b>' + (s.uebrig || 0).toLocaleString('de-AT') +
-      '</b><span>übriger Verkehr</span></div></div>' +
+      '</b><span>übriger Traffic</span></div></div>' +
 
       zeichneKurve(kurveReihe) +
 
       '<div class="legende"><span><i class="k"></i>aus der Kampagne</span>' +
-      '<span><i class="u"></i>übriger Verkehr</span></div>' +
+      '<span><i class="u"></i>übriger Traffic</span></div>' +
       '<p class="ablesung" id="ablesung"></p>' +
 
       '<div class="hinweis">Nicht gezählt: <b>' + (s.scanner || 0).toLocaleString('de-AT') +
@@ -1138,7 +1138,7 @@ tr.trenner td{
 
   function start(){
     inhalt.innerHTML = '<p class="leer">wird geladen …</p>';
-    // Der Verkehrs-Reiter bringt seinen eigenen Zeitraum mit und kennt keine
+    // Der Traffic-Reiter bringt seinen eigenen Zeitraum mit und kennt keine
     // Kampagne. Die Filterleiste verspraeche dort etwas, das sie nicht haelt.
     document.querySelector('.filter').hidden = (Z.tab === 'verkehr');
 

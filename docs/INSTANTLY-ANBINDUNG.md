@@ -30,9 +30,9 @@ Gearbeitet wird auf dem Branch `Tracking` (bleibt Vorschau, kein Merge nach
 
 ---
 
-## Verhältnis zum Verkehrs-Reiter (`961071f`)
+## Verhältnis zum Traffic-Reiter (`961071f`)
 
-Parallel ist ein fünfter Reiter **Verkehr** entstanden: Kurve über 7/14/30 Tage,
+Parallel ist ein fünfter Reiter **Traffic** entstanden: Kurve über 7/14/30 Tage,
 Herkunft, Gerät, Land, Log der jüngsten 200 Besuche — alles über `visits`, alles
 auf `human` gefiltert, ohne Kampagnen- und Datumsfilter
 (`api/auswertung.js:416-537`, `auswertung.html:727-1011`).
@@ -42,7 +42,7 @@ Er kommt diesem Vorhaben **nicht in die Quere**:
 - Er liest ausschließlich `visits` und `events`. Hier wird nach `mail_events`
   und `contacts` geschrieben; `visits` bleibt unberührt.
 - Die Funktionen, die geändert werden — `uebersicht()` (232), `personen()`
-  (309), `person()` (346) — stehen **vor** dem eingefügten Verkehrsblock. Ihre
+  (309), `person()` (346) — stehen **vor** dem eingefügten Traffic-Block. Ihre
   Zeilennummern sind unverändert.
 - Der Reiter hat eine eigene Router-Verzweigung `?a=verkehr`
   (`api/auswertung.js:738`) und eine eigene Zeitraumlogik; der neue Endpunkt
@@ -54,10 +54,10 @@ Zwei Stellen, die dadurch trotzdem zu beachten sind:
    source = 'instantly' where source = 'gmass'`). Die neue Tabelle gehört
    hinter `events`, die `alter table`-Zeilen zu den Nachzügen ans Dateiende —
    nicht dazwischen, sonst zerfällt die Gliederung der Datei.
-2. **Abgemeldete bleiben im Verkehrs-Reiter sichtbar, und das ist richtig so.**
+2. **Abgemeldete bleiben im Traffic-Reiter sichtbar, und das ist richtig so.**
    Setzt `lead_unsubscribed` künftig `contacts.optout_at`, verweigert
    `api/track.js:146-156` die Zuordnung, der Besuch bekommt also kein Token.
-   Der Verkehrs-Reiter zählt ihn dennoch zur Kampagne, weil `AUS_KAMPAGNE`
+   Der Traffic-Reiter zählt ihn dennoch zur Kampagne, weil `AUS_KAMPAGNE`
    zusätzlich auf `source = 'instantly'` prüft (`api/auswertung.js:437-438`) und
    `sourceOf()` diesen Wert aus dem Browser übernimmt (`api/track.js:66-71`).
    Ergebnis: der Besuch erscheint im Log ohne Namen. Genau so soll es sein —
@@ -182,7 +182,7 @@ anderes als nie zugestellt.
 **Detailblatt** (`person()`, `api/auswertung.js:346-376`; `zeichneBlatt` ab
 `auswertung.html:588`): Mail-Chronik aus `mail_events` **vor** den Besuchen, in
 derselben Form wie die bestehende Ereignis-Chronik. Das Blatt wird auch aus dem
-Verkehrs-Log heraus geöffnet — es muss an beiden Einstiegen tragen.
+Traffic-Log heraus geöffnet — es muss an beiden Einstiegen tragen.
 
 **Verwaltung** (`zeichneVerwaltung`, ab `auswertung.html:1015`): Knopf „Jetzt
 mit Instantly abgleichen" plus Zeitpunkt des letzten Abgleichs, dazu die
@@ -241,7 +241,7 @@ curl -X POST 'localhost:3000/api/instantly?a=hook' \
 - Zweimal dasselbe Paket → genau **eine** Zeile in `mail_events`.
 - `lead_unsubscribed` → `contacts.optout_at` gesetzt; danach wird ein Aufruf
   mit `?m=<Token>` **nicht** mehr zugeordnet (`api/track.js:146-156`). Im
-  Reiter **Verkehr** muss derselbe Besuch trotzdem als Kampagnenverkehr
+  Reiter **Traffic** muss derselbe Besuch trotzdem als Kampagnenverkehr
   erscheinen, nur ohne Namen — sonst hat die Abmeldung die Kurve rückwirkend
   verändert.
 - Unbekannter Token → 200, Zeile mit `token is null`.

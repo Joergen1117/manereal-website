@@ -413,7 +413,7 @@ async function seiten(sql, kampagne) {
   return { routen, faq, cta, signale };
 }
 
-/* --- Verkehr ------------------------------------------------------------ */
+/* --- Traffic ------------------------------------------------------------ */
 
 // Was auf der Seite überhaupt los ist -- nicht nur das, was aus dem Outreach
 // kommt. Gezählt werden ausschließlich Besuche mit menschlichem Signal: Das
@@ -429,7 +429,7 @@ function tageOder(wert, standard) {
 }
 
 // Tagesgrenzen in Wiener Zeit. Die Datenbank rechnet in UTC; ein Aufruf um
-// 23:30 Uhr fiele dort auf den Folgetag, und die Kurve zeigte Verkehr an
+// 23:30 Uhr fiele dort auf den Folgetag, und die Kurve zeigte Traffic an
 // Abenden, an denen niemand da war. $1 ist überall die Zahl der Tage.
 const HEUTE = "(now() at time zone 'Europe/Vienna')::date";
 const AB = `((${HEUTE} - ($1::int - 1))::timestamp at time zone 'Europe/Vienna')`;
@@ -437,7 +437,7 @@ const TAG_VON = "(v.started_at at time zone 'Europe/Vienna')::date";
 
 // 'instantly' bleibt stehen, auch wenn der Kontakt nach DSGVO gelöscht wird
 // und token dabei auf null fällt. Über token allein wanderten diese Besuche
-// rückwirkend in den übrigen Verkehr -- die Vergangenheit im Chart änderte
+// rückwirkend in den übrigen Traffic -- die Vergangenheit im Chart änderte
 // sich also nachträglich, ohne dass jemand die Seite besucht hätte.
 //
 // 'gmass' ist der alte Name desselben Wegs. Er wird hier nur noch aufgefangen,
@@ -732,7 +732,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(await seiten(sql, kampagne));
     }
 
-    // Der Verkehrs-Reiter kennt weder Kampagne noch Von/Bis: Sein Zeitraum kommt
+    // Der Traffic-Reiter kennt weder Kampagne noch Von/Bis: Sein Zeitraum kommt
     // allein aus den Knöpfen 7/14/30, damit Kurve und Log stets denselben
     // Ausschnitt zeigen.
     if (aktion === 'verkehr') {

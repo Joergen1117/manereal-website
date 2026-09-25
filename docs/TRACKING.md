@@ -248,13 +248,13 @@ Systems: Kommt fast alles über „10 Sekunden sichtbar geblieben" herein und
 kaum etwas über Maus oder Scroll, sitzen vermutlich Scanner unter den
 gezählten Menschen. Dann gehört der Schwellwert nach oben.
 
-### Verkehr
+### Traffic
 
 Die ersten drei Reiter sehen nur, was aus dem Outreach kommt. Dieser sieht
 **alles** — auch die Aufrufe, hinter denen kein Kontakt steht.
 
 Die Kurve zeigt zwei Linien über 7, 14 oder 30 Tage: die gefüllte Fläche sind
-die Besuche aus der Kampagne, die dünne Linie darüber ist der übrige Verkehr.
+die Besuche aus der Kampagne, die dünne Linie darüber ist der übrige Traffic.
 Ein Tippen oder Zeigen auf einen Tag schreibt dessen Zahlen unter das Chart.
 
 **Gezählt wird nur, was ein menschliches Signal gesendet hat** — in der Kurve,

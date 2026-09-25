@@ -11,6 +11,24 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 38 — Der Reiter „Verkehr" heißt „Traffic" (25.09.2026)
+
+Nur der Name, keine Funktion. Sichtbar geändert: die Reiterbeschriftung, die
+Überschrift der ersten Karte und die Legende („übriger Traffic").
+
+Die internen Bezeichner bleiben deutsch — `data-tab="verkehr"` im HTML und die
+Abfrage `a=verkehr` in der API. Sie sind nirgends sichtbar, und eine Umbenennung
+hätte beide Dateien gleichzeitig treffen müssen, damit niemand einen Unterschied
+bemerkt.
+
+| Datei | Änderung |
+|---|---|
+| [`auswertung.html`](../auswertung.html) | Reiter, Kartenüberschrift, Legende, Ablesung |
+| [`api/auswertung.js`](../api/auswertung.js), [`db/schema.sql`](../db/schema.sql) | nur Kommentare |
+| [`docs/TRACKING.md`](TRACKING.md), [`docs/INSTANTLY-ANBINDUNG.md`](INSTANTLY-ANBINDUNG.md) | Abschnitt und Verweise |
+
+---
+
 ## 37 — Reiter „Verkehr" im Dashboard (24.09.2026)
 
 An der Website selbst nur eine Zeile geändert, der Rest betrifft das

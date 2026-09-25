@@ -57,7 +57,7 @@ create index if not exists events_visit_ts   on events (visit_id, ts);
 create index if not exists events_type       on events (type);
 create index if not exists visits_token      on visits (token);
 create index if not exists visits_campaign   on visits (campaign, started_at);
--- Der Verkehrs-Reiter fragt nach Tagen über alle Besuche hinweg, ohne
+-- Der Traffic-Reiter fragt nach Tagen über alle Besuche hinweg, ohne
 -- Kampagne davor. Der Index oben greift dafür nicht: Sein erster Schlüssel ist
 -- campaign, und über alle Kampagnen hinweg ist das kein Bereich mehr.
 create index if not exists visits_started_at  on visits (started_at);
