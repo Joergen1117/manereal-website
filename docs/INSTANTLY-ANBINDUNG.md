@@ -25,8 +25,8 @@ die [UMSTELLUNG-INSTANTLY.md](UMSTELLUNG-INSTANTLY.md) aus guten Gründen
 abgeschaltet hat. „Angeklickt" misst das eigene System ohnehin besser, weil es
 Scanner vom Menschen trennt, was Instantly nicht tut.
 
-Gearbeitet wird auf dem Branch `Tracking` (bleibt Vorschau, kein Merge nach
-`main`).
+Gearbeitet wird auf `main`. Der Branch `Tracking` ist am 25.09.2026 nach `main`
+gemergt und danach gelöscht worden — es gibt nur noch einen Branch.
 
 ---
 
@@ -262,8 +262,10 @@ curl -X POST 'localhost:3000/api/instantly?a=hook' \
 - Eine Adresse auf eine bekannte Bounce-Adresse setzen und den Trichter prüfen:
   „versendet" 1, „zugestellt" 0.
 
-**Auslieferung:** Push auf den Branch `Tracking` am `joergen`-Remote, Prüfung
-auf der Vorschau-URL. Kein Merge nach `main`.
+**Auslieferung:** `git push joergen main` — nicht `origin`. Nur das
+`joergen`-Remote löst den Redeploy aus. Jeder Push geht damit direkt live, es
+gibt keine Vorschau mehr dazwischen; der Webhook wird deshalb erst angelegt,
+wenn der Endpunkt steht.
 
 ---
 

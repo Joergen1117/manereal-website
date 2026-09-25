@@ -11,6 +11,43 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 39 — Das Tracking ist live (25.09.2026)
+
+`Tracking` ist nach `main` gemergt und ausgeliefert. Bis heute lag das gesamte
+Tracking nur auf einem Vorschau-Branch: Die Produktionsseite hatte kein
+Mess-Snippet, `/api/track` und `/auswertung` antworteten mit 404. **Ab diesem
+Zeitpunkt erhebt die Website Daten.**
+
+Ein Fast-Forward, neun Commits. Der Merge hat auch die Löschungen aus `26b5bfa`
+nach `main` gebracht — `designs/`, `archive/erstentwurf.html`,
+`archive/unused/`, fünf iStock-Rohdateien, `_tmp/`, `docs/00-handoff.md`. Sie
+bleiben über `b2b927e` in der Historie erreichbar (CLAUDE.md, Regel 7: von Julia
+am 25.09.2026 freigegeben).
+
+**Sichtbar geändert hat sich an der Website genau eine Stelle:** Abschnitt 4 der
+Datenschutzerklärung. Aus „Diese Website verwendet keine Cookies zu Analyse-
+oder Marketingzwecken." werden fünf Absätze unter der Überschrift
+„4. Cookies und Reichweitenmessung": was erfasst wird, dass die IP-Adresse nicht
+gespeichert wird, die Kennung im persönlichen Mail-Link samt Widerspruchsrecht,
+Neon als Auftragsverarbeiter, Löschfrist 24 Monate.
+
+**Dieser Text ist ein Entwurf und rechtlich noch zu bestätigen.** Der Vermerk
+steht als Kommentar direkt darüber in [`index.html`](../index.html), die offenen
+Punkte in [TRACKING.md](TRACKING.md). Julia hat den Live-Gang in diesem Wissen
+freigegeben. Kein CSS, kein Layout, keine Struktur wurde berührt.
+
+Was dazukam, ohne sichtbar zu sein: das `__mr`-Script im Head, das `?m=` aus der
+Adresszeile entfernt, und der Messblock am Ende — beide passiv, ohne Einfluss auf
+Darstellung oder Bedienung.
+
+| Was | Wo |
+|---|---|
+| Die Seite läuft unter | `manereal-website.vercel.app`, später `www.manereal.at` |
+| Dashboard | `/auswertung`, passwortgeschützt, für Suchmaschinen gesperrt |
+| Weiterentwickelt wird auf | `main` — der Branch `Tracking` ist nach dem Merge gelöscht, lokal und am Remote |
+
+---
+
 ## 38 — Der Reiter „Verkehr" heißt „Traffic" (25.09.2026)
 
 Nur der Name, keine Funktion. Sichtbar geändert: die Reiterbeschriftung, die
