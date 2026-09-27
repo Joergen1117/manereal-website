@@ -46,10 +46,14 @@ Vercel → Projekt → Settings → Environment Variables:
 
 **Zur Domain.** Die Website wird **`www.manereal.at`** heißen, sobald die Domain
 verfügbar ist. Bis dahin läuft sie unter `manereal-website.vercel.app`, und
-`manereal.at` ist nicht erreichbar. Deshalb bleibt `SEITEN_URL` vorerst **leer**:
-`api/auswertung.js` nimmt dann den Host der Anfrage, und die Links im
-Ergebnis-Export zeigen dorthin, wo die Seite wirklich steht. Ein festes
-`https://manereal.at` erzeugte stattdessen Links ins Leere.
+`manereal.at` ist nicht erreichbar — ein festes `https://manereal.at` in
+`SEITEN_URL` erzeugte also Links ins Leere.
+
+Zwei Werte sind richtig: die **aktuelle** Adresse eintragen, oder die Variable
+**leer** lassen. Bei leer nimmt `seitenUrl()` den Host der Anfrage
+(`api/auswertung.js:220`) — dieselbe Adresse, nur ohne Pflegeaufwand, weil sie
+der Domain-Umstellung von selbst folgt. Die Variable wird ausschließlich für die
+Links im Ergebnis-Export gebraucht; Tracking und Zuordnung hängen nicht an ihr.
 
 **Am Tag der Domain-Umstellung** sind drei Stellen nachzuziehen:
 
