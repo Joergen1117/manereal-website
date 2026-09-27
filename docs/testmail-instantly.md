@@ -1,6 +1,7 @@
 # Testmail für Instantly
 
-Zum Kopieren. Empfänger: `Julian@pils.cc`
+Zum Kopieren. Empfänger: die drei Adressen aus
+`docs/test-zustellung.lokal.csv`.
 
 ---
 
@@ -35,9 +36,11 @@ Drei Dinge, die die Vorschau im Editor nicht beantwortet:
 | **Posteingang oder Spam** | Wie schlägt sich eine HTML-Mail mit Link in der Signatur bei den drei großen Filtern? |
 | **Die ganze Kette** | Klick auf den Link → steht der Besuch im Dashboard bei der richtigen Person? |
 
-**Ein Hinweis zum Aufbau:** Sichtbar steht `www.jpprocessautomation.de`, das
-Ziel ist `manereal-website.vercel.app` — **zwei verschiedene Domains**. Instantly
-warnt selbst davor, und im Echtbetrieb wird beides `manereal.at` sein.
+**Ein Hinweis zum Aufbau:** Sichtbar steht `www.manereal.at`, das Ziel ist
+`manereal-website.vercel.app` — **noch zwei verschiedene Domains**. Instantly
+warnt selbst davor. Der Grund ist nur, dass die Domain noch nicht erreichbar
+ist; sobald sie läuft, sind Anzeige und Ziel dieselbe Adresse und diese
+Störgröße fällt weg.
 
 Das macht den Test nicht wertlos, nur einseitig: **Kommt die Mail an, ist der
 Echtfall erst recht sicher.** Landet sie im Spam, weiß man nicht, ob es an der
@@ -51,13 +54,13 @@ beweist nichts.
 **Betreff**
 
 ```
-Kurze Frage zu Ihren Prozessen, Julian
+Kurze Frage zu Ihren Prozessen, {{firstName}}
 ```
 
 **Text — in der Code-Ansicht `<>` einfügen, nicht im normalen Editor**
 
 ```html
-Hallo Julian,<br><br>
+Hallo {{firstName}},<br><br>
 
 ich melde mich kurz bei Ihnen, da wir Unternehmen dabei unterstützen,
 zeitaufwendige manuelle Abläufe durch intelligente Prozessautomatisierung
@@ -68,7 +71,7 @@ Hätten Sie diese Woche Zeit für einen kurzen, 5-minütigen Austausch dazu?<br>
 Beste Grüße<br>
 Max Mustermann<br>
 Prozessberater | JP Process Automation<br>
-<a href="https://manereal-website.vercel.app/?m={{Token}}">www.jpprocessautomation.de</a>
+<a href="https://manereal-website.vercel.app/?m={{Token}}">www.manereal.at</a>
 ```
 
 **Zwei Abweichungen von der Vorlage des Support-Agenten, mit Absicht:**
@@ -82,17 +85,30 @@ Prozessberater | JP Process Automation<br>
 
 ## Die Leads dafür
 
-Am einfachsten im Dashboard unter *Verwaltung* eine CSV mit einer Zeile
-einspielen — dann stimmt das Format von selbst, der Kontakt liegt in der
-Datenbank und der Code passt zum Link:
+Im Dashboard unter *Verwaltung* die Liste `docs/test-zustellung.lokal.csv`
+einspielen, Kampagne `test-zustellung`. Dann stimmt das Format von selbst, die
+Kontakte liegen in der Datenbank und die Codes passen zu den Links:
 
 ```
-email,firstname,lastname,company
-Julian@pils.cc,Julian,Pils,JP Process Automation
+email,firstname,lastname,company,Einheiten
+161apiljul@eurogym.info,Andreas,Hofstätter,Hausverwaltung Hofstätter GmbH,180
+Julian.pils@cap-finisher.com,Gerhard,Reithofer,Reithofer Immobilienverwaltung KG,340
+Julian.pils@cap-ausbildung.com,Elisabeth,Wallner,"Wallner, Koch & Partner Hausverwaltung",95
 ```
+
+Die Namen sind erfunden, die Adressen echt. **Einen neuen Kampagnennamen wählen**
+— liegt eine Adresse in derselben Kampagne schon, legt ein zweiter Upload nichts
+an und behält den alten Namen (`on conflict (email, campaign) do nothing`).
 
 Die zurückgegebene Datei geht direkt nach Instantly. Beim Import zuordnen:
-`Email` → Email, **`Token` → Custom Variable**, der Rest nach Bedarf.
+`Email` → Email, **`Firstname` → First Name** (sonst bleibt `{{firstName}}`
+leer), **`Token` → Custom Variable**, der Rest nach Bedarf. `Einheiten` ist keine
+Pflicht — die Spalte ist mitgenommen, um zu sehen, ob beliebige Zusatzspalten
+unverändert durchkommen.
+
+**Kein Fallback in der Anrede.** `{{firstName|Guten Tag}}` wäre im Echtbetrieb
+richtig, hier nicht: Der Test soll zeigen, wenn die Ersetzung ausfällt, nicht den
+Ausfall überdecken.
 
 ---
 
@@ -127,17 +143,17 @@ oder die Mail als `.eml` speichern und im Texteditor öffnen.
 |---|---|
 | `<a href="https://manereal-website.vercel.app/?m=K7F3M2QX9P">` | **Bestanden.** Die Kette steht bis ins Postfach |
 | `<a href="…?m={{Token}}">` | Ersetzung greift nicht — wurde der Link im normalen Editor gesetzt? |
-| kein `<a>`, nur `www.jpprocessautomation.de` als Text | HTML wurde entfernt → Text-only-Schalter prüfen |
+| kein `<a>`, nur `www.manereal.at` als Text | HTML wurde entfernt → Text-only-Schalter prüfen |
+| `Hallo {{firstName}},` steht wörtlich da | der Lead wurde ohne Vornamen importiert oder die Spalte falsch zugeordnet |
 | Ziel zeigt auf eine fremde Tracking-Domain | Link Tracking war noch an |
 
 **Und danach:** Auf den Link klicken, dann ins Dashboard unter
 `/auswertung` → Personen. Steht dort ein Besuch beim richtigen Kontakt, ist die
 ganze Kette bewiesen — von der Mail bis zur Auswertung.
 
-Das setzt voraus, dass der Kontakt in der Datenbank liegt. Am einfachsten:
-vorher im Dashboard unter *Verwaltung* eine CSV mit dieser einen Zeile
-einspielen und die zurückgegebene Datei direkt für Instantly verwenden — dann
-stimmt der Code von selbst.
+Das setzt voraus, dass die Kontakte in der Datenbank liegen — siehe *Die Leads
+dafür*. Die zurückgegebene Datei direkt für Instantly verwenden, dann stimmen die
+Codes von selbst.
 
 ---
 
@@ -148,6 +164,24 @@ Wenn der Quelltext stimmt, dieselbe Kampagne an je eine Adresse bei
 Filterwelten, in denen österreichische Hausverwaltungen sitzen. Posteingang
 oder Spam — das entscheidet mehr über die Kampagne als alles andere in diesem
 System.
+
+**Die Liste oben leistet das noch nicht.** Am 25.09.2026 über Google-DNS geprüft:
+
+| Adresse | MX | |
+|---|---|---|
+| `161apiljul@eurogym.info` | `*.mail.protection.outlook.com` | Microsoft 365 |
+| `Julian.pils@cap-finisher.com` | `*.mail.protection.outlook.com` | Microsoft 365 |
+| `Julian.pils@cap-ausbildung.com` | — | **Domain existiert nicht** |
+
+Microsoft wird also zweimal geprüft, Gmail und GMX nicht, und die dritte Adresse
+**bounct hart**. Existieren tun stattdessen `cap-ausbildung.at` (eigener Server
+bei Hetzner, also eine dritte Filterwelt) und `cap-ausbildung.eu` (wieder
+Microsoft).
+
+Eine tote Adresse ist für den Bounce-Test aus
+[INSTANTLY-ANBINDUNG.md](INSTANTLY-ANBINDUNG.md) genau richtig — aber dann
+bewusst und einzeln. Mitten im Zustelltest sind es 33 % Bounce-Rate auf einer
+Kennzahl, die Instantly der Absender-Reputation zuschreibt.
 
 ---
 
