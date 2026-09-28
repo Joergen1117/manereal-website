@@ -3,7 +3,8 @@
 Wie die Messung auf manereal.at funktioniert, wie eine Outreach-Welle
 vorbereitet wird und wie die Zahlen zu lesen sind.
 
-Stand 24.09.2026.
+Stand 28.09.2026. Seit diesem Tag holt das Dashboard auch nach, was **vor**
+dem Klick geschah — siehe [Was Instantly beisteuert](#was-instantly-beisteuert).
 
 ---
 
@@ -28,8 +29,13 @@ Vercel setzt `DATABASE_URL` danach automatisch als Environment-Variable.
 ### 2. Tabellen einspielen
 
 Im SQL-Editor von Neon den Inhalt von [`db/schema.sql`](../db/schema.sql)
-einfügen und ausführen. Drei Tabellen entstehen: `contacts`, `visits`,
-`events`.
+einfügen und ausführen. Fünf Tabellen entstehen: `contacts`, `visits`,
+`events` für die eigene Messung, dazu `mail_events` und `sync_state` für das,
+was Instantly beisteuert.
+
+Die Datei lässt sich gefahrlos ein zweites Mal ausführen: Jede Anweisung ist
+`if not exists` oder `add column if not exists`, und die Nachzüge am Dateiende
+ändern nichts, was schon geändert ist.
 
 ### 3. Environment-Variablen setzen
 
@@ -43,6 +49,13 @@ Vercel → Projekt → Settings → Environment Variables:
 | `SEITEN_URL` | solange die Domain fehlt: leer lassen | baut die Links im Export |
 | `TRACKING_PERSONENBEZUG` | leer lassen | `0` schaltet die Personenzuordnung ab |
 | `AUSWERTUNG_TIMEOUT_MIN` | leer lassen | Minuten Ruhe bis zur erneuten Anmeldung, Standard 10 |
+| `INSTANTLY_API_KEY` | API-v2-Schlüssel aus Instantly, Scope `all:read` oder `leads:read` | holt die Versanddaten |
+| `CRON_SECRET` | langer Zufallsstring | lässt den täglichen Abgleich herein |
+
+**`CRON_SECRET` ist der einzige Name, der nicht frei wählbar ist.** Vercel
+sendet den Wert einer so benannten Variablen selbsttätig als
+`Authorization`-Header, wenn es den Cron aufruft. Heißt sie anders, kommt der
+Cron nicht durch und der Abgleich läuft nur noch von Hand.
 
 **Zur Domain.** Die Website wird **`www.manereal.at`** heißen, sobald die Domain
 verfügbar ist. Bis dahin läuft sie unter `manereal-website.vercel.app`, und
@@ -210,21 +223,105 @@ Vor jeder Welle:
 
 ---
 
+## Was Instantly beisteuert
+
+Das eigene Tracking beginnt **beim Klick auf den Link**. Was davor liegt — ob
+die Mail tatsächlich hinausging, ob sie ankam, ob jemand geantwortet oder sich
+abgemeldet hat — weiß nur Instantly. Seit dem 28.09.2026 holt
+[`api/instantly.js`](../api/instantly.js) es einmal täglich nach.
+
+### Wie es läuft
+
+| | |
+|---|---|
+| Wann | Vercel-Cron, täglich um **5 Uhr** (`vercel.json`, `crons`) |
+| Von Hand | Dashboard → **Verwaltung** → *Jetzt abgleichen* |
+| Woher | `POST /api/v2/leads/list`, **ohne Kampagnenfilter** |
+| Zuordnung | über die Custom Variable **`Token`**, nicht über die Adresse |
+| Wohin | `mail_events`, dazu vier Spalten auf `contacts` und `sync_state` |
+
+**Ohne Kampagnenfilter ist Absicht.** `contacts.token` ist Primärschlüssel und
+damit über alle Wellen hinweg eindeutig — die Zuordnung braucht die Kampagne
+nicht. Niemand muss pflegen, welche Instantly-Kampagne zu welcher Welle gehört.
+Eine neue Kampagne, drei parallele, ein umbenannter Titel, verschobene Leads:
+nichts davon verlangt einen Eingriff.
+
+**Ein Lead ohne `Token` wird übersprungen.** Das ist der eine Handgriff, der
+beim Import in Instantly sitzen muss: Spalte `Token` → **Custom Variable**.
+Fehlt sie, laufen die Mails trotzdem — nur weiß das Dashboard nichts darüber,
+und die Klicks sind niemandem zuzuordnen. Der Abgleich meldet das: *„n Leads
+tragen keinen Token."* Diese Zeile ist keine Nebensache.
+
+### Kein Webhook, und warum das reicht
+
+Webhooks setzen bei Instantly den **Hyper-Growth**-Tarif voraus, der
+Arbeitsbereich hat **Growth**. API v2 zum Lesen ist in allen Tarifen enthalten.
+
+Was der Abgleich gegenüber einem Webhook kostet, ist allein die **Aktualität**:
+Ereignisse stehen bis zu 24 Stunden später im Dashboard statt binnen Sekunden.
+Der Trichter verliert keine Stufe.
+
+### Der eine neue Irrtum
+
+**Eine leere Mail-Zelle heißt „noch nicht abgeglichen", nicht „nicht
+versendet".** Deshalb steht über jeder Ansicht mit Mail-Zahlen der Zeitpunkt
+des letzten Abgleichs, und ein Kontakt, den der Abgleich noch nie gesehen hat,
+trägt `unbekannt` statt `offen`. Ist der Stand älter als anderthalb Tage,
+färbt sich die Zeile — dann hat der Cron nicht gewartet, dann läuft er nicht.
+
+### Zwei Zeitpunkte, die nicht exakt sind
+
+- **Der Abmeldezeitpunkt.** Instantly gibt den *Zustand* heraus, nicht den
+  Moment. `contacts.optout_at` bekommt deshalb den Zeitpunkt des Abgleichs,
+  der die Abmeldung zuerst gesehen hat — im Zweifel bis zu einen Tag zu spät.
+  Für die Zuordnungssperre ist das unschädlich: Sie greift ab diesem Moment,
+  und rückwirkend soll sie ohnehin nichts ändern.
+- **Der Bounce-Zeitpunkt.** Instantly nennt keinen. Genommen wird der letzte
+  Kontaktversuch — näher kommt man nicht heran.
+
+### Abgemeldete bleiben im Traffic-Reiter sichtbar
+
+Setzt der Abgleich `optout_at`, verweigert `api/track.js` die Zuordnung: Der
+Besuch bekommt kein Token mehr. Der Reiter **Traffic** zählt ihn trotzdem zur
+Kampagne, nur ohne Namen. Das ist richtig so — **die Kurve der Vergangenheit
+darf sich durch eine Abmeldung nicht rückwirkend ändern.**
+
+---
+
 ## Das Dashboard lesen
 
 ### Übersicht
 
 Der Trichter zählt **Personen, nicht Besuche**. Wer dreimal wiederkommt,
-verdreifacht die Klickrate nicht.
+verdreifacht die Klickrate nicht. Die ersten drei Stufen kommen aus Instantly,
+alles darunter aus dem eigenen Tracking.
 
 ```
-E-Mails versendet        180
-Link aufgerufen           34      18,9 %
+Mit Instantly abgeglichen am 12.10. 05:00 · 180 Kontakte zugeordnet
+
+in der Datenbank         180
+tatsächlich versendet    178      98,9 %
+zugestellt               171      96,1 %
+Link aufgerufen           34      19,9 %
 davon Mensch              27      79,4 %
 zwei Seiten oder mehr     19      70,4 %
 Erstgespräch angeklickt    6      22,2 %
 Formular abgeschickt       2       7,4 %
+
+geantwortet  4     Mails kamen zurück  7     abgemeldet  2
 ```
+
+**„Zugestellt" ist versendet minus gebounct.** Eine Zustellbestätigung gibt es
+nicht; was nicht zurückkommt, gilt als angekommen.
+
+**Die Klickrate rechnet gegen das Zugestellte**, nicht gegen die Liste. Wer nie
+eine Mail bekommen hat, darf die Rate nicht drücken. Solange noch nichts
+versendet ist, rechnet sie ersatzweise gegen die Datenbank — sonst stünde dort
+eine Division durch null.
+
+**Geantwortet, gebounct und abgemeldet stehen *neben* dem Trichter, nicht
+darin.** Eine Antwort ist kein Zwischenschritt zum Formular, sondern ein
+zweiter Weg zum selben Ziel. Eine Abmeldung ist gar kein Fortschritt.
 
 **„Davon Mensch" ist die wichtigste Zeile.** Die Link-Scanner der
 Mail-Gateways — Microsoft Defender Safe Links, Proofpoint, Mimecast,
@@ -244,12 +341,29 @@ Mail-Infrastruktur der Angeschriebenen ist.
 
 ### Personen
 
-Alle Angeschriebenen einer Kampagne. Oben die mit Besuch, nach Lesezeit
-sortiert; darunter die ohne. Damit steht die Klickrate ohne Rechnen vor
-Augen. Ein Klick auf eine Zeile öffnet den Verlauf:
+Alle Kontakte einer Kampagne. Oben die mit Besuch, nach Lesezeit sortiert;
+darunter die ohne. Damit steht die Klickrate ohne Rechnen vor Augen.
+
+Die Spalte **Mail** sagt, warum jemand unten steht — *nicht aufgerufen* ist
+etwas anderes als *nie zugestellt*:
+
+| Wort | heißt |
+|---|---|
+| `unbekannt` | Der Abgleich hat diesen Kontakt noch nie gesehen |
+| `offen` | Instantly kennt ihn, es ist aber noch keine Mail hinaus |
+| `versendet` | Die Mail ging hinaus und kam nicht zurück |
+| `gebounct` | Die Mail kam zurück — die Adresse trägt nicht |
+| `abgemeldet` | Abmeldung; ab jetzt wird kein Besuch mehr zugeordnet |
+| `geantwortet` | Es gibt eine Antwort — der wichtigste Zustand von allen |
+
+Ein Klick auf eine Zeile öffnet den Verlauf. Er beginnt seit dem 28.09.2026 bei
+der Mail, nicht erst beim Klick:
 
 ```
-Max Mustermann · Hausverwaltung Mustermann GmbH · welle-2-wien · Mail 12.10.
+Max Mustermann · Hausverwaltung Mustermann GmbH · welle-2-wien · versendet
+
+Die Mail · abgeglichen 12.10. 05:00
+  12.10. 08:14 — Mail versendet
 
 Erster Aufruf · 12.10. 14:22 · Mensch (gescrollt) · desktop · AT
   Start            4:29
@@ -334,8 +448,14 @@ auslösbar noch messbar — **jede Formular-Conversion-Rate ist systematisch zu
 niedrig**. Sobald Nummern auf der Seite stehen, kommt ein eigener
 Ereignistyp dazu.
 
-**Geöffnete E-Mails.** Dafür bräuchte es ein Zählpixel in Instantly — davon
-raten wir ab, siehe oben.
+**Geöffnete E-Mails.** Keine technische Grenze, sondern eine **Entscheidung**.
+Instantly könnte es liefern, aber nur über ein Zählpixel — und das kostet
+Zustellbarkeit (Provider prüfen auf den Pixelabruf) und verlangt rechtlich eine
+ausdrückliche Einwilligung, weil die ePrivacy-Richtlinie vorgeht. Seit Apple
+Mail Privacy Protection ist die Öffnungsrate ohnehin kaum noch aussagekräftig.
+Dasselbe gilt für Instantlys eigenes **Klick**-Tracking: Es schriebe jede
+Adresse auf eine fremde Domain um, und unser Dashboard weiß mehr — nämlich
+nicht nur *ob* geklickt wurde, sondern was danach gelesen wurde.
 
 **Weitergeleitete Links zeigen die falsche Person.** Leitet Herr Mustermann
 die Mail an seinen Steuerberater weiter, laufen dessen Klicks auf sein Konto.
@@ -353,11 +473,13 @@ davor bleibt vollständig zugeordnet.
 
 | Datei | wofür |
 |---|---|
-| [`db/schema.sql`](../db/schema.sql) | die drei Tabellen |
+| [`db/schema.sql`](../db/schema.sql) | die fünf Tabellen |
 | [`api/track.js`](../api/track.js) | nimmt die Messpunkte entgegen, gibt nie Daten heraus |
 | [`api/auswertung.js`](../api/auswertung.js) | alle Abfragen des Dashboards |
+| [`api/instantly.js`](../api/instantly.js) | holt die Versanddaten aus Instantly nach |
 | [`api/_db.js`](../api/_db.js), [`api/_token.js`](../api/_token.js) | Datenbankzugriff, Code-Erzeugung |
 | [`auswertung.html`](../auswertung.html) | das Dashboard |
+| [`vercel.json`](../vercel.json) | Laufzeiten der Functions und der tägliche Cron |
 | [`scripts/links-erzeugen.js`](../scripts/links-erzeugen.js) | dasselbe Einspielen auf der Kommandozeile |
 | [`index.html`](../index.html) | zwei Stellen: das Snippet im `<head>`, der Messblock am Ende |
 
@@ -382,6 +504,14 @@ Drei Zusagen sind im Code umgesetzt und mit Browser-Proben belegt:
   Ratenbegrenzung und dem Herkunftsland (zwei Buchstaben).
 - **Der Messendpunkt gibt niemals Daten heraus.** Jede Antwort ist `204`
   ohne Inhalt, egal was gefragt wird.
+
+**Der Instantly-Abgleich ändert daran nichts.** Es kommt kein Zählpixel und
+kein Cookie dazu; die Daten stammen aus dem Versandsystem, nicht aus dem
+Browser der Empfänger. `mail_events` trägt **keine E-Mail-Spalte** — die
+Adresse wird beim Abgleich zu einem Token aufgelöst und dann verworfen, und
+`on delete set null` macht die Ereignisse nach einer Löschung anonym, genau wie
+bei den Besuchen. Der Vorbehalt oben gilt trotzdem auch für die
+Versandereignisse: Abschnitt 4 ist ein Entwurf und rechtlich zu bestätigen.
 
 Zur Outreach-Kampagne selbst: In Österreich verlangt **§ 174 TKG 2021** für
 Werbe-E-Mails eine vorherige Einwilligung, **auch im B2B** — anders als in

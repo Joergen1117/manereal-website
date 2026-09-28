@@ -227,15 +227,45 @@ function seitenUrl(req) {
 
 /* --- Abfragen ----------------------------------------------------------- */
 
+// Wann der Abgleich mit Instantly zuletzt lief. Reist mit jeder Mail-Angabe
+// mit: Ohne ihn liest man eine leere Zelle als "nicht versendet", obwohl sie
+// "noch nicht abgeglichen" heißt. Das ist der einzige Irrtum, den der tägliche
+// Abgleich gegenüber einem Webhook einführt -- er gehört sichtbar entschärft.
+async function abgleichStand(sql) {
+  const [stand] = await sql.query(
+    "select ts, meta from sync_state where key = 'instantly'",
+    [],
+  );
+  return stand || null;
+}
+
 // Trichter über PERSONEN, nicht über Besuche: Wer dreimal wiederkommt, soll die
 // Klickrate nicht verdreifachen. Die Besuche ohne Zuordnung stehen daneben.
 async function uebersicht(sql, kampagne, von, bis) {
   const p = [kampagne, von, bis];
 
-  const [versendet] = await sql.query(
-    'select count(*)::int as n from contacts where ($1::text is null or campaign = $1)',
-    [kampagne],
-  );
+  // Die Mail-Stufen stehen bewusst ohne Von/Bis da, genau wie die Zahl der
+  // Kontakte darüber: Sie zählen Personen der Kampagne, nicht Vorgänge eines
+  // Zeitraums. Der Zeitraumfilter greift ab "Link aufgerufen", wo Besuche
+  // gezählt werden.
+  const [mail] = await sql.query(`
+    select
+      count(*)::int                                            as in_datenbank,
+      count(mail_sent_at)::int                                 as versendet,
+      -- zugestellt = versendet minus gebounct. Instantly kennt keine
+      -- Zustellbestätigung; was nicht zurückkommt, gilt als angekommen.
+      count(*) filter (where mail_sent_at is not null
+                         and mail_bounced_at is null)::int      as zugestellt,
+      count(mail_bounced_at)::int                              as gebounct,
+      count(optout_at)::int                                    as abgemeldet,
+      count(mail_replied_at)::int                              as geantwortet,
+      -- Wie viele Kontakte der Abgleich überhaupt je gesehen hat. Steht das
+      -- auf 0, sind alle Mail-Zahlen darunter nicht "null", sondern "unbekannt".
+      count(mail_status)::int                                  as abgeglichen
+    from contacts where ($1::text is null or campaign = $1)
+  `, [kampagne]);
+
+  const abgleich = await abgleichStand(sql);
 
   const [trichter] = await sql.query(`
     with b as (
@@ -275,7 +305,11 @@ async function uebersicht(sql, kampagne, von, bis) {
 
   const kampagnen = await sql.query(`
     select c.campaign,
-           count(distinct c.token)::int                             as versendet,
+           count(distinct c.token)::int                             as kontakte,
+           -- Seit dem Instantly-Abgleich ist "versendet" eine gemessene Zahl
+           -- und nicht mehr gleichbedeutend mit "steht in der Datenbank".
+           count(distinct c.token) filter (where c.mail_sent_at is not null)::int as versendet,
+           count(distinct c.token) filter (where c.mail_status is not null)::int  as abgeglichen,
            count(distinct v.token)::int                             as aufgerufen,
            count(distinct v.token) filter (where v.human)::int      as mensch,
            count(distinct v.token) filter (where x.cta and v.human)::int      as cta,
@@ -297,7 +331,16 @@ async function uebersicht(sql, kampagne, von, bis) {
   `, []);
 
   return {
-    versendet: versendet.n,
+    abgleich,
+    mail: {
+      inDatenbank: mail.in_datenbank,
+      versendet: mail.versendet,
+      zugestellt: mail.zugestellt,
+      gebounct: mail.gebounct,
+      abgemeldet: mail.abgemeldet,
+      geantwortet: mail.geantwortet,
+      abgeglichen: mail.abgeglichen,
+    },
     trichter,
     ohneZuordnung: ohne,
     kampagnen,
@@ -309,6 +352,10 @@ async function uebersicht(sql, kampagne, von, bis) {
 async function personen(sql, kampagne) {
   return sql.query(`
     select c.token, c.email, c.firstname, c.lastname, c.company, c.campaign, c.sent_at,
+           -- Was mit der Mail geschah. Erklärt, warum jemand unten in der Liste
+           -- steht: nicht aufgerufen ist etwas anderes als nie zugestellt.
+           c.mail_status, c.mail_sent_at, c.mail_bounced_at, c.mail_replied_at,
+           c.optout_at,
            coalesce(b.besuche, 0)::int   as besuche,
            b.erster, b.letzter,
            coalesce(b.mensch, false)     as mensch,
@@ -345,11 +392,19 @@ async function personen(sql, kampagne) {
 
 async function person(sql, token) {
   const [kontakt] = await sql.query(
-    `select token, email, firstname, lastname, company, campaign, sent_at, optout_at, extra
+    `select token, email, firstname, lastname, company, campaign, sent_at, optout_at, extra,
+            mail_status, mail_sent_at, mail_bounced_at, mail_replied_at
      from contacts where token = $1`,
     [token],
   );
   if (!kontakt) return null;
+
+  // Was mit der Mail geschah, vor den Besuchen. Ohne diese Chronik beginnt das
+  // Blatt mitten in der Geschichte -- beim Klick, als wäre davor nichts gewesen.
+  const mail = await sql.query(`
+    select ts, type, step, meta
+    from mail_events where token = $1 order by ts, id
+  `, [token]);
 
   const besuche = await sql.query(`
     select id, started_at, human, signal, device, country, source
@@ -372,7 +427,7 @@ async function person(sql, token) {
     order by e.ts
   `, [token]);
 
-  return { kontakt, besuche, routen, ereignisse };
+  return { kontakt, mail, abgleich: await abgleichStand(sql), besuche, routen, ereignisse };
 }
 
 async function seiten(sql, kampagne) {
@@ -643,12 +698,21 @@ async function importieren(sql, csv, kampagne) {
 // Excel sie ohne Umweg richtig öffnet.
 async function exportieren(sql, kampagne, basis) {
   const liste = await personen(sql, kampagne);
+  // Die Mail-Spalten stehen vor den Besuchsspalten, weil sie zeitlich davor
+  // liegen: erst ging die Mail hinaus, dann wurde der Link aufgerufen.
+  const tag = (wert) => (wert ? new Date(wert).toISOString().slice(0, 10) : '');
   return csvSchreiben(
     ['vorname', 'nachname', 'unternehmen', 'email', 'kampagne', 'token', 'link',
+      'mail_status', 'versendet_am', 'gebounct', 'geantwortet', 'abgemeldet',
       'besuche', 'mensch', 'lesezeit_sekunden', 'erstgespraech', 'formular'],
     liste.map((p) => [
       p.firstname || '', p.lastname || '', p.company || '', p.email, p.campaign,
       p.token, basis + '/?m=' + p.token,
+      // Leer heißt "noch nicht abgeglichen", nicht "nicht versendet". Der
+      // Zeitpunkt des Abgleichs steht in der Kopfzeile des Dashboards.
+      p.mail_status || '', tag(p.mail_sent_at),
+      p.mail_bounced_at ? 'ja' : 'nein', p.mail_replied_at ? 'ja' : 'nein',
+      p.optout_at ? 'ja' : 'nein',
       p.besuche, p.mensch ? 'ja' : 'nein', Math.round(p.lesezeit / 1000),
       p.cta ? 'ja' : 'nein', p.formular ? 'ja' : 'nein',
     ]),
@@ -718,7 +782,11 @@ module.exports = async function handler(req, res) {
     }
 
     if (aktion === 'personen') {
-      return res.status(200).json({ personen: await personen(sql, kampagne) });
+      // Der Stand reist mit: Die Spalte "Mail" ist ohne ihn nicht zu lesen.
+      return res.status(200).json({
+        personen: await personen(sql, kampagne),
+        abgleich: await abgleichStand(sql),
+      });
     }
 
     if (aktion === 'person') {
@@ -730,6 +798,12 @@ module.exports = async function handler(req, res) {
 
     if (aktion === 'seiten') {
       return res.status(200).json(await seiten(sql, kampagne));
+    }
+
+    // Nur der Stand des Abgleichs, ohne den Rest der Übersicht. Die Verwaltung
+    // zeigt ihn neben dem Knopf und holt ihn nach jedem Abgleich neu.
+    if (aktion === 'stand') {
+      return res.status(200).json({ abgleich: await abgleichStand(sql) });
     }
 
     // Der Traffic-Reiter kennt weder Kampagne noch Von/Bis: Sein Zeitraum kommt

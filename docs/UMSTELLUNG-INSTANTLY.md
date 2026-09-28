@@ -4,9 +4,13 @@ Was am Tracking geändert werden muss, weil der Outreach über
 [Instantly](https://instantly.ai) statt über GMass läuft — und wie der Link in
 der Signatur aussehen sollte.
 
-Stand 24.09.2026. **Umgesetzt und in Instantly geprüft.** Enthält die Auskunft
-des Instantly-Support-Agenten und das Ergebnis des Praxistests, beides vom
-24.09.2026.
+Stand 24.09.2026, CSV-Angaben am 28.09.2026 berichtigt. **Umgesetzt und in
+Instantly geprüft.** Enthält die Auskunft des Instantly-Support-Agenten und das
+Ergebnis des Praxistests, beides vom 24.09.2026.
+
+Dieses Dokument beschreibt den Weg **zu** Instantly hin — Linkaufbau, CSV,
+Einstellungen. Den Weg zurück, also die Versanddaten ins Dashboard, beschreibt
+[INSTANTLY-ANBINDUNG.md](INSTANTLY-ANBINDUNG.md).
 
 ---
 
@@ -210,14 +214,23 @@ Instantly stellt andere Anforderungen als Excel. **Zwei Formate statt einem:**
 Kopfzeile der Instantly-Datei:
 
 ```
-Email,Name,Company,Link
+Email,Firstname,Lastname,Company,Token
 ```
 
-`Link` enthält die **vollständige Adresse**, nicht nur den Code. Dann steht in
-der Sequenz schlicht `{{Link}}` — und die Frage, ob eine Variable *innerhalb*
-einer URL ersetzt wird, stellt sich gar nicht erst. Das ist der Unterschied
-zwischen einer Ersetzung im Fließtext, die sicher funktioniert, und einer im
-Inneren einer Adresse, die es vielleicht nicht tut.
+plus alle Zusatzspalten der hochgeladenen Datei, unverändert durchgereicht.
+
+`Token` enthält **nur den Code**, nicht die ganze Adresse. Der Link wird in
+Instantly daraus gebaut — Julias Entscheidung, am 24.09.2026 in der Praxis
+bestätigt: In der Code-Ansicht `<>` wird die Variable auch mitten im `href`
+ersetzt. Ein früherer Entwurf dieses Dokuments sah eine Spalte `Link` mit der
+fertigen Adresse vor, um genau diese Frage zu umgehen; sie stellte sich als
+unnötig heraus.
+
+`Token` ist zugleich der Schlüssel, über den der tägliche Abgleich die
+Versanddaten zurückholt (siehe [INSTANTLY-ANBINDUNG.md](INSTANTLY-ANBINDUNG.md)).
+**Wird die Spalte beim Import nicht als Custom Variable zugeordnet, bleibt der
+Lead für das Dashboard unsichtbar** — die Mails laufen, aber niemand ist
+zuzuordnen.
 
 *Warum kein BOM:* Instantly verlangt UTF-8. Ein BOM kann dazu führen, dass die
 erste Spalte als `﻿Email` gelesen wird und das Mapping scheitert.
@@ -327,9 +340,15 @@ aussagekräftig.
 | Spalte | Zuordnung in Instantly |
 |---|---|
 | `Email` | Email *(Pflicht, erste Spalte)* |
-| `Name` | Custom Variable → `{{Name}}` |
+| `Firstname` | First Name — trägt die Anrede über `{{firstName}}` |
+| `Lastname` | Last Name |
 | `Company` | Company Name oder Custom Variable |
-| `Link` | **Custom Variable** → `{{Link}}` |
+| `Token` | **Custom Variable** → `{{Token}}` |
+| Zusatzspalten | nach Bedarf als Custom Variable |
+
+**`Token` ist der Handgriff, der sitzen muss.** Er baut den Link *und* ist der
+Schlüssel, über den der tägliche Abgleich die Versanddaten zurückholt. Fehlt er,
+laufen die Mails trotzdem — nur bleibt der Lead für das Dashboard unsichtbar.
 
 Vorgaben: Spaltennamen beginnen mit Großbuchstaben, höchstens 20 Zeichen, keine
 Dopplungen, höchstens 50 Variablen pro Upload. Benutzerdefinierte Variablen

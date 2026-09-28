@@ -100,6 +100,41 @@ tr.trenner td{
 .marke.ja{background:#E3F0EE; color:#0B5B4E}
 .marke.nein{background:var(--flaeche); color:var(--ink-soft)}
 
+/* Was mit der Mail geschah. "unbekannt" trägt bewusst keine Farbe, sondern
+   einen gestrichelten Rand: Es ist kein Ergebnis, sondern dessen Fehlen. */
+.marke.m-versendet{background:#E7EEF4; color:var(--navy)}
+.marke.m-geantwortet{background:#E3F0EE; color:#0B5B4E}
+.marke.m-gebounct{background:#F6E7E2; color:var(--warn)}
+.marke.m-abgemeldet{background:#EFE9E4; color:#6B4A32}
+.marke.m-offen{background:var(--flaeche); color:var(--ink-soft)}
+.marke.m-unbekannt{background:none; color:var(--ink-soft); border:1px dashed var(--line); padding:0 7px}
+
+/* Stand des Instantly-Abgleichs. Steht über jeder Mail-Angabe, weil eine
+   leere Zelle sonst als "nicht versendet" gelesen wird statt als "noch
+   nicht abgeglichen". */
+.stand{
+  display:flex; gap:8px 16px; flex-wrap:wrap; align-items:baseline;
+  margin:0 0 18px; padding:12px 16px; border-radius:10px;
+  background:var(--flaeche); font-size:14px; color:var(--ink-soft);
+}
+.stand b{color:var(--navy)}
+.stand.warnung{background:#F6E7E2; color:var(--warn)}
+.stand.warnung b{color:var(--warn)}
+.stand .schub{margin-left:auto}
+
+/* Die drei Zahlen neben dem Trichter: eine Antwort ist kein Zwischenschritt
+   zum Formular, und eine Abmeldung ist gar kein Fortschritt. */
+.neben{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px}
+.neben div{padding:13px 16px; background:var(--flaeche); border-radius:10px}
+.neben b{display:block; font-size:22px; font-variant-numeric:tabular-nums; line-height:1.2}
+.neben span{font-size:13px; color:var(--ink-soft)}
+
+/* Mail-Chronik im Personenblatt, vor den Besuchen. */
+.chronik{border:1px solid var(--line); border-left:3px solid var(--teal-bright);
+  border-radius:11px; padding:14px 16px; margin-bottom:14px; font-size:14px}
+.chronik .kopfzeile{font-size:13px; color:var(--ink-soft); margin-bottom:8px}
+.chronik div.zeile{margin-bottom:3px}
+
 /* Traffic */
 .kartenkopf{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap}
 .umschalter{display:flex; gap:6px; margin-left:auto}
@@ -221,6 +256,8 @@ tr.trenner td{
   nav.reiter{flex-wrap:wrap}
   nav.reiter button{padding:12px 14px; font-size:14px}
   .kennzahlen{grid-template-columns:1fr; gap:10px}
+  .neben{grid-template-columns:1fr; gap:10px}
+  .stand .schub{margin-left:0}
   .umschalter{margin-left:0}
   section.karte{padding:18px}
   .blatt{padding:20px}
@@ -354,6 +391,50 @@ tr.trenner td{
     return n || p.email || '–';
   }
 
+  /* --- Was mit der Mail geschah ---------------------------------------- */
+
+  // Ein leeres mail_status heißt nicht "offen", sondern "der Abgleich hat
+  // diesen Kontakt noch nie gesehen". Die beiden auseinanderzuhalten ist der
+  // ganze Unterschied zwischen einer Zahl und einer Vermutung.
+  function mailMarke(p){
+    var w = p.mail_status;
+    if(!w) return '<span class="marke m-unbekannt" title="Der Abgleich hat diesen Kontakt noch nicht gesehen">unbekannt</span>';
+    // Eine Abmeldung überschreibt das Wort aus Instantly nicht, sie tritt
+    // daneben: Wer abgemeldet ist, hat die Mail trotzdem bekommen.
+    var zusatz = (p.optout_at && w !== 'abgemeldet')
+      ? ' <span class="marke m-abgemeldet">abgemeldet</span>' : '';
+    return '<span class="marke m-' + sicher(w) + '">' + sicher(w) + '</span>' + zusatz;
+  }
+
+  // Der Stand des Abgleichs, über jeder Ansicht, die Mail-Zahlen zeigt.
+  // Fehlt er ganz, ist das keine Nebensache, sondern die Erklärung für lauter
+  // Nullen -- deshalb rot statt grau.
+  function standZeile(abgleich, zusatz){
+    if(!abgleich || !abgleich.ts){
+      return '<p class="stand warnung"><b>Noch nie mit Instantly abgeglichen.</b> ' +
+        'Alle Mail-Angaben sind deshalb unbekannt, nicht null. ' +
+        'Unter „Verwaltung“ lässt sich der Abgleich von Hand auslösen.</p>';
+    }
+    var m = abgleich.meta || {};
+    var alt = Date.now() - new Date(abgleich.ts).getTime();
+    // Der Cron läuft einmal täglich um 5 Uhr. Wird der Stand älter als
+    // anderthalb Tage, hat er nicht bloß gewartet -- dann läuft er nicht.
+    var schal = alt > 36*3600*1000;
+    return '<p class="stand' + (schal ? ' warnung' : '') + '">' +
+      '<span>Mit Instantly abgeglichen am <b>' + datum(abgleich.ts) + '</b>' +
+      (schal ? ' — das ist länger her als der tägliche Lauf um 5 Uhr.' : '') + '</span>' +
+      (m.zugeordnet != null
+        ? '<span><b>' + m.zugeordnet + '</b> Kontakte zugeordnet' +
+          (m.unbekannt ? ', <b>' + m.unbekannt + '</b> Tokens unbekannt' : '') + '</span>'
+        : '') +
+      (zusatz || '') + '</p>';
+  }
+
+  var MAILNAME = {
+    sent:'Mail versendet', bounced:'Mail kam zurück (Bounce)',
+    unsubscribed:'Abgemeldet', replied:'Geantwortet', interested:'Als interessiert markiert'
+  };
+
   /* --- Abfragen -------------------------------------------------------- */
 
   function abfrage(){
@@ -483,19 +564,29 @@ tr.trenner td{
 
   function zeichneUebersicht(d){
     var t = d.trichter || {};
+    var m = d.mail || {};
+    // Die ersten drei Stufen kommen aus Instantly, der Rest aus dem eigenen
+    // Tracking. Die Naht liegt zwischen "zugestellt" und "Link aufgerufen" --
+    // davor weiß nur Instantly etwas, danach nur wir.
     var stufen = [
-      ['E-Mails versendet',        d.versendet,     null],
-      ['Link aufgerufen',          t.aufgerufen,    d.versendet],
+      ['in der Datenbank',         m.inDatenbank,   null],
+      ['tatsächlich versendet',    m.versendet,     m.inDatenbank],
+      ['zugestellt',               m.zugestellt,    m.versendet],
+      ['Link aufgerufen',          t.aufgerufen,    m.zugestellt || m.inDatenbank],
       ['davon Mensch',             t.mensch,        t.aufgerufen],
       ['zwei Seiten oder mehr',    t.mehrseitig,    t.mensch],
       ['Erstgespräch angeklickt',  t.cta,           t.mensch],
       ['Formular abgeschickt',     t.formular,      t.mensch]
     ];
-    var groesste = d.versendet || t.aufgerufen || 1;
+    var groesste = m.inDatenbank || t.aufgerufen || 1;
 
     var html = '<section class="karte"><h2>Trichter</h2>' +
       '<p class="unter">Gezählt werden Personen, nicht Besuche — wer dreimal wiederkommt, ' +
-      'verdreifacht die Klickrate nicht.</p>';
+      'verdreifacht die Klickrate nicht. Die ersten drei Stufen kommen aus Instantly, ' +
+      'alles darunter aus dem eigenen Tracking.</p>' +
+      standZeile(d.abgleich,
+        (m.abgeglichen && !m.versendet)
+          ? '<span class="schub"><b>Noch keine Mail versendet.</b></span>' : '');
 
     stufen.forEach(function(s){
       var wert = s[1] || 0;
@@ -507,6 +598,15 @@ tr.trenner td{
         '</div></div>';
     });
 
+    // Daneben, nicht darin: Eine Antwort ist kein Zwischenschritt zum Formular,
+    // sondern ein zweiter Weg zum selben Ziel. Eine Abmeldung ist gar kein
+    // Fortschritt, und ein Bounce ist ein Abgang.
+    html += '<div class="neben">' +
+      '<div><b>' + (m.geantwortet || 0) + '</b><span>haben auf die Mail geantwortet</span></div>' +
+      '<div><b>' + (m.gebounct || 0) + '</b><span>Mails kamen zurück</span></div>' +
+      '<div><b>' + (m.abgemeldet || 0) + '</b><span>haben sich abgemeldet</span></div>' +
+      '</div>';
+
     html += '<div class="hinweis">' +
       '<b>' + (t.besuche || 0) + '</b> zugeordnete Aufrufe insgesamt, davon <b>' +
       (t.scanner || 0) + '</b> ohne menschliches Signal (vermutlich Link-Scanner). ' +
@@ -515,21 +615,27 @@ tr.trenner td{
       '</div></section>';
 
     html += '<section class="karte"><h2>Kampagnen</h2>' +
-      '<p class="unter">Jede Welle einzeln. Die Lesezeit ist die Summe aller zugeordneten Besuche.</p>' +
+      '<p class="unter">Jede Welle einzeln. „Kontakte“ steht in der Datenbank, „versendet“ ' +
+      'meldet Instantly — die Rate rechnet gegen das Versendete, nicht gegen das Geplante. ' +
+      'Die Lesezeit ist die Summe aller zugeordneten Besuche.</p>' +
       '<div class="waage"><table><thead><tr>' +
-      '<th>Kampagne</th><th class="n">versendet</th><th class="n">aufgerufen</th>' +
+      '<th>Kampagne</th><th class="n">Kontakte</th><th class="n">versendet</th>' +
+      '<th class="n">aufgerufen</th>' +
       '<th class="n">Rate</th><th class="n">Mensch</th><th class="n">Erstgespräch</th>' +
       '<th class="n">Formular</th><th class="n">Lesezeit</th>' +
       '</tr></thead><tbody>';
 
     if(!d.kampagnen.length){
-      html += '<tr><td colspan="8" class="leer">Noch keine Kontakte angelegt.</td></tr>';
+      html += '<tr><td colspan="9" class="leer">Noch keine Kontakte angelegt.</td></tr>';
     }
     d.kampagnen.forEach(function(k){
       html += '<tr><td>' + sicher(k.campaign) + '</td>' +
-        '<td class="n">' + k.versendet + '</td>' +
+        '<td class="n">' + k.kontakte + '</td>' +
+        // Nie abgeglichen heißt nicht "null versendet". Ein Strich sagt das,
+        // eine Null behauptete etwas.
+        '<td class="n">' + (k.abgeglichen ? k.versendet : '–') + '</td>' +
         '<td class="n">' + k.aufgerufen + '</td>' +
-        '<td class="n">' + quote(k.aufgerufen, k.versendet) + '</td>' +
+        '<td class="n">' + quote(k.aufgerufen, k.versendet || k.kontakte) + '</td>' +
         '<td class="n">' + k.mensch + '</td>' +
         '<td class="n">' + k.cta + '</td>' +
         '<td class="n">' + k.formular + '</td>' +
@@ -548,10 +654,13 @@ tr.trenner td{
     var ohne = d.personen.filter(function(p){ return !p.besuche; });
 
     var html = '<section class="karte"><h2>Personen</h2>' +
-      '<p class="unter">Alle Angeschriebenen. Oben die mit Besuch, nach Lesezeit sortiert — ' +
-      'darunter die ohne. <b>' + mit.length + ' von ' + d.personen.length + '</b> haben den Link aufgerufen.</p>' +
+      '<p class="unter">Alle Kontakte der Kampagne. Oben die mit Besuch, nach Lesezeit sortiert — ' +
+      'darunter die ohne. <b>' + mit.length + ' von ' + d.personen.length + '</b> haben den Link aufgerufen. ' +
+      'Die Spalte „Mail“ sagt, warum jemand unten steht: nicht aufgerufen ist etwas anderes ' +
+      'als nie zugestellt.</p>' +
+      standZeile(d.abgleich) +
       '<div class="waage"><table><thead><tr>' +
-      '<th>Name</th><th>Unternehmen</th><th>Kampagne</th><th class="n">Besuche</th>' +
+      '<th>Name</th><th>Unternehmen</th><th>Kampagne</th><th>Mail</th><th class="n">Besuche</th>' +
       '<th class="n">Lesezeit</th><th class="n">zuletzt</th><th class="n">Erstgespräch</th>' +
       '<th class="n">Formular</th></tr></thead><tbody>';
 
@@ -560,6 +669,7 @@ tr.trenner td{
         '<td>' + sicher(personName(p)) + '</td>' +
         '<td>' + sicher(p.company || '–') + '</td>' +
         '<td>' + sicher(p.campaign) + '</td>' +
+        '<td>' + mailMarke(p) + '</td>' +
         '<td class="n">' + (p.besuche || '–') + '</td>' +
         '<td class="n">' + dauer(p.lesezeit) + '</td>' +
         '<td class="n">' + (p.letzter ? datum(p.letzter) : '–') + '</td>' +
@@ -568,12 +678,13 @@ tr.trenner td{
     }
 
     if(!d.personen.length){
-      html += '<tr><td colspan="8" class="leer">Noch keine Kontakte angelegt. Unter „Verwaltung“ eine CSV einspielen.</td></tr>';
+      html += '<tr><td colspan="9" class="leer">Noch keine Kontakte angelegt. Unter „Verwaltung“ eine CSV einspielen.</td></tr>';
     }
     mit.forEach(function(p){ html += zeile(p, false); });
     if(ohne.length){
-      html += '<tr class="trenner"><td colspan="8">' + ohne.length +
-        ' ohne Besuch — angeschrieben, aber der Link wurde nie aufgerufen</td></tr>';
+      html += '<tr class="trenner"><td colspan="9">' + ohne.length +
+        ' ohne Besuch — der Link wurde nie aufgerufen. Die Spalte „Mail“ sagt, ob überhaupt ' +
+        'eine Mail hinausging</td></tr>';
       ohne.forEach(function(p){ html += zeile(p, true); });
     }
 
@@ -615,7 +726,38 @@ tr.trenner td{
     var html = '<button class="knopf leise" style="float:right" data-zu>schließen</button>' +
       '<h2 id="blattTitel">' + sicher(personName(k)) + '</h2>' +
       '<p class="firma">' + sicher(k.company || 'kein Unternehmen hinterlegt') + ' · ' +
-      sicher(k.campaign) + (k.sent_at ? ' · Mail ' + tag(k.sent_at) : '') + '</p>';
+      sicher(k.campaign) + ' · ' + mailMarke(k) + '</p>';
+
+    // Die Mail-Chronik steht vor den Besuchen, weil sie zeitlich davor liegt.
+    // Ohne sie begänne das Blatt mitten in der Geschichte -- beim Klick, als
+    // wäre davor nichts gewesen.
+    var chronik = (d.mail || []).slice();
+    html += '<div class="chronik"><div class="kopfzeile">Die Mail' +
+      (d.abgleich && d.abgleich.ts ? ' · abgeglichen ' + datum(d.abgleich.ts) : '') + '</div>';
+    // sent_at kommt aus der hochgeladenen Datei und sagt, was geplant war --
+    // mail_sent_at sagt, was Instantly tatsächlich getan hat. Beide stehen da,
+    // getrennt benannt, damit niemand das eine für das andere hält.
+    if(k.sent_at) html += '<div class="zeile">Geplant für ' + tag(k.sent_at) + '</div>';
+    if(chronik.length){
+      chronik.forEach(function(e){
+        html += '<div class="zeile">' + datum(e.ts) + ' — ' +
+          (MAILNAME[e.type] || sicher(e.type)) +
+          (e.step ? ' (Schritt ' + e.step + ')' : '') + '</div>';
+      });
+    } else if(!d.abgleich || !d.abgleich.ts){
+      html += '<div class="zeile">Noch nie mit Instantly abgeglichen — über die Mail ist nichts bekannt.</div>';
+    } else if(k.mail_status){
+      html += '<div class="zeile">Instantly kennt den Kontakt, es ist aber noch keine Mail hinausgegangen.</div>';
+    } else {
+      html += '<div class="zeile">Der Abgleich hat diesen Kontakt nicht gefunden — der Token liegt ' +
+        'in Instantly nicht vor. Klicks lassen sich zuordnen, Versanddaten nicht.</div>';
+    }
+    if(k.optout_at){
+      html += '<div class="zeile"><b>Abgemeldet.</b> Spätestens seit ' + datum(k.optout_at) +
+        ' — Instantly nennt den Zustand, nicht den Moment. Neue Besuche werden dieser ' +
+        'Person nicht mehr zugeordnet.</div>';
+    }
+    html += '</div>';
 
     if(!d.besuche.length){
       html += '<p class="leer">Der Link wurde nie aufgerufen.</p>';
@@ -1058,9 +1200,22 @@ tr.trenner td{
       '<i>Open Tracking</i>.</p>' +
       '</section>' +
 
+      '<section class="karte"><h2>Mit Instantly abgleichen</h2>' +
+      '<p class="unter">Holt nach, was vor dem Klick geschah: ob die Mail tatsächlich hinausging, ' +
+      'ob sie zurückkam, ob jemand geantwortet oder sich abgemeldet hat. Läuft von selbst ' +
+      'einmal täglich um 5 Uhr — dieser Knopf ist für die Ungeduld dazwischen. Die Zuordnung ' +
+      'läuft über die Variable <code>Token</code>; ein Lead ohne sie wird übersprungen.</p>' +
+      '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
+      '<button class="knopf" id="abgleichen">Jetzt abgleichen</button>' +
+      '<span id="abgleichStand" style="font-size:14px;color:var(--ink-soft)">wird geladen …</span>' +
+      '</div>' +
+      '<p id="abgleichErgebnis" style="margin-top:14px"></p>' +
+      '</section>' +
+
       '<section class="karte"><h2>Ergebnisse ausgeben</h2>' +
-      '<p class="unter">Alle Kontakte der oben gewählten Kampagne samt Link, Lesezeit und Ergebnis. ' +
-      'Semikolon und BOM, damit Excel die Umlaute richtig anzeigt.</p>' +
+      '<p class="unter">Alle Kontakte der oben gewählten Kampagne samt Link, Lesezeit und Ergebnis — ' +
+      'dazu, was Instantly über die Mail weiß. Semikolon und BOM, damit Excel die Umlaute ' +
+      'richtig anzeigt.</p>' +
       '<button class="knopf leise" id="ausgeben">CSV herunterladen</button></section>' +
 
       '<section class="karte"><h2>Personenbezug abschalten</h2>' +
@@ -1099,6 +1254,61 @@ tr.trenner td{
       }).catch(function(e){
         ergebnis.innerHTML = '<span class="fehler">' + sicher(e.message) + '</span>';
       }).then(pruefeBereit);
+    });
+
+    var abKnopf = document.getElementById('abgleichen');
+    var abStand = document.getElementById('abgleichStand');
+    var abErgebnis = document.getElementById('abgleichErgebnis');
+
+    function zeigeStand(){
+      hole('stand').then(function(d){
+        var a = d.abgleich;
+        abStand.textContent = (a && a.ts)
+          ? 'zuletzt am ' + datum(a.ts)
+          : 'noch nie gelaufen';
+      }).catch(function(){ abStand.textContent = ''; });
+    }
+    zeigeStand();
+
+    abKnopf.addEventListener('click', function(){
+      abKnopf.disabled = true;
+      abErgebnis.textContent = 'wird abgeglichen … das dauert bei vielen Leads einen Moment.';
+      // Eigener Endpunkt, nicht über /api/auswertung: api/instantly.js prüft
+      // dasselbe Cookie mit derselben Funktion, und der Cron ruft dieselbe
+      // Adresse auf. Zwei Wege herein, ein Weg hindurch.
+      fetch('/api/instantly?a=abgleich', {credentials:'same-origin'})
+        .then(function(r){
+          if(r.status === 401){ zeigeTor(ABGELAUFEN); throw new Error('nicht angemeldet'); }
+          return r.json().then(function(d){
+            if(!r.ok) throw new Error(d.fehler || 'Abgleich fehlgeschlagen');
+            return d;
+          });
+        })
+        .then(function(d){
+          var teile = [
+            d.leads + ' Leads in Instantly',
+            d.mitToken + ' davon mit Token',
+            d.zugeordnet + ' zugeordnet'
+          ];
+          if(d.unbekannt) teile.push(d.unbekannt + ' Tokens kennen wir nicht');
+          abErgebnis.innerHTML = sicher(teile.join(', ')) + '.<br>' +
+            '<b>' + d.geaendert + '</b> Kontakte geändert, <b>' + d.neueEreignisse +
+            '</b> neue Ereignisse.' +
+            (d.abgebrochen
+              ? '<br><span class="fehler">Abgebrochen bei ' + d.seiten + ' Seiten — ' +
+                'es gibt mehr Leads als die Sicherheitsgrenze zulässt.</span>'
+              : '') +
+            (d.mitToken < d.leads
+              ? '<br><span class="fehler">' + (d.leads - d.mitToken) + ' Leads tragen keinen ' +
+                'Token. Deren Klicks sind niemandem zuzuordnen — beim Import in Instantly ' +
+                'muss die Spalte <code>Token</code> als Custom Variable zugeordnet werden.</span>'
+              : '');
+          zeigeStand();
+        })
+        .catch(function(e){
+          abErgebnis.innerHTML = '<span class="fehler">' + sicher(e.message) + '</span>';
+        })
+        .then(function(){ abKnopf.disabled = false; });
     });
 
     document.getElementById('ausgeben').addEventListener('click', function(){

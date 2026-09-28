@@ -1,7 +1,25 @@
 # Instantly-Versanddaten ins Dashboard
 
-Stand 25.09.2026. **Vorhaben, noch nicht gebaut.** Das Dokument hält die
-Entscheidung und den Weg fest, damit beides überprüfbar bleibt.
+Stand 28.09.2026. **Gebaut.** Schema, Abgleich, Cron und Dashboard stehen;
+offen ist allein der Webhook, und der bleibt es bis zum Tarifwechsel.
+
+| Teil | Stand |
+|---|---|
+| `db/schema.sql` — `mail_events`, `sync_state`, vier Spalten auf `contacts` | eingespielt |
+| `api/instantly.js` — täglicher Abgleich | läuft, erstmals am 28.09.2026 |
+| `vercel.json` — Function und Cron `0 5 * * *` | gesetzt |
+| Dashboard — Trichter, Spalte *Mail*, Mail-Chronik, Abgleich-Knopf, Export | gebaut am 28.09.2026 |
+| Doku — [TRACKING.md](TRACKING.md), [UMSTELLUNG-INSTANTLY.md](UMSTELLUNG-INSTANTLY.md) | nachgezogen |
+| `POST /api/instantly?a=hook` — der Webhook | **zurückgestellt**, Tarif |
+
+Das Dokument hält die Entscheidung und den Weg fest, damit beides überprüfbar
+bleibt. Der Entwurf für den Webhook steht unverändert darin — er wird gebaut,
+wenn der Tarif es zulässt.
+
+**Was der erste Lauf zutage gefördert hat:** Von 134 Leads im Arbeitsbereich
+tragen nur **67** die Custom Variable `Token`. Die übrigen sind dem Dashboard
+nicht zuzuordnen. Der Abgleich meldet das jetzt von sich aus im Reiter
+*Verwaltung*.
 
 ---
 
@@ -144,10 +162,19 @@ Zwei Punkte, die nicht verhandelbar sind:
 - **Keine E-Mail-Spalte.** Die Adresse wird beim Eingang zu einem Token
   aufgelöst und dann verworfen. `on delete set null` macht die Ereignisse nach
   einer DSGVO-Löschung anonym — dasselbe Verhalten wie bei `visits` heute.
-- **`dedupe_key`** = HMAC über `campaign_id|lead_email|type|timestamp|step` mit
-  `AUSWERTUNG_SECRET` als Schlüssel. Instantly stellt Webhooks ausdrücklich
-  mehrfach zu; `on conflict (dedupe_key) do nothing` macht das folgenlos, ohne
-  dass eine Adresse im Klartext in der Tabelle steht.
+- **`dedupe_key`** ist Klartext, kein HMAC: `token|type` für Zustände,
+  `token|sent|<zeitstempel>` für den wiederholbaren Versand. Die Verschlüsselung
+  war nur dafür gedacht, die Adresse aus einem Webhook-Payload nicht im Klartext
+  in die Tabelle zu schreiben — der Abgleich liefert den Token, die Adresse kommt
+  gar nicht vor. `on conflict (dedupe_key) do nothing` macht den täglichen Lauf
+  folgenlos. Nebenwirkung: Eine Rotation von `AUSWERTUNG_SECRET` kann keine alten
+  Schlüssel mehr ungültig machen und damit keine Ereignisse verdoppeln.
+
+  Der Unterschied zwischen den beiden Formen trägt die ganze Logik: **Versendet
+  ist ein Vorgang**, der sich bei jedem Sequenzschritt wiederholt — deshalb
+  gehört der Zeitstempel in den Schlüssel. **Gebounct, abgemeldet und
+  geantwortet sind Zustände**; wer gebounct ist, bouncet nicht jeden Tag neu.
+  Stünde dort ein Zeitstempel, legte jeder Abgleich eine weitere Zeile an.
 
 Dazu vier denormalisierte Spalten auf `contacts`, damit die Dashboard-Abfragen
 nicht um ein weiteres Join-Niveau wachsen:
@@ -213,39 +240,68 @@ nicht.** `CRON_SECRET` ist der einzige Name, der nicht frei wählbar ist —
 Vercel sendet den Wert einer so benannten Variablen selbsttätig als
 `Authorization`-Header, wenn es den Cron aufruft.
 
-### 3. Dashboard — `api/auswertung.js` und `auswertung.html`
+### 3. Dashboard — `api/auswertung.js` und `auswertung.html` *(gebaut)*
 
-**Trichter** (`uebersicht()`, `api/auswertung.js:232-305`; Darstellung
-`zeichneUebersicht`, ab `auswertung.html:482`). Zwei Stufen vorn eingesetzt:
+Am 28.09.2026 umgesetzt. Drei Dinge kamen im Bauen dazu, die im Plan nicht
+standen und ohne die der Umbau in die Irre geführt hätte:
+
+1. **`unbekannt` als eigener Zustand.** Ein Kontakt ohne `mail_status` ist nicht
+   *offen* — der Abgleich hat ihn schlicht nie gesehen. Die Spalte *Mail* zeigt
+   dafür ein Wort mit gestricheltem Rand statt einer Farbe: Es ist kein
+   Ergebnis, sondern dessen Fehlen.
+2. **Der Stand des Abgleichs reist mit jeder Ansicht mit**, die Mail-Zahlen
+   zeigt — Übersicht, Personen, Detailblatt. Dafür gibt es `abgleichStand()` und
+   die Aktion `?a=stand` für die Verwaltung. Ist der Stand älter als anderthalb
+   Tage, färbt sich die Zeile: Dann hat der Cron nicht gewartet, dann läuft er
+   nicht.
+3. **Der Abgleich meldet Leads ohne Token.** Der erste Lauf zeigte 134 Leads,
+   davon 67 ohne `Token` — unsichtbar für das Dashboard, ohne dass es jemandem
+   aufgefallen wäre. Die Zahl steht jetzt als Warnung unter dem Knopf.
+
+**Trichter** (`uebersicht()`; Darstellung `zeichneUebersicht`). Zwei Stufen vorn
+eingesetzt:
 
 ```text
 in der Datenbank → tatsächlich versendet → zugestellt → Link aufgerufen
 → davon Mensch → zwei Seiten oder mehr → Erstgespräch → Formular
 ```
 
-„zugestellt" = versendet minus `mail_bounced_at`. „geantwortet" und
+„zugestellt" = versendet minus `mail_bounced_at`. „geantwortet", „gebounct" und
 „abgemeldet" stehen **neben** dem Trichter, nicht darin — eine Antwort ist kein
 Zwischenschritt zum Formular, sondern ein zweiter Weg zum selben Ziel, und eine
 Abmeldung ist gar kein Fortschritt.
 
-**Personen** (`personen()`, `api/auswertung.js:309-344`; Tabelle ab
-`auswertung.html:546`): neue Spalte **Mail** mit einem Wort —
-*versendet · gebounct · abgemeldet · geantwortet · offen*. Die Sortierung
-bleibt unverändert (Lesezeit absteigend, Nichtaufrufer unten); die Spalte
-erklärt aber endlich, warum jemand unten steht — nicht aufgerufen ist etwas
-anderes als nie zugestellt.
+Die Klickrate rechnet gegen das **Zugestellte**, nicht mehr gegen die Liste;
+solange nichts versendet ist, ersatzweise gegen die Datenbank, sonst stünde
+dort eine Division durch null. Dieselbe Unterscheidung in der
+Kampagnen-Tabelle: Die Spalte hieß *versendet* und meinte *in der Datenbank* —
+jetzt stehen beide nebeneinander.
 
-**Detailblatt** (`person()`, `api/auswertung.js:346-376`; `zeichneBlatt` ab
-`auswertung.html:588`): Mail-Chronik aus `mail_events` **vor** den Besuchen, in
-derselben Form wie die bestehende Ereignis-Chronik. Das Blatt wird auch aus dem
-Traffic-Log heraus geöffnet — es muss an beiden Einstiegen tragen.
+**Personen** (`personen()`; Tabelle in `zeichnePersonen`): neue Spalte **Mail**
+mit einem Wort — *unbekannt · offen · versendet · gebounct · abgemeldet ·
+geantwortet*. Die Sortierung bleibt unverändert (Lesezeit absteigend,
+Nichtaufrufer unten); die Spalte erklärt aber endlich, warum jemand unten steht
+— nicht aufgerufen ist etwas anderes als nie zugestellt.
 
-**Verwaltung** (`zeichneVerwaltung`, ab `auswertung.html:1015`): Knopf „Jetzt
-mit Instantly abgleichen" plus Zeitpunkt des letzten Abgleichs, dazu die
-Einrichtungsanleitung für den Webhook.
+**Detailblatt** (`person()`; `zeichneBlatt`): Mail-Chronik aus `mail_events`
+**vor** den Besuchen, in derselben Form wie die bestehende Ereignis-Chronik.
+Liegt kein Ereignis vor, steht dort trotzdem ein Satz — *noch nie abgeglichen*,
+*noch keine Mail hinaus* oder *Token liegt in Instantly nicht vor* —, weil ein
+leerer Kasten die drei Fälle nicht unterscheidet. `contacts.sent_at` aus der
+hochgeladenen Datei steht als *geplant für* daneben, getrennt benannt, damit
+niemand das Geplante für das Gemessene hält. Das Blatt wird auch aus dem
+Traffic-Log heraus geöffnet — es trägt an beiden Einstiegen.
 
-**Export** (`exportieren()`, `api/auswertung.js:644`): Spalten `mail_status`,
-`versendet_am`, `gebounct`, `geantwortet` ergänzen.
+**Verwaltung** (`zeichneVerwaltung`): Knopf „Jetzt abgleichen" plus Zeitpunkt
+des letzten Abgleichs. Der Knopf ruft `/api/instantly?a=abgleich` **direkt**
+auf, nicht über `/api/auswertung` — `api/instantly.js` prüft dasselbe Cookie mit
+derselben Funktion, und der Cron ruft dieselbe Adresse auf. Zwei Wege herein,
+ein Weg hindurch. Die Einrichtungsanleitung für den Webhook entfällt, solange
+es ihn nicht gibt.
+
+**Export** (`exportieren()`): Spalten `mail_status`, `versendet_am`, `gebounct`,
+`geantwortet` und `abgemeldet`, vor den Besuchsspalten — sie liegen zeitlich
+davor.
 
 ### 4. Webhook in Instantly anlegen — entfällt vorerst
 
@@ -279,55 +335,59 @@ soweit ist:
 
 ## Reihenfolge
 
-1. `db/schema.sql` erweitern, Migration im Neon-SQL-Editor einspielen
-2. `api/instantly.js` — erst `?a=hook`, dann `?a=abgleich`
-3. `vercel.json`: Function-Eintrag und Cron
-4. Abfragen in `api/auswertung.js`
-5. Darstellung in `auswertung.html`
-6. Abgleich gegen die echte Kampagne auslösen, Testmail
-7. Doku
-
-Schritte 1–5 sind ohne Instantly-Zugang lokal prüfbar.
+1. ✅ `db/schema.sql` erweitern, Migration im Neon-SQL-Editor einspielen
+2. ✅ `api/instantly.js` — `?a=abgleich`; `?a=hook` zurückgestellt
+3. ✅ `vercel.json`: Function-Eintrag und Cron
+4. ✅ Abfragen in `api/auswertung.js`
+5. ✅ Darstellung in `auswertung.html`
+6. ✅ Abgleich gegen die echte Kampagne ausgelöst — 28.09.2026, 134 Leads,
+   67 zugeordnet, 0 Änderungen (es ist noch keine Mail hinaus)
+7. ✅ Doku
+8. ⬜ **Testmail.** Steht noch aus, weil die Welle noch nicht läuft. Erst sie
+   beweist die Kette bis zum Postfach, siehe [testmail-instantly.md](testmail-instantly.md)
 
 ---
 
 ## Prüfung
 
-**Lokal**, ohne Instantly:
+### Was am 28.09.2026 geprüft wurde *(erledigt)*
 
-```bash
-vercel dev
-curl -X POST 'localhost:3000/api/instantly?a=hook' \
-  -H 'x-manereal-hook: <secret>' -H 'content-type: application/json' \
-  -d '{"event_type":"email_sent","timestamp":"2026-09-25T09:00:00Z",
-       "campaign_name":"test","lead_email":"vorname.nachname@example.at",
-       "Token":"<Token aus der DB>","step":1}'
-```
+Gegen die echte Neon-Datenbank und die echte Instantly-API, über einen lokalen
+Server, der `vercel dev` nachbildet (statische Dateien plus die beiden
+Functions):
 
-- Ohne Header → 401, kein Datensatz.
-- Zweimal dasselbe Paket → genau **eine** Zeile in `mail_events`.
-- `lead_unsubscribed` → `contacts.optout_at` gesetzt; danach wird ein Aufruf
-  mit `?m=<Token>` **nicht** mehr zugeordnet (`api/track.js:146-156`). Im
-  Reiter **Traffic** muss derselbe Besuch trotzdem als Kampagnenverkehr
-  erscheinen, nur ohne Namen — sonst hat die Abmeldung die Kurve rückwirkend
-  verändert.
-- Unbekannter Token → 200, Zeile mit `token is null`.
-- Dashboard: Trichter zeigt die neuen Stufen, Personenspalte „Mail" stimmt,
-  Detailblatt zeigt die Chronik.
+- Alle sechs Abfragen antworten mit 200: `uebersicht`, `personen`, `person`,
+  `seiten`, `verkehr`, `stand` — dazu der CSV-Export mit den neuen Spalten.
+- Dashboard im Browser, alle fünf Reiter, **keine Konsolenmeldung**. Bei 390 px
+  Breite kein Querscrollen, der Stand-Balken und die drei Nebenzahlen stapeln.
+- Spaltenzahl in der Personentabelle stimmt mit den Zeilen überein (9 zu 9) —
+  der Fehler, den ein übersehenes `colspan` erzeugt.
+- **Abgleich von Hand ausgelöst** und gegen die echte API gelaufen: 134 Leads,
+  67 mit Token, 67 zugeordnet, 0 Änderungen, 0 neue Ereignisse. Der zweite Lauf
+  ohne Änderung meldet null — der `dedupe_key` trägt.
+- Der Stand-Balken zeigte nach dem Lauf den neuen Zeitpunkt.
 
-**Echt**, über Instantly:
+### Was erst die erste Welle prüfen kann *(offen)*
 
-- Testkampagne an `Julian@pils.cc` nach dem Muster in
-  [testmail-instantly.md](testmail-instantly.md).
-- `email_sent` muss binnen Sekunden im Dashboard stehen — **bevor** die Mail
-  gelesen wird. Das ist der Beweis, dass die Zuordnung über den Token läuft und
-  nicht am Klick hängt.
-- Danach den Link klicken: dieselbe Person muss Mail-Ereignis **und** Besuch in
-  einer Zeile zeigen.
-- `?a=abgleich` von Hand auslösen, ohne dass sich etwas geändert hat → meldet
-  null Änderungen.
-- Eine Adresse auf eine bekannte Bounce-Adresse setzen und den Trichter prüfen:
-  „versendet" 1, „zugestellt" 0.
+Kein Kontakt hat bisher eine Mail bekommen; alle 67 stehen auf `offen`, und
+`mail_events` ist leer. Diese fünf Dinge sind deshalb **ungeprüft**:
+
+- **Ein `sent`-Ereignis entsteht** und die Stufe „tatsächlich versendet"
+  springt. Bis dahin ist der Trichter oben ehrlich leer.
+- **Ein Bounce** setzt `mail_bounced_at`: „versendet" 1, „zugestellt" 0.
+- **Eine Antwort** setzt `mail_replied_at` und das Wort *geantwortet*.
+- **Eine Abmeldung** setzt `contacts.optout_at`; danach wird ein Aufruf mit
+  `?m=<Token>` **nicht** mehr zugeordnet (`api/track.js:146-156`). Im Reiter
+  **Traffic** muss derselbe Besuch trotzdem als Kampagnenverkehr erscheinen,
+  nur ohne Namen — sonst hat die Abmeldung die Kurve rückwirkend verändert.
+- **Testmail** an `Julian@pils.cc` nach dem Muster in
+  [testmail-instantly.md](testmail-instantly.md): Steht im Quelltext der
+  empfangenen Mail die fertige Adresse statt `{{Token}}`, ist die Kette vom
+  Editor bis zum Postfach bewiesen und nicht nur bis zur Vorschau.
+
+**Die Kontrolle im laufenden Betrieb bleibt dieselbe:** nach den ersten fünfzig
+Mails ins Dashboard sehen. Stehen dort nur anonyme Aufrufe, ist der Code
+unterwegs verloren gegangen.
 
 **Auslieferung:** `git push joergen main` — nicht `origin`. Nur das
 `joergen`-Remote löst den Redeploy aus. Jeder Push geht damit direkt live, es
@@ -342,6 +402,16 @@ Cron ruft ohnehin von innen auf.
 
 ## Was offen bleibt
 
+- **67 von 134 Leads in Instantly tragen keinen `Token`** (Stand 28.09.2026).
+  Für sie sammelt der Abgleich nichts, und ihre Klicks wären niemandem
+  zuzuordnen. Zu klären ist, ob das ein zweiter Import ohne die Spalte war oder
+  eine fremde Kampagne im selben Arbeitsbereich. **Vor der ersten Welle zu
+  entscheiden** — nachträglich lässt sich einem bereits angeschriebenen Lead
+  kein Token mehr unterschieben, der zu einem Link passt, der schon draußen ist.
+- **Der Abgleich läuft über alle Kampagnen des Arbeitsbereichs.** Solange dort
+  auch Fremdes liegt, meldet er jedes Mal „n Tokens unbekannt". Das ist richtig
+  gezählt, aber es gewöhnt einen an eine Warnung — und eine Warnung, an die man
+  sich gewöhnt, wirkt nicht mehr.
 - **Geklärt am 28.09.2026:** Der Arbeitsbereich hat Growth, API v2 ist damit
   verfügbar, Webhooks nicht. Der Key braucht nur Lesezugriff — `all:read` oder
   `leads:read`; das Anlegen eines Webhooks geschieht ohnehin in der

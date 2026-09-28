@@ -11,6 +11,96 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 40 — Das Dashboard weiß jetzt, was vor dem Klick geschah (28.09.2026)
+
+**An der Website selbst wurde nichts geändert.** [index.html](../index.html) ist
+unberührt — kein Markup, kein CSS, kein Skript. Dieser Schritt betrifft
+ausschließlich das Dashboard unter `/auswertung` und die Doku.
+
+### Warum
+
+Das eigene Tracking beginnt beim **Klick auf den Link**. Alles davor war
+geraten: `contacts.sent_at` kam aus der hochgeladenen CSV und sagte, was geplant
+war, nicht was hinausging. Bounces, Abmeldungen und Antworten sah das Dashboard
+gar nicht — `contacts.optout_at` wurde gelesen, aber von keiner Codestelle
+beschrieben.
+
+Seit dem 28.09.2026 holt [`api/instantly.js`](../api/instantly.js) diese Strecke
+täglich um 5 Uhr aus der Instantly-API nach. Schema, Abgleich und Cron standen
+bereits; dieser Schritt macht die Zahlen **sichtbar**.
+
+### Der Trichter hat vorn zwei Stufen dazubekommen
+
+```
+in der Datenbank → tatsächlich versendet → zugestellt → Link aufgerufen
+→ davon Mensch → zwei Seiten oder mehr → Erstgespräch → Formular
+```
+
+Die erste Stufe hieß bisher „E-Mails versendet" und meinte in Wahrheit „steht in
+der Datenbank". Jetzt sind es zwei verschiedene Zahlen, und **die Klickrate
+rechnet gegen das Zugestellte** statt gegen die Liste: Wer nie eine Mail bekommen
+hat, darf die Rate nicht drücken. Dieselbe Trennung in der Kampagnen-Tabelle.
+
+„geantwortet", „gebounct" und „abgemeldet" stehen **neben** dem Trichter. Eine
+Antwort ist kein Zwischenschritt zum Formular, sondern ein zweiter Weg zum
+selben Ziel — und eine Abmeldung ist gar kein Fortschritt.
+
+### Die Spalte „Mail" erklärt, warum jemand unten steht
+
+*unbekannt · offen · versendet · gebounct · abgemeldet · geantwortet.* Nicht
+aufgerufen ist etwas anderes als nie zugestellt, und bisher sah beides gleich
+aus. Im Detailblatt steht die Mail-Chronik **vor** den Besuchen, weil sie
+zeitlich davor liegt.
+
+### Der einzige neue Irrtum, und was ihn entschärft
+
+Ein täglicher Abgleich statt eines Webhooks führt einen Irrtum ein: **Eine leere
+Zelle liest man als „nicht versendet", obwohl sie „noch nicht abgeglichen"
+heißt.** Dagegen drei Dinge:
+
+- Über jeder Ansicht mit Mail-Zahlen steht der **Zeitpunkt des letzten
+  Abgleichs**. Ist er älter als anderthalb Tage, färbt sich die Zeile — dann hat
+  der Cron nicht gewartet, dann läuft er nicht.
+- Ein Kontakt, den der Abgleich nie gesehen hat, trägt **`unbekannt`** statt
+  `offen`, mit gestricheltem Rand statt einer Farbe: kein Ergebnis, sondern
+  dessen Fehlen.
+- In der Kampagnen-Tabelle steht bei „versendet" ein **Strich**, solange nie
+  abgeglichen wurde. Eine Null behauptete etwas.
+
+### Was der erste echte Lauf zutage gefördert hat
+
+Von **134 Leads** im Instantly-Arbeitsbereich tragen nur **67** die Custom
+Variable `Token`. Für die übrigen sammelt der Abgleich nichts, und ihre Klicks
+wären niemandem zuzuordnen. Der Abgleich meldet das jetzt von sich aus unter
+dem Knopf in der Verwaltung. **Vor der ersten Welle zu klären** — nachträglich
+lässt sich einem bereits angeschriebenen Lead kein Token mehr unterschieben, der
+zu einem Link passt, der schon draußen ist.
+
+### Geändert
+
+| Datei | was |
+|---|---|
+| [`api/auswertung.js`](../api/auswertung.js) | `abgleichStand()`, Mail-Zahlen im Trichter, Mail-Spalten bei Personen und im Detailblatt, fünf neue Export-Spalten, Aktion `?a=stand` |
+| [`auswertung.html`](../auswertung.html) | Trichter, Spalte *Mail*, Mail-Chronik, Knopf *Jetzt abgleichen*, Stand-Balken, CSS für beides |
+| [`docs/TRACKING.md`](TRACKING.md) | neuer Abschnitt *Was Instantly beisteuert*, zwei ENV-Variablen, Dashboard-Abschnitt nachgezogen |
+| [`docs/UMSTELLUNG-INSTANTLY.md`](UMSTELLUNG-INSTANTLY.md) | CSV-Kopfzeile berichtigt: `Email,Firstname,Lastname,Company,Token` statt `Email,Name,Company,Link` |
+| [`docs/INSTANTLY-ANBINDUNG.md`](INSTANTLY-ANBINDUNG.md) | Status auf *gebaut*, `dedupe_key`-Widerspruch aufgelöst, Prüfprotokoll |
+
+### Kontrolle
+
+Gegen die echte Datenbank und die echte Instantly-API geprüft: alle sechs
+Abfragen antworten mit 200, das Dashboard rendert alle fünf Reiter ohne eine
+einzige Konsolenmeldung, bei 390 px Breite gibt es kein Querscrollen, und der
+Abgleich lief von Hand durch (134 Leads, 67 zugeordnet, 0 Änderungen).
+
+**Ungeprüft bleibt alles, was einen echten Versand voraussetzt** — ein
+`sent`-Ereignis, ein Bounce, eine Antwort, eine Abmeldung. Es ist noch keine
+Mail hinausgegangen, alle 67 Kontakte stehen auf `offen`, und `mail_events` ist
+leer. Das steht so in [INSTANTLY-ANBINDUNG.md](INSTANTLY-ANBINDUNG.md) unter
+*Prüfung*.
+
+---
+
 ## 39 — Das Tracking ist live (25.09.2026)
 
 `Tracking` ist nach `main` gemergt und ausgeliefert. Bis heute lag das gesamte
