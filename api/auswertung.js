@@ -776,6 +776,9 @@ module.exports = async function handler(req, res) {
 // Mit exportiert für scripts/links-erzeugen.js und die lokalen Proben. Der
 // Kommandozeilenweg ruft dieselbe Funktion auf wie das Dashboard -- es gibt
 // keine zweite Umsetzung derselben Regeln, die auseinanderlaufen könnte.
+// Auch api/instantly.js prüft das Dashboard-Cookie -- mit derselben
+// Funktion, nicht mit einer zweiten Umsetzung derselben Regeln.
+module.exports.angemeldet = angemeldet;
 module.exports.importieren = importieren;
 module.exports.csvLesen = csvLesen;
 module.exports.csvSchreiben = csvSchreiben;

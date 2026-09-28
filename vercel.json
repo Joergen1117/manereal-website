@@ -11,6 +11,9 @@
     },
     "api/auswertung.js": {
       "maxDuration": 15
+    },
+    "api/instantly.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -22,5 +25,6 @@
       "source": "/auswertung.html",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     }
-  ]
+  ],
+  "crons": [{ "path": "/api/instantly?a=abgleich", "schedule": "0 5 * * *" }]
 }

@@ -66,6 +66,58 @@ Zwei Stellen, die dadurch trotzdem zu beachten sind:
 
 ---
 
+## Was der Tarif zulässt (Stand 28.09.2026)
+
+Der Arbeitsbereich läuft auf **Growth**. Damit gilt:
+
+| | |
+|---|---|
+| API v2, Leads und Kampagnen lesen | **verfügbar** — „API access is available on all Email Outreach plans" |
+| Webhooks | **nicht verfügbar** — „available on the Hyper Growth plan or above" |
+
+Die frühere Annahme, API v2 setze Growth voraus und ohne API-Zugang sei nichts
+baubar, war in beide Richtungen falsch: Der Lesezugriff liegt tiefer, der
+Webhook höher.
+
+**Gebaut wird deshalb nur der Abgleich.** Er ist nicht mehr der Nachzieher
+hinter dem Webhook, sondern die einzige Quelle. Was das kostet, ist allein die
+Aktualität — die Ereignisse stehen bis zu 24 Stunden später im Dashboard, nicht
+binnen Sekunden. Der Trichter selbst verliert keine Stufe.
+
+Drei Endpunkte tragen das:
+
+| Endpunkt | liefert |
+|---|---|
+| `POST /api/v2/leads/list` | je Person `status` (−1 gebounct, −2 abgemeldet, 1 aktiv, 2 pausiert, 3 fertig), `status_summary`, `email_reply_count`, `timestamp_last_contact`, `timestamp_last_touch`, `esp_code` — und in `payload` unseren Token. **Am 28.09.2026 gegen die echte API geprüft**; ein `timestamp_last_reply`, wie die Doku ihn nennt, existiert nicht — Antworten erkennt nur `email_reply_count` |
+| `GET /api/v2/emails` | die einzelnen Mails samt Zeitstempel; daraus wird die Mail-Chronik im Detailblatt. 20 Anfragen je Minute |
+| `GET /api/v2/campaigns/analytics` | Summen je Kampagne, als Gegenprobe zum Trichter |
+
+Drei Folgen, die nicht im Code stehen, sondern in der Gestaltung:
+
+1. **Jede Mail-Angabe im Dashboard braucht den Zeitpunkt des letzten
+   Abgleichs.** Ohne ihn liest man eine leere Zelle als „nicht versendet",
+   obwohl sie „noch nicht abgeglichen" heißt. Das ist der einzige neue Irrtum,
+   den dieser Weg einführt — und er gehört sichtbar entschärft, nicht in eine
+   Fußnote.
+2. **Der Abmeldezeitpunkt ist nicht exakt.** Instantly gibt den Zustand heraus,
+   nicht den Moment. `contacts.optout_at` bekommt daher den Zeitpunkt des
+   Abgleichs, der die Abmeldung zuerst gesehen hat — im Zweifel bis zu einen Tag
+   zu spät. Für die Zuordnungssperre in `api/track.js:146-156` ist das
+   unschädlich: sie greift ab diesem Moment, und rückwirkend soll sie ohnehin
+   nichts ändern.
+3. **Der `dedupe_key` braucht kein HMAC mehr.** Die Verschlüsselung war nur
+   da, um die Adresse aus dem Webhook-Payload nicht im Klartext in die Tabelle
+   zu schreiben. Der Abgleich liefert den Token, die Adresse kommt gar nicht
+   vor — `token|type|ts|step` genügt als Schlüssel. Damit entfällt auch, dass
+   eine Rotation von `AUSWERTUNG_SECRET` alte Schlüssel ungültig machen und
+   Ereignisse doppelt eintragen könnte.
+
+Der Entwurf für den Webhook bleibt unten stehen. Er wird gebaut, wenn der Tarif
+es zulässt — nicht vorher: Ein Endpunkt, den niemand aufrufen kann, lässt sich
+auch nicht prüfen.
+
+---
+
 ## Was gebaut wird
 
 ### 1. Schema erweitern — `db/schema.sql`
@@ -118,7 +170,9 @@ Eine Datei, zwei Betriebsarten, aufgebaut wie `api/auswertung.js` (Router über
 `?a=`, `crypto.timingSafeEqual` für Geheimnisvergleiche, `db()` aus
 [`api/_db.js`](../api/_db.js)).
 
-**`POST /api/instantly?a=hook`** — der Webhook.
+**`POST /api/instantly?a=hook`** — der Webhook. **Zurückgestellt**, der
+Tarif lässt ihn nicht zu (siehe oben). Der Entwurf gilt unverändert, sobald
+Hyper Growth vorliegt.
 
 - Instantly bietet **keine Signatur**, nur selbst gesetzte Header. Auth ist
   deshalb ein Header `x-manereal-hook` gegen `INSTANTLY_WEBHOOK_SECRET`,
@@ -138,10 +192,10 @@ Eine Datei, zwei Betriebsarten, aufgebaut wie `api/auswertung.js` (Router über
 **`GET /api/instantly?a=abgleich`** — der tägliche Nachzieher.
 
 - `POST https://api.instantly.ai/api/v2/leads/list` mit
-  `Authorization: Bearer $INSTANTLY_API_KEY`, gefiltert auf die Kampagne,
+  `Authorization: Bearer $INSTANTLY_API_KEY`, **ohne Kampagnenfilter**,
   `limit: 100`, Cursor `starting_after`.
 - Pro Lead übernommen: `status`, `timestamp_last_contact`, `email_reply_count`,
-  `payload.Token` für die Zuordnung. Das repariert stumme Webhook-Ausfälle.
+  `payload.Token` für die Zuordnung. Leads ohne Token werden übersprungen.
 - Zugang: entweder `Authorization: Bearer $CRON_SECRET` (Vercel Cron) oder ein
   gültiges `auswertung`-Cookie (Knopf im Dashboard).
 - Fasst zusammen, wie viele Kontakte geändert wurden, und schreibt den
@@ -154,8 +208,10 @@ Eintrag in [`vercel.json`](../vercel.json): `maxDuration: 30` für
 "crons": [{ "path": "/api/instantly?a=abgleich", "schedule": "0 5 * * *" }]
 ```
 
-Neue Environment-Variablen: `INSTANTLY_API_KEY`, `INSTANTLY_WEBHOOK_SECRET`,
-`CRON_SECRET`.
+Neue Environment-Variablen: **`INSTANTLY_API_KEY` und `CRON_SECRET`, mehr
+nicht.** `CRON_SECRET` ist der einzige Name, der nicht frei wählbar ist —
+Vercel sendet den Wert einer so benannten Variablen selbsttätig als
+`Authorization`-Header, wenn es den Cron aufruft.
 
 ### 3. Dashboard — `api/auswertung.js` und `auswertung.html`
 
@@ -191,11 +247,22 @@ Einrichtungsanleitung für den Webhook.
 **Export** (`exportieren()`, `api/auswertung.js:644`): Spalten `mail_status`,
 `versendet_am`, `gebounct`, `geantwortet` ergänzen.
 
-### 4. Webhook in Instantly anlegen
+### 4. Webhook in Instantly anlegen — entfällt vorerst
 
-Einmalig per API, in [TRACKING.md](TRACKING.md) als kopierbarer Befehl zu
-hinterlegen: `POST /api/v2/webhooks` mit `target_hook_url`, `event_types` und
-dem `headers`-Objekt, das unser Secret trägt.
+Zurückgestellt bis Hyper Growth. Zwei Korrekturen für den Tag, an dem es
+soweit ist:
+
+- **Kein API-Aufruf nötig.** Der Webhook wird in der Oberfläche angelegt:
+  Integrations → *Add Webhook* → URL, Events und Kampagne wählen. Unter *Add
+  headers* lässt sich `x-manereal-hook` mit dem Secret setzen — „Attach custom
+  HTTP headers for authentication or extra context".
+- **Der Payload trägt den Token vermutlich nicht.** Dokumentiert sind
+  `timestamp`, `campaign_id`, `lead_email`, `step`, `event_type`,
+  `workspace`, `email_id`, `email_subject` — von den Custom Variables des
+  Leads ist keine Rede. Die Zuordnung läuft dann über `lead_email` **plus**
+  `campaign_id`, denn `unique (email, campaign)` erlaubt dieselbe Adresse in
+  mehreren Wellen. Der erste echte Webhook wird deshalb einmal im Rohtext
+  protokolliert, bevor die Zuordnung darauf gebaut wird.
 
 ### 5. Doku
 
@@ -217,7 +284,7 @@ dem `headers`-Objekt, das unser Secret trägt.
 3. `vercel.json`: Function-Eintrag und Cron
 4. Abfragen in `api/auswertung.js`
 5. Darstellung in `auswertung.html`
-6. Webhook in Instantly anlegen, Testmail
+6. Abgleich gegen die echte Kampagne auslösen, Testmail
 7. Doku
 
 Schritte 1–5 sind ohne Instantly-Zugang lokal prüfbar.
@@ -264,21 +331,34 @@ curl -X POST 'localhost:3000/api/instantly?a=hook' \
 
 **Auslieferung:** `git push joergen main` — nicht `origin`. Nur das
 `joergen`-Remote löst den Redeploy aus. Jeder Push geht damit direkt live, es
-gibt keine Vorschau mehr dazwischen; der Webhook wird deshalb erst angelegt,
-wenn der Endpunkt steht.
+gibt keine Vorschau mehr dazwischen.
+
+Ein *Protection Bypass for Automation* ist **nicht** nötig — er war nur für den
+Webhook gedacht. Vercels Standard-Schutz deckt Vorschau- und
+Deployment-Adressen ab, die aktuelle Produktionsadresse bleibt offen, und der
+Cron ruft ohnehin von innen auf.
 
 ---
 
 ## Was offen bleibt
 
-- **API v2 braucht Growth oder höher.** Der Key wird mit Scopes erzeugt; hier
-  genügen Lesezugriff auf Leads und das Anlegen eines Webhooks.
-- **Welche Instantly-Kampagne der Abgleich zieht**, ist noch nicht festgelegt.
-  Der Webhook braucht das nicht — er bekommt den Token mitgeliefert. Der Abruf
-  über `leads/list` braucht aber eine Kampagnen-ID. Einfachster Weg: ein Feld je
-  Welle in der Verwaltung, in dem die Instantly-ID hinterlegt wird; Kampagnen
-  ohne ID werden übersprungen. Entscheidet sich bei Schritt 2, sobald die erste
-  echte ID vorliegt.
+- **Geklärt am 28.09.2026:** Der Arbeitsbereich hat Growth, API v2 ist damit
+  verfügbar, Webhooks nicht. Der Key braucht nur Lesezugriff — `all:read` oder
+  `leads:read`; das Anlegen eines Webhooks geschieht ohnehin in der
+  Oberfläche, nicht über die API.
+- **Erledigt am 28.09.2026: Der Abgleich braucht überhaupt keine
+  Kampagnen-ID.** `leads/list` antwortet auch ohne `campaign`-Filter und gibt
+  die Leads aller Kampagnen des Arbeitsbereichs heraus. Weil `contacts.token`
+  Primärschlüssel ist, ist der Token über alle Wellen hinweg eindeutig — die
+  Zuordnung braucht die Kampagne nicht, und niemand muss pflegen, welche
+  Instantly-Kampagne zu welcher Welle gehört. Eine neue Kampagne, drei parallele
+  Kampagnen, ein umbenannter Titel, verschobene Leads: nichts davon verlangt
+  einen Eingriff.
+
+  Der Preis ist ein Vollabgleich statt eines gefilterten. Bei 100 Leads je Seite
+  sind das für den österreichischen Markt — rund 2.000 bis 3.000 Betriebe —
+  höchstens 30 Aufrufe. Sollte es je knapp werden, filtert man nachträglich auf
+  aktive Kampagnen; dafür jetzt eine Konfiguration einzuführen wäre verkehrt.
 - **Vercel Cron** läuft im Hobby-Tarif nur einmal täglich. Für den Nachzieher
   reicht das; wer häufiger abgleichen will, drückt den Knopf im Dashboard.
 - **Rechtliches:** es kommt kein Zählpixel und kein Cookie dazu, der Charakter
