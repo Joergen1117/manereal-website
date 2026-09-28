@@ -17,9 +17,10 @@ bleibt. Der Entwurf für den Webhook steht unverändert darin — er wird gebaut
 wenn der Tarif es zulässt.
 
 **Was der erste Lauf zutage gefördert hat:** Von 134 Leads im Arbeitsbereich
-tragen nur **67** die Custom Variable `Token`. Die übrigen sind dem Dashboard
-nicht zuzuordnen. Der Abgleich meldet das jetzt von sich aus im Reiter
-*Verwaltung*.
+tragen nur **67** die Custom Variable `Token` — und es sind zweimal dieselben
+67 Personen, in zwei Kampagnen. Die Kampagne, die hinausgehen soll, ist die
+**ohne** Token. Siehe [Was offen bleibt](#was-offen-bleibt); das ist vor der
+ersten Welle zu richten. Der Abgleich meldet es jetzt von sich aus.
 
 ---
 
@@ -223,6 +224,19 @@ Hyper Growth vorliegt.
   `limit: 100`, Cursor `starting_after`.
 - Pro Lead übernommen: `status`, `timestamp_last_contact`, `email_reply_count`,
   `payload.Token` für die Zuordnung. Leads ohne Token werden übersprungen.
+- **Geschrieben wird in Stapeln zu 500**, nicht Zeile für Zeile. Eine SQL-Runde
+  je Lead kostet gegen Neon rund 62 ms; bei den 2000 bis 3000 Betrieben des
+  Markts wären das fünf bis sechs Minuten, und Vercel bricht nach
+  `maxDuration: 30` ab — mitten im Schreiben, ohne dass `sync_state` je erreicht
+  würde. In Stapeln sind es zwei Runden je 500 Zeilen. Gemessen: 134 Leads in
+  **1,2 s** statt 8 s.
+- **Leads ohne Token werden unterschieden**, und zwar über die Adresse gegen
+  `contacts.email`: Steht sie dort, ist es *unsere* Person, bei der die
+  Token-Zuordnung im Import fehlt — ein Fehler, der laut gemeldet wird. Steht
+  sie nicht dort, gehört der Lead einer fremden Kampagne und wird stillschweigend
+  gezählt. Ohne diese Trennung stünde bei jedem Lauf dieselbe Warnung, und eine
+  Warnung, an die man sich gewöhnt, wirkt nicht mehr. Die Adressen werden dabei
+  nur verglichen, nie gespeichert.
 - Zugang: entweder `Authorization: Bearer $CRON_SECRET` (Vercel Cron) oder ein
   gültiges `auswertung`-Cookie (Knopf im Dashboard).
 - Fasst zusammen, wie viele Kontakte geändert wurden, und schreibt den
@@ -402,16 +416,35 @@ Cron ruft ohnehin von innen auf.
 
 ## Was offen bleibt
 
-- **67 von 134 Leads in Instantly tragen keinen `Token`** (Stand 28.09.2026).
-  Für sie sammelt der Abgleich nichts, und ihre Klicks wären niemandem
-  zuzuordnen. Zu klären ist, ob das ein zweiter Import ohne die Spalte war oder
-  eine fremde Kampagne im selben Arbeitsbereich. **Vor der ersten Welle zu
-  entscheiden** — nachträglich lässt sich einem bereits angeschriebenen Lead
-  kein Token mehr unterschieben, der zu einem Link passt, der schon draußen ist.
-- **Der Abgleich läuft über alle Kampagnen des Arbeitsbereichs.** Solange dort
-  auch Fremdes liegt, meldet er jedes Mal „n Tokens unbekannt". Das ist richtig
-  gezählt, aber es gewöhnt einen an eine Warnung — und eine Warnung, an die man
-  sich gewöhnt, wirkt nicht mehr.
+- **Die 67 Kontakte liegen zweimal in Instantly, und die falsche Hälfte trägt
+  den Token.** Am 28.09.2026 geprüft:
+
+  | Kampagne | Zustand | Sequenz | Leads |
+  |---|---|---|---|
+  | `Manereal Burgenland` (23.09.) | **Entwurf** | **keine** | dieselben 67, **ohne** `Token` |
+  | `julian_test_01` (24.09.) | pausiert | 1 Schritt, Betreff „TEST 01", mit `{{Token}}` | dieselben 67, **mit** `Token` |
+
+  Alle 67 Adressen stehen in beiden Kampagnen und alle 67 in unserer Datenbank.
+  Es gibt also **keine fremde Kampagne** — es ist zweimal dieselbe Liste.
+
+  **Folge:** Wird die Sequenz in `Manereal Burgenland` geschrieben und gestartet,
+  sammelt das Tracking nichts. Die Leads dort tragen keinen `Token`, der
+  Signatur-Link lässt sich nicht je Person bauen, und der Abgleich findet sie
+  nicht. Genau der stille Fehler, vor dem
+  [UMSTELLUNG-INSTANTLY.md](UMSTELLUNG-INSTANTLY.md) warnt: Die Mails laufen,
+  alles sieht richtig aus, und das Dashboard zeigt nach dreihundert Mails
+  ausschließlich anonyme Aufrufe.
+
+  **Vor der ersten Welle zu richten:** Die Datei aus dem Dashboard in
+  `Manereal Burgenland` erneut importieren und dabei `Token` → Custom Variable
+  zuordnen. Die Tokens sind dieselben wie beim ersten Mal — ein wiederholter
+  Upload legt nichts doppelt an.
+
+- **`julian_test_01` enthält 67 echte Adressen und ist nur pausiert, nicht
+  gelöscht.** Ihre Sequenz trägt den Betreff „TEST 01". Wer sie versehentlich
+  fortsetzt, schickt 67 Hausverwaltern eine Mail mit diesem Betreff. Die echten
+  Leads gehören da heraus.
+
 - **Geklärt am 28.09.2026:** Der Arbeitsbereich hat Growth, API v2 ist damit
   verfügbar, Webhooks nicht. Der Key braucht nur Lesezugriff — `all:read` oder
   `leads:read`; das Anlegen eines Webhooks geschieht ohnehin in der

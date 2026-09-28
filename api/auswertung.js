@@ -702,8 +702,12 @@ async function exportieren(sql, kampagne, basis) {
   // liegen: erst ging die Mail hinaus, dann wurde der Link aufgerufen.
   const tag = (wert) => (wert ? new Date(wert).toISOString().slice(0, 10) : '');
   return csvSchreiben(
+    // "zuletzt_versendet_am", nicht "versendet_am": Instantly gibt
+    // timestamp_last_contact heraus, und der wandert mit jedem Sequenzschritt
+    // mit. Wer nach dem ersten Versand sortiert, sortierte sonst nach dem
+    // letzten. Die einzelnen Versände stehen in der Chronik des Detailblatts.
     ['vorname', 'nachname', 'unternehmen', 'email', 'kampagne', 'token', 'link',
-      'mail_status', 'versendet_am', 'gebounct', 'geantwortet', 'abgemeldet',
+      'mail_status', 'zuletzt_versendet_am', 'gebounct', 'geantwortet', 'abgemeldet',
       'besuche', 'mensch', 'lesezeit_sekunden', 'erstgespraech', 'formular'],
     liste.map((p) => [
       p.firstname || '', p.lastname || '', p.company || '', p.email, p.campaign,

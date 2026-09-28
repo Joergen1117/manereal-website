@@ -420,12 +420,18 @@ tr.trenner td{
     // Der Cron läuft einmal täglich um 5 Uhr. Wird der Stand älter als
     // anderthalb Tage, hat er nicht bloß gewartet -- dann läuft er nicht.
     var schal = alt > 36*3600*1000;
-    return '<p class="stand' + (schal ? ' warnung' : '') + '">' +
+    // Eigene Kontakte ohne Token sind der teuerste Fehler des ganzen Aufbaus:
+    // Die Mails laufen, alles sieht richtig aus, und niemand ist zuzuordnen.
+    // Deshalb steht er hier oben und nicht nur in der Verwaltung.
+    var luecke = (m.ohneZuordnung || 0) + (m.unbekannt || 0);
+    return '<p class="stand' + (schal || luecke ? ' warnung' : '') + '">' +
       '<span>Mit Instantly abgeglichen am <b>' + datum(abgleich.ts) + '</b>' +
       (schal ? ' — das ist länger her als der tägliche Lauf um 5 Uhr.' : '') + '</span>' +
       (m.zugeordnet != null
-        ? '<span><b>' + m.zugeordnet + '</b> Kontakte zugeordnet' +
-          (m.unbekannt ? ', <b>' + m.unbekannt + '</b> Tokens unbekannt' : '') + '</span>'
+        ? '<span><b>' + m.zugeordnet + '</b> Kontakte zugeordnet</span>'
+        : '') +
+      (luecke
+        ? '<span><b>' + luecke + '</b> ohne Zuordnung — siehe Verwaltung</span>'
         : '') +
       (zusatz || '') + '</p>';
   }
@@ -1285,12 +1291,10 @@ tr.trenner td{
           });
         })
         .then(function(d){
-          var teile = [
-            d.leads + ' Leads in Instantly',
-            d.mitToken + ' davon mit Token',
-            d.zugeordnet + ' zugeordnet'
-          ];
-          if(d.unbekannt) teile.push(d.unbekannt + ' Tokens kennen wir nicht');
+          // Das Sachliche zuerst, die Fehler danach und als solche kenntlich.
+          // Leads fremder Kampagnen sind kein Fehler und stehen deshalb grau.
+          var teile = [d.leads + ' Leads in Instantly', d.zugeordnet + ' zugeordnet'];
+          if(d.fremd) teile.push(d.fremd + ' gehören anderen Kampagnen');
           abErgebnis.innerHTML = sicher(teile.join(', ')) + '.<br>' +
             '<b>' + d.geaendert + '</b> Kontakte geändert, <b>' + d.neueEreignisse +
             '</b> neue Ereignisse.' +
@@ -1298,10 +1302,16 @@ tr.trenner td{
               ? '<br><span class="fehler">Abgebrochen bei ' + d.seiten + ' Seiten — ' +
                 'es gibt mehr Leads als die Sicherheitsgrenze zulässt.</span>'
               : '') +
-            (d.mitToken < d.leads
-              ? '<br><span class="fehler">' + (d.leads - d.mitToken) + ' Leads tragen keinen ' +
-                'Token. Deren Klicks sind niemandem zuzuordnen — beim Import in Instantly ' +
-                'muss die Spalte <code>Token</code> als Custom Variable zugeordnet werden.</span>'
+            (d.ohneZuordnung
+              ? '<br><span class="fehler"><b>' + d.ohneZuordnung + ' unserer eigenen Kontakte ' +
+                'liegen in Instantly ohne Token.</b> Für sie wird nichts gesammelt, und ihre ' +
+                'Klicks wären niemandem zuzuordnen — beim Import muss die Spalte ' +
+                '<code>Token</code> als Custom Variable zugeordnet werden. Das ist vor dem ' +
+                'Versand zu richten, nicht danach.</span>'
+              : '') +
+            (d.unbekannt
+              ? '<br><span class="fehler">' + d.unbekannt + ' Tokens kennen wir nicht. ' +
+                'Entweder nach einer DSGVO-Löschung verschwunden oder falsch übertragen.</span>'
               : '');
           zeigeStand();
         })

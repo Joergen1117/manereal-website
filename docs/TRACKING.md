@@ -249,8 +249,25 @@ nichts davon verlangt einen Eingriff.
 **Ein Lead ohne `Token` wird übersprungen.** Das ist der eine Handgriff, der
 beim Import in Instantly sitzen muss: Spalte `Token` → **Custom Variable**.
 Fehlt sie, laufen die Mails trotzdem — nur weiß das Dashboard nichts darüber,
-und die Klicks sind niemandem zuzuordnen. Der Abgleich meldet das: *„n Leads
-tragen keinen Token."* Diese Zeile ist keine Nebensache.
+und die Klicks sind niemandem zuzuordnen.
+
+Der Abgleich unterscheidet dabei zwei Fälle, und der Unterschied ist der
+zwischen *gehört uns nicht* und *ist kaputt*:
+
+| Befund | heißt | Meldung |
+|---|---|---|
+| Kein Token, Adresse **nicht** in `contacts` | eine fremde Kampagne im selben Arbeitsbereich | grau, kein Fehler |
+| Kein Token, Adresse **steht** in `contacts` | unsere Person, Zuordnung im Import vergessen | **rot, oben in der Übersicht** |
+| Token vorhanden, aber unbekannt | nach DSGVO-Löschung verschwunden oder falsch | **rot** |
+
+Die Adressen werden dafür nur verglichen, nie gespeichert. Ohne diese Trennung
+stünde bei jedem Lauf dieselbe Warnung da — und eine Warnung, an die man sich
+gewöhnt, wirkt nicht mehr.
+
+**Der Abgleich schreibt in Stapeln zu 500 Zeilen**, nicht Zeile für Zeile. Eine
+SQL-Runde je Lead kostet rund 62 ms; bei 2500 Kontakten wären das über fünf
+Minuten, und Vercel bricht nach 30 Sekunden ab. So braucht der Lauf ein paar
+Sekunden, unabhängig von der Listengröße.
 
 ### Kein Webhook, und warum das reicht
 

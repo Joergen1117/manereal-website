@@ -29,6 +29,11 @@ const { angemeldet } = require('./auswertung');
 
 const API = 'https://api.instantly.ai/api/v2';
 const JE_SEITE = 100;
+// Wie viele Zeilen in eine SQL-Runde gehen. Eine Runde je Lead braucht bei
+// 2500 Kontakten rund fünf Minuten -- Vercel bricht vorher ab. In Stapeln sind
+// es ein paar Sekunden. 500 ist groß genug, dass es schnell ist, und klein
+// genug, dass die Parameterliste handlich bleibt.
+const JE_STAPEL = 500;
 // Sicherheitsnetz: 50 Seiten sind 5000 Leads. Der österreichische Markt hat
 // rund 2000 bis 3000 Hausverwaltungen -- wird diese Grenze erreicht, ist etwas
 // anderes kaputt als die Kampagnengröße.
@@ -47,6 +52,14 @@ function zeit(wert) {
   if (!wert) return null;
   const d = new Date(wert);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+// Teilt eine Liste in Stapel. Eine leere Liste ergibt keinen Stapel, nicht
+// einen leeren -- sonst liefe eine SQL-Runde ohne Zeilen.
+function stuecke(liste, groesse) {
+  const raus = [];
+  for (let i = 0; i < liste.length; i += groesse) raus.push(liste.slice(i, i + groesse));
+  return raus;
 }
 
 /* --- Instantly ---------------------------------------------------------- */
@@ -134,67 +147,141 @@ function deuten(lead, jetzt) {
 
 /* --- Abgleich ----------------------------------------------------------- */
 
+// Leads, die keinen Token tragen, sind zweierlei -- und der Unterschied ist der
+// zwischen "gehört uns nicht" und "ist kaputt":
+//
+//   fremd            Die Adresse steht nicht in contacts. Eine andere Kampagne
+//                    im selben Arbeitsbereich, die uns nichts angeht. Kein
+//                    Fehler, keine Meldung.
+//   ohneZuordnung    Die Adresse steht in contacts, der Token fehlt trotzdem.
+//                    Dann wurde die Spalte beim Import in Instantly nicht als
+//                    Custom Variable zugeordnet -- unsere eigene Person, für die
+//                    nichts gesammelt wird. Das ist der Fehler, der auffallen
+//                    muss.
+//
+// Ohne diese Trennung stünde bei jedem Lauf eine Warnung, die immer zutrifft --
+// und eine Warnung, an die man sich gewöhnt, wirkt nicht mehr.
+async function ohneTokenEinordnen(sql, ohneToken) {
+  const adressen = ohneToken
+    .map((l) => String(l.email || '').trim().toLowerCase())
+    .filter(Boolean);
+  if (!adressen.length) return { fremd: ohneToken.length, ohneZuordnung: 0 };
+
+  const unsere = new Set();
+  for (const teil of stuecke(adressen, JE_STAPEL)) {
+    const zeilen = await sql.query(
+      'select lower(email) as email from contacts where lower(email) = any($1::text[])',
+      [teil],
+    );
+    zeilen.forEach((z) => unsere.add(z.email));
+  }
+
+  const eigene = adressen.filter((a) => unsere.has(a)).length;
+  return { fremd: ohneToken.length - eigene, ohneZuordnung: eigene };
+}
+
 async function abgleichen(sql, key) {
   const jetzt = new Date().toISOString();
   const { leads, seiten, abgebrochen } = await leadsHolen(key);
 
   const mitToken = leads.filter((l) => l.payload && l.payload.Token);
+  const ohneToken = leads.filter((l) => !(l.payload && l.payload.Token));
   const tokens = mitToken.map((l) => String(l.payload.Token).trim().toUpperCase());
 
-  // Welche dieser Tokens kennen wir? Alles andere gehört nicht zu uns oder ist
-  // nach einer DSGVO-Löschung verschwunden.
-  const bekannt = new Set(
-    tokens.length
-      ? (await sql`select token from contacts where token = any(${tokens})`).map((r) => r.token)
-      : [],
-  );
+  // Welche dieser Tokens kennen wir? Ein unbekannter Token ist etwas anderes
+  // als ein fehlender: Er war einmal unser und ist nach einer DSGVO-Löschung
+  // verschwunden -- oder er ist falsch. Beides gehört gemeldet.
+  const bekannt = new Set();
+  for (const teil of stuecke(tokens, JE_STAPEL)) {
+    const zeilen = await sql.query(
+      'select token from contacts where token = any($1::text[])',
+      [teil],
+    );
+    zeilen.forEach((z) => bekannt.add(z.token));
+  }
 
-  let geaendert = 0;
-  let neueEreignisse = 0;
+  // Erst alles deuten, dann in Stapeln schreiben. Eine SQL-Runde je Lead würde
+  // bei den 2000 bis 3000 Betrieben des Markts rund fünf Minuten brauchen --
+  // Vercel bricht nach maxDuration ab, mitten im Schreiben und ohne dass
+  // sync_state je erreicht würde. So sind es zwei Runden je Stapel.
+  const ereignisse = [];
+  const stand = [];
 
   for (const lead of mitToken) {
     const token = String(lead.payload.Token).trim().toUpperCase();
     if (!bekannt.has(token)) continue;
 
     const d = deuten(lead, jetzt);
+    const meta = JSON.stringify({ status: d.status });
 
-    for (const e of d.ereignisse) {
-      const treffer = await sql`
-        insert into mail_events (token, campaign, type, ts, step, meta, dedupe_key)
-        select ${token}, c.campaign, ${e.type}, ${e.ts}::timestamptz, null,
-               ${JSON.stringify({ status: d.status })}::jsonb, ${token + '|' + e.schluessel}
-          from contacts c where c.token = ${token}
-        on conflict (dedupe_key) do nothing
-        returning id`;
-      if (treffer.length) neueEreignisse++;
-    }
+    d.ereignisse.forEach((e) => {
+      ereignisse.push({ token, type: e.type, ts: e.ts, meta, key: token + '|' + e.schluessel });
+    });
+    stand.push({
+      token, sentAt: d.sentAt, bouncedAt: d.bouncedAt, repliedAt: d.repliedAt,
+      wort: d.wort, abgemeldet: d.abgemeldet,
+    });
+  }
 
+  let neueEreignisse = 0;
+  for (const teil of stuecke(ereignisse, JE_STAPEL)) {
+    // Die Kampagne kommt aus contacts, nicht aus Instantly: Der Wellenname
+    // gehört uns, Instantlys Kampagnen-ID sagt darüber nichts.
+    const zeilen = await sql.query(`
+      insert into mail_events (token, campaign, type, ts, step, meta, dedupe_key)
+      select e.token, c.campaign, e.type, e.ts, null, e.meta, e.schluessel
+        from unnest($1::text[], $2::text[], $3::timestamptz[], $4::jsonb[], $5::text[])
+             as e(token, type, ts, meta, schluessel)
+        join contacts c on c.token = e.token
+      on conflict (dedupe_key) do nothing
+      returning id`, [
+      teil.map((e) => e.token), teil.map((e) => e.type), teil.map((e) => e.ts),
+      teil.map((e) => e.meta), teil.map((e) => e.key),
+    ]);
+    neueEreignisse += zeilen.length;
+  }
+
+  let geaendert = 0;
+  for (const teil of stuecke(stand, JE_STAPEL)) {
     // optout_at nur beim ersten Erkennen setzen. Instantly gibt den Zustand
     // heraus, nicht den Zeitpunkt -- ein zweiter Abgleich darf ihn nicht
     // nachträglich verschieben.
-    const zeilen = await sql`
-      update contacts set
-        mail_sent_at    = ${d.sentAt}::timestamptz,
-        mail_bounced_at = ${d.bouncedAt}::timestamptz,
-        mail_replied_at = ${d.repliedAt}::timestamptz,
-        mail_status     = ${d.wort},
-        optout_at       = case when ${d.abgemeldet} then coalesce(optout_at, now()::timestamptz)
-                               else optout_at end
-      where token = ${token}
-        and (mail_status is distinct from ${d.wort}
-             or mail_sent_at is distinct from ${d.sentAt}::timestamptz
-             or mail_bounced_at is distinct from ${d.bouncedAt}::timestamptz
-             or mail_replied_at is distinct from ${d.repliedAt}::timestamptz
-             or (${d.abgemeldet} and optout_at is null))
-      returning token`;
-    if (zeilen.length) geaendert++;
+    const zeilen = await sql.query(`
+      update contacts c set
+        mail_sent_at    = u.sent_at,
+        mail_bounced_at = u.bounced_at,
+        mail_replied_at = u.replied_at,
+        mail_status     = u.wort,
+        optout_at       = case when u.abgemeldet then coalesce(c.optout_at, now())
+                               else c.optout_at end
+      from unnest($1::text[], $2::timestamptz[], $3::timestamptz[], $4::timestamptz[],
+                  $5::text[], $6::boolean[])
+           as u(token, sent_at, bounced_at, replied_at, wort, abgemeldet)
+      where c.token = u.token
+        and (c.mail_status     is distinct from u.wort
+             or c.mail_sent_at    is distinct from u.sent_at
+             or c.mail_bounced_at is distinct from u.bounced_at
+             or c.mail_replied_at is distinct from u.replied_at
+             or (u.abgemeldet and c.optout_at is null))
+      returning c.token`, [
+      teil.map((s) => s.token), teil.map((s) => s.sentAt), teil.map((s) => s.bouncedAt),
+      teil.map((s) => s.repliedAt), teil.map((s) => s.wort), teil.map((s) => s.abgemeldet),
+    ]);
+    geaendert += zeilen.length;
   }
+
+  const { fremd, ohneZuordnung } = await ohneTokenEinordnen(sql, ohneToken);
 
   const bericht = {
     leads: leads.length,
     mitToken: mitToken.length,
     zugeordnet: tokens.filter((t) => bekannt.has(t)).length,
+    // Token vorhanden, aber uns unbekannt -- gelöscht oder falsch.
     unbekannt: tokens.filter((t) => !bekannt.has(t)).length,
+    // Kein Token, aber die Adresse ist unsere -- Zuordnung im Import vergessen.
+    ohneZuordnung,
+    // Kein Token, Adresse nicht unsere -- eine fremde Kampagne, kein Fehler.
+    fremd,
     geaendert,
     neueEreignisse,
     seiten,

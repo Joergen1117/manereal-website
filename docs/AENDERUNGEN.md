@@ -70,17 +70,50 @@ heißt.** Dagegen drei Dinge:
 ### Was der erste echte Lauf zutage gefördert hat
 
 Von **134 Leads** im Instantly-Arbeitsbereich tragen nur **67** die Custom
-Variable `Token`. Für die übrigen sammelt der Abgleich nichts, und ihre Klicks
-wären niemandem zuzuordnen. Der Abgleich meldet das jetzt von sich aus unter
-dem Knopf in der Verwaltung. **Vor der ersten Welle zu klären** — nachträglich
-lässt sich einem bereits angeschriebenen Lead kein Token mehr unterschieben, der
-zu einem Link passt, der schon draußen ist.
+Variable `Token` — und es sind **zweimal dieselben 67 Personen**, in zwei
+Kampagnen. Alle 67 Adressen stehen in beiden und alle 67 in unserer Datenbank:
+
+| Kampagne | Zustand | Sequenz | Token |
+|---|---|---|---|
+| `Manereal Burgenland` | Entwurf | keine | **nein** |
+| `julian_test_01` | pausiert | Betreff „TEST 01" | ja |
+
+**Die Kampagne, die hinausgehen soll, ist die ohne Token.** Würde ihre Sequenz
+geschrieben und gestartet, sammelte das Tracking nichts — genau der stille
+Fehler, vor dem [UMSTELLUNG-INSTANTLY.md](UMSTELLUNG-INSTANTLY.md) warnt. Vor
+der ersten Welle zu richten.
+
+Damit diese Meldung nicht zur Gewohnheit wird, **unterscheidet der Abgleich jetzt
+zwei Fälle**: Ein Lead ohne Token, dessen Adresse *nicht* in `contacts` steht,
+gehört einer fremden Kampagne und wird grau gezählt. Steht sie dort, ist es
+unsere Person mit fehlender Zuordnung — und das steht rot, oben in der
+Übersicht. Die Adressen werden dafür nur verglichen, nie gespeichert.
+
+### Der Abgleich hält jetzt bis zur echten Wellengröße durch
+
+Er machte **eine SQL-Runde je Lead, nacheinander**. Gegen Neon kostet eine Runde
+rund 62 ms — bei 67 Kontakten sind das 8 Sekunden, bei den 2.000 bis 3.000
+Betrieben des österreichischen Markts **fünf bis sechs Minuten**. Vercel bricht
+nach `maxDuration: 30` ab, mitten im Schreiben und ohne dass `sync_state` je
+erreicht würde. Der Abgleich funktionierte bisher nur, weil die Liste klein ist.
+
+Jetzt wird in **Stapeln zu 500** geschrieben, über `unnest` statt Zeile für
+Zeile: zwei Runden je Stapel. Gemessen: dieselben 134 Leads in **1,2 statt 8
+Sekunden**, und die Laufzeit hängt kaum noch an der Listengröße.
+
+### Eine Export-Spalte hieß, was sie nicht ist
+
+Sie nannte `versendet_am`, was Instantly als `timestamp_last_contact`
+herausgibt — den **letzten** Versand, nicht den ersten, und er wandert mit jedem
+Sequenzschritt mit. Heißt jetzt `zuletzt_versendet_am`. Die einzelnen Versände
+stehen in der Chronik des Detailblatts.
 
 ### Geändert
 
 | Datei | was |
 |---|---|
 | [`api/auswertung.js`](../api/auswertung.js) | `abgleichStand()`, Mail-Zahlen im Trichter, Mail-Spalten bei Personen und im Detailblatt, fünf neue Export-Spalten, Aktion `?a=stand` |
+| [`api/instantly.js`](../api/instantly.js) | Schreiben in Stapeln statt je Lead, `ohneTokenEinordnen()` — fremd oder eigen |
 | [`auswertung.html`](../auswertung.html) | Trichter, Spalte *Mail*, Mail-Chronik, Knopf *Jetzt abgleichen*, Stand-Balken, CSS für beides |
 | [`docs/TRACKING.md`](TRACKING.md) | neuer Abschnitt *Was Instantly beisteuert*, zwei ENV-Variablen, Dashboard-Abschnitt nachgezogen |
 | [`docs/UMSTELLUNG-INSTANTLY.md`](UMSTELLUNG-INSTANTLY.md) | CSV-Kopfzeile berichtigt: `Email,Firstname,Lastname,Company,Token` statt `Email,Name,Company,Link` |
@@ -91,7 +124,11 @@ zu einem Link passt, der schon draußen ist.
 Gegen die echte Datenbank und die echte Instantly-API geprüft: alle sechs
 Abfragen antworten mit 200, das Dashboard rendert alle fünf Reiter ohne eine
 einzige Konsolenmeldung, bei 390 px Breite gibt es kein Querscrollen, und der
-Abgleich lief von Hand durch (134 Leads, 67 zugeordnet, 0 Änderungen).
+Abgleich lief von Hand durch (134 Leads, 67 zugeordnet, 0 Änderungen, 1,2 s).
+Die drei neuen SQL-Formen — mehrarmiges `unnest` mit leeren Zeitstempeln und
+`jsonb`, der Stapel-Update gegen `contacts`, der Adressvergleich in
+Kleinschreibung — einzeln gegen die Datenbank geprüft, bevor sie schreiben
+durften.
 
 **Ungeprüft bleibt alles, was einen echten Versand voraussetzt** — ein
 `sent`-Ereignis, ein Bounce, eine Antwort, eine Abmeldung. Es ist noch keine
