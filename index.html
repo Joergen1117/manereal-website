@@ -22,6 +22,15 @@ window.__mr = (function () {
 </script>
 <title>Manereal Hausverwaltung – Ihr Lebenswerk. Unsere Verantwortung.</title>
 <meta name="description" content="Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.">
+
+<!-- Tab-Symbol. Die Bildmarke steht auf weissem Grund, nicht frei: Das Navy
+     der linken Haelfte hat gegen eine dunkle Tableiste 1,1:1 Kontrast und
+     verschwaende dort. Die Kachel liest sich in hellem und dunklem
+     Browser-Design gleich. Erzeugt aus assets/images/brand/logo.png. -->
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="assets/images/brand/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/images/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#0E2A47">
 <style>
 /* Inter, lokal eingebunden. Variable Schrift: eine Datei deckt die
    Schnitte 400–800 ab. Nur latin und latin-ext — kyrillische, griechische
@@ -489,7 +498,14 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 /* Der Trennstrich sitzt hier, nicht mehr innerhalb von „Die Menschen
    dahinter". Er trennt jetzt das Team vom Beirat — also zwei
    Personenkreise voneinander — statt das Team in sich zu zerteilen.
-   Gleiche Breite wie zuvor (1000 px), damit die Optik gleich bleibt. */
+   Gleiche Breite wie zuvor (1000 px), damit die Optik gleich bleibt.
+
+   Stand 28.09.2026: Die Sektion #beirat ist im HTML auskommentiert, diese
+   beiden Regeln greifen also gerade ins Leere. Sie bleiben absichtlich
+   stehen, damit das Wiedereinsetzen des Beirats eine reine HTML-Aenderung
+   ist. Auf „Die Menschen dahinter" folgt derzeit direkt der getoente
+   Block #versprechen-4 -- der Farbwechsel trennt dort von selbst, ein
+   Strich wird nicht gebraucht. */
 #beirat{padding-top:0}
 #beirat .container::before{content:"";display:block;max-width:1000px;
   margin:0 auto var(--s-block);border-top:1px solid var(--line)}
@@ -953,6 +969,13 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   </div>
 </section>
 
+<!-- BEIRAT AUSGEBLENDET fuer den Launch (Julia, 28.09.2026).
+     Wortlaut und Bild bleiben unveraendert stehen, damit die Sektion
+     wieder hereingenommen werden kann: dazu nur diese Kommentarklammer
+     entfernen. Das Portrait liegt weiterhin unter
+     assets/images/people/nikolaus-mueller.jpg, das CSS zu #beirat steht
+     unveraendert weiter oben.
+
 <section id="beirat">
   <div class="container center">
     <span class="eyebrow">Beirat</span>
@@ -966,6 +989,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     </div>
   </div>
 </section>
+-->
 
 <section id="versprechen-4">
   <div class="container center">
