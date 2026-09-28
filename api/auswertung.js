@@ -753,6 +753,35 @@ async function exportieren(sql, kampagne, basis) {
   );
 }
 
+// Löscht eine gesamte Kampagne: Kontakte, Besuche und die daraus abgeleiteten
+// Ereignisse sowie die Mail-Chronik. Anders als die einzelne Kontaktlöschung
+// (DSGVO, anonymisiert nur) verschwinden hier auch die Besuchsdaten -- gedacht
+// für Test- oder Fehlwellen, nicht für Löschaufforderungen einzelner Personen.
+//
+// events hängt per "on delete cascade" an visits, das Löschen von visits nimmt
+// sie also mit. mail_events und visits hängen beide per "on delete set null"
+// an contacts und müssen deshalb vor oder unabhängig von contacts eigens
+// gelöscht werden, sonst blieben sie als verwaiste, aber weiterhin der
+// Kampagne zugeordnete Zeilen stehen.
+async function kampagneLoeschen(sql, kampagne) {
+  const [vorher] = await sql.query(
+    `select
+       (select count(*)::int from contacts where campaign = $1)    as kontakte,
+       (select count(*)::int from visits where campaign = $1)      as besuche,
+       (select count(*)::int from mail_events where campaign = $1) as mail
+     `,
+    [kampagne],
+  );
+
+  await sql.transaction([
+    sql.query('delete from mail_events where campaign = $1', [kampagne]),
+    sql.query('delete from visits where campaign = $1', [kampagne]),
+    sql.query('delete from contacts where campaign = $1', [kampagne]),
+  ]);
+
+  return vorher;
+}
+
 /* --- Verteiler ---------------------------------------------------------- */
 
 module.exports = async function handler(req, res) {
@@ -879,6 +908,21 @@ module.exports = async function handler(req, res) {
       // Durch "on delete set null" in visits bleibt der Verlauf anonym erhalten.
       await sql.query('delete from contacts where token = $1', [token]);
       return res.status(200).json({ ok: true });
+    }
+
+    // Löscht mehr als ein Kontakt auf einmal -- die Bestätigung verlangt
+    // deshalb den exakt getippten Kampagnennamen, nicht nur einen Klick.
+    if (aktion === 'kampagne_loeschen') {
+      if (req.method !== 'POST') return res.status(405).json({ fehler: 'Nur POST.' });
+      const body = await leseBody(req);
+      const ziel = text(body.kampagne, 80);
+      const bestaetigung = text(body.bestaetigung, 80);
+      if (!ziel) return res.status(400).json({ fehler: 'Keine Kampagne angegeben.' });
+      if (bestaetigung !== ziel) {
+        return res.status(400).json({ fehler: 'Bestätigung stimmt nicht mit der Kampagne überein.' });
+      }
+      const geloescht = await kampagneLoeschen(sql, ziel);
+      return res.status(200).json({ ok: true, geloescht });
     }
 
     return res.status(404).json({ fehler: 'Unbekannte Abfrage.' });

@@ -1230,7 +1230,20 @@ tr.trenner td{
       '<p class="unter">Zwei Schalter, weil einer im Zweifel vergessen wird. In Vercel die Variable ' +
       '<b>TRACKING_PERSONENBEZUG</b> auf <b>0</b> setzen, und in <b>index.html</b> im Messblock ' +
       '<b>PERSONENBEZUG</b> auf <b>false</b>. Danach werden Besuche weiter gezählt, aber keiner ' +
-      'Person mehr zugeordnet. Bestehende Daten bleiben unverändert.</p></section>';
+      'Person mehr zugeordnet. Bestehende Daten bleiben unverändert.</p></section>' +
+
+      '<section class="karte"><h2>Kampagne löschen</h2>' +
+      '<p class="unter">Entfernt eine ganze Kampagne endgültig aus der Datenbank — Kontakte, ' +
+      'Besuche, Ereignisse und Mail-Chronik. Anders als das Löschen eines einzelnen Kontakts bleibt ' +
+      'hier nichts anonym stehen. Gedacht für Fehlwellen oder Testdaten, nicht für die ' +
+      'Löschaufforderung einer einzelnen Person — dafür gibt es den Knopf im Personenblatt.</p>' +
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">' +
+      '<label for="kampagneLoeschenWahl">Kampagne</label>' +
+      '<select id="kampagneLoeschenWahl" style="min-width:260px"><option value="">wird geladen …</option></select>' +
+      '<button class="knopf gefahr" id="kampagneLoeschen" disabled>Kampagne endgültig löschen</button>' +
+      '</div>' +
+      '<p id="kampagneLoeschenErgebnis" style="margin-top:14px"></p>' +
+      '</section>';
 
     var datei = document.getElementById('datei');
     var kampagne = document.getElementById('kampagne');
@@ -1326,6 +1339,61 @@ tr.trenner td{
     document.getElementById('ausgeben').addEventListener('click', function(){
       var p = abfrage(); p.set('a','export');
       location.href = '/api/auswertung?' + p.toString();
+    });
+
+    var lwWahl = document.getElementById('kampagneLoeschenWahl');
+    var lwKnopf = document.getElementById('kampagneLoeschen');
+    var lwErgebnis = document.getElementById('kampagneLoeschenErgebnis');
+
+    hole('uebersicht').then(function(d){
+      lwWahl.innerHTML = '<option value="">— Kampagne wählen —</option>';
+      d.kampagnen.filter(function(k){ return k.campaign; }).forEach(function(k){
+        var o = document.createElement('option');
+        o.value = k.campaign;
+        o.textContent = k.campaign + ' (' + k.kontakte + ' Kontakte)';
+        lwWahl.appendChild(o);
+      });
+    }).catch(function(){
+      lwWahl.innerHTML = '<option value="">Kampagnen konnten nicht geladen werden</option>';
+    });
+
+    lwWahl.addEventListener('change', function(){
+      lwKnopf.disabled = !lwWahl.value;
+      lwErgebnis.textContent = '';
+    });
+
+    lwKnopf.addEventListener('click', function(){
+      var name = lwWahl.value;
+      if(!name) return;
+      // Ein Klick allein reicht bei diesem Umfang nicht -- der Name muss
+      // exakt eingetippt werden, damit kein versehentlicher zweiter Klick
+      // eine Kampagne mitsamt aller Kontakte und Besuche löscht.
+      var eingabe = prompt(
+        'Das löscht die Kampagne „' + name + '“ endgültig — alle Kontakte, Besuche, ' +
+        'Ereignisse und die Mail-Chronik. Das lässt sich nicht rückgängig machen.\n\n' +
+        'Zum Bestätigen den Namen der Kampagne eintippen:'
+      );
+      if(eingabe === null) return;
+      if(eingabe.trim() !== name){
+        lwErgebnis.innerHTML = '<span class="fehler">Eingabe stimmte nicht mit dem Kampagnennamen ' +
+          'überein — nichts wurde gelöscht.</span>';
+        return;
+      }
+      lwKnopf.disabled = true;
+      lwErgebnis.textContent = 'wird gelöscht …';
+      schicke('kampagne_loeschen', {kampagne:name, bestaetigung:eingabe.trim()}).then(function(d){
+        if(d.fehler){ lwErgebnis.innerHTML = '<span class="fehler">' + sicher(d.fehler) + '</span>'; return; }
+        var g = d.geloescht || {};
+        lwErgebnis.textContent = 'Gelöscht: ' + (g.kontakte || 0) + ' Kontakte, ' +
+          (g.besuche || 0) + ' Besuche, ' + (g.mail || 0) + ' Mail-Ereignisse.';
+        Array.prototype.slice.call(lwWahl.options).forEach(function(o){
+          if(o.value === name) o.remove();
+        });
+        lwWahl.value = '';
+        kampagnenGefuellt = false;
+      }).catch(function(e){
+        lwErgebnis.innerHTML = '<span class="fehler">' + sicher(e.message) + '</span>';
+      }).then(function(){ lwKnopf.disabled = !lwWahl.value; });
     });
   }
 
