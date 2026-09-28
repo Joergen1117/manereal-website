@@ -54,6 +54,35 @@ function zuVieleVersuche(ip) {
 
 /* --- Anmeldung ---------------------------------------------------------- */
 
+// Passwoerter reisen durch WhatsApp, Outlook und Word, bevor sie hier
+// ankommen. Diese Wege haengen Zeichen an, die auf dem Bildschirm nicht zu
+// sehen sind, den byteweisen Vergleich aber scheitern lassen:
+//
+//   U+200B..U+200D  Zero-Width-Space, -Non-Joiner, -Joiner
+//   U+200E, U+200F  Schreibrichtungsmarken
+//   U+00AD          weiches Trennzeichen
+//   U+2060, U+FEFF  Wortverbinder und Byte-Order-Mark
+//   U+00A0 u. a.    geschuetzte und typografische Leerzeichen
+//
+// JavaScripts trim() faengt davon nur U+00A0 -- die Nullbreiten-Zeichen
+// ueberleben und sind fuer den Anwender unauffindbar. Er tippt scheinbar
+// dasselbe und bekommt "Passwort stimmt nicht".
+//
+// Beide Seiten werden gleich behandelt, denn auch die Variable in Vercel
+// kann beim Einfuegen so ein Zeichen abbekommen haben.
+//
+// Was ausdruecklich NICHT angefasst wird: Gross- und Kleinschreibung und
+// jedes sichtbare Zeichen. Ein Passwort lockerer zu pruefen, als es gesetzt
+// wurde, waere ein Sicherheitsverlust -- hier faellt nur weg, was ohnehin
+// niemand eingeben wollte.
+function normalisiere(wert) {
+  return String(wert == null ? '' : wert)
+    .normalize('NFKC')
+    .replace(/[­​-‏⁠﻿]/g, '')
+    .replace(/[   -   　]/g, ' ')
+    .trim();
+}
+
 function gleich(a, b) {
   const x = Buffer.from(String(a));
   const y = Buffer.from(String(b));
@@ -731,7 +760,7 @@ module.exports = async function handler(req, res) {
   const aktion = text(url.searchParams.get('a'), 20) || 'uebersicht';
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
 
-  const passwort = (process.env.AUSWERTUNG_PASSWORT || '').trim();
+  const passwort = normalisiere(process.env.AUSWERTUNG_PASSWORT);
   const geheim = (process.env.AUSWERTUNG_SECRET || '').trim();
   if (!passwort || !geheim) {
     console.error('Auswertung: AUSWERTUNG_PASSWORT oder AUSWERTUNG_SECRET fehlt.');
@@ -743,7 +772,15 @@ module.exports = async function handler(req, res) {
     if (zuVieleVersuche(ip)) return res.status(429).json({ fehler: 'Zu viele Versuche. Bitte kurz warten.' });
     let body;
     try { body = await leseBody(req); } catch (err) { return res.status(400).json({ fehler: 'Unlesbar.' }); }
-    if (!gleich(text(body.passwort, 200), passwort)) {
+    const eingabe = normalisiere(text(body.passwort, 200));
+    if (!gleich(eingabe, passwort)) {
+      // Nur die Laengen, nie das Eingetippte: Steht hier eine andere Zahl als
+      // erwartet, ist etwas mitgereist oder es wurde wirklich etwas anderes
+      // eingegeben. Stimmen die Laengen ueberein, liegt es an den Zeichen
+      // selbst -- etwa Gross- und Kleinschreibung. Nachzulesen in Vercel
+      // unter Logs.
+      console.error('Auswertung: Anmeldung gescheitert (empfangen '
+        + eingabe.length + ' Zeichen, erwartet ' + passwort.length + ').');
       return res.status(401).json({ fehler: 'Passwort stimmt nicht.' });
     }
     setzeCookie(res, req, signiere(Date.now() + GUELTIG_MS), Math.floor(GUELTIG_MS / 1000));
