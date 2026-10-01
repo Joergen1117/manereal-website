@@ -11,6 +11,28 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 41 — Impressum: Anschrift und Geschäftsführung korrigiert (01.10.2026)
+
+Zwei inhaltliche Korrekturen auf Anweisung von Niklas Gruber, beide im
+Impressum von [index.html](../index.html) und in
+[content/inhalte.md](../content/inhalte.md) nachgezogen:
+
+1. **Anschrift** — die Zeile „Gruber Umzüge“ entfällt. Es bleiben
+   Firmenwortlaut, Straße und Ort.
+2. **Geschäftsführung** — Niklas Gruber statt Claus Gruber.
+3. **Rechtsform** — „Kommanditgesellschaft“ statt „Gesellschaft mit
+   beschränkter Haftung“. Der Firmenwortlaut lautet „Ges.m.b.H & CoKG“;
+   die bisherige Angabe widersprach ihm.
+
+**Offen:** Ob Geschäftsführung, Rechtsform und Firmenbuchnummer so im
+Firmenbuch stehen, ist nicht gegengeprüft — vor Veröffentlichung mit
+einem Firmenbuchauszug abgleichen.
+
+An Gestaltung, Markup-Struktur und Datenschutzerklärung wurde nichts
+geändert.
+
+---
+
 ## 40 — Das Dashboard weiß jetzt, was vor dem Klick geschah (28.09.2026)
 
 **An der Website selbst wurde nichts geändert.** [index.html](../index.html) ist

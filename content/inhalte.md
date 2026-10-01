@@ -318,17 +318,22 @@ Prüfung liegt nicht im Gestaltungsauftrag.
 Ersetzen die Platzhalter des Erstentwurfs. Telefon und Fax sind auf
 Julias Wunsch **nicht** veröffentlicht.
 
-- Medieninhaber: Int. Möbelspedition R. Gruber Ges.m.b.H & CoKG
-  (Gruber Umzüge), Winetzhammerstraße 3, 4030 Linz, Österreich
+- Medieninhaber: Int. Möbelspedition R. Gruber Ges.m.b.H & CoKG,
+  Winetzhammerstraße 3, 4030 Linz, Österreich
+  *(„Gruber Umzüge“ am 01.10.2026 auf Anweisung von Niklas Gruber aus
+  der Anschrift entfernt.)*
 - E-Mail: kontakt@manereal.at (Julia, 22.09.2026)
-- Rechtsform: Gesellschaft mit beschränkter Haftung
+- Rechtsform: Kommanditgesellschaft *(01.10.2026 — zuvor „Gesellschaft
+  mit beschränkter Haftung“, im Widerspruch zum Firmenwortlaut
+  „Ges.m.b.H & CoKG“.)*
 - Firmenbuchnummer: FN23338X · Firmenbuchgericht: Landesgericht Linz
 - UID-Nummer: ATU 23125605
 - Unternehmensgegenstand: Spedition
 - Ort der Gewerbeberechtigung: Winetzhammerstraße 3, 4030 Linz, Österreich
 - Kammer: Wirtschaftskammer Oberösterreich
 - Aufsichtsbehörde: Magistrat der Stadt Linz/Donau
-- Geschäftsführung: Claus Gruber
+- Geschäftsführung: Niklas Gruber *(01.10.2026, Korrektur von Niklas
+  Gruber — zuvor stand hier Claus Gruber.)*
 
 Gestalterisch relevant: reine Textseiten, im Erstentwurf mit
 `data-solid="1"`, also ohne Hero-Bild und mit durchgehend deckender
