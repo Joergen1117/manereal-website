@@ -108,6 +108,19 @@ gegen Googles Spam-Richtlinien) und eigene Adressen je Bereich.
 
 ---
 
+## 44 — Video steht still, solange das Formular offen ist (02.10.2026)
+
+Auf Anweisung von Julia. Öffnet sich der Dialog „Vertrauliches
+Erstgespräch“, hält das Video im Kopfbereich der Startseite an; beim
+Schließen (Kreuz, Klick daneben, Escape, „Schließen“ nach dem Absenden)
+läuft es an derselben Stelle weiter. War das Video schon vorher
+angehalten, bleibt es das auch danach.
+
+Nur Skript in [index.html](../index.html), kein Markup, kein CSS, kein
+Wortlaut.
+
+---
+
 ## 43 — Kontaktformular: Fehlertexte je Fehlerfall (02.10.2026)
 
 Auf Anweisung von Julia. Bisher gab es eine einzige Meldung für alles;

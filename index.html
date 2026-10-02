@@ -1358,7 +1358,22 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
     boxShadow: '0 24px 64px rgba(14,42,71,.28)'
   };
 
+  // Das Video im Kopfbereich steht still, solange der Dialog offen ist.
+  var heroVideo = document.querySelector('.hero-media video');
+  var videoHeld = false;
+  function holdVideo(hold){
+    if(!heroVideo) return;
+    if(hold){
+      if(!heroVideo.paused){ heroVideo.pause(); videoHeld = true; }
+    } else if(videoHeld){
+      videoHeld = false;
+      var p = heroVideo.play();
+      if(p && p.catch) p.catch(function(){});
+    }
+  }
+
   function openModal(){
+    holdVideo(true);
     formWrap.hidden = false; done.hidden = true;
     if(running){ running.cancel(); running = null; }
     modal.classList.add('open');
@@ -1391,6 +1406,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   }
 
   function closeModal(){
+    holdVideo(false);
     if(running){ running.cancel(); running = null; }
     var start = reduce.matches ? null : fromButton();
     if(!start){
