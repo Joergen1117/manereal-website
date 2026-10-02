@@ -11,6 +11,26 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 46 — Video: Standbild bei reduzierter Bewegung, `preload` (02.10.2026)
+
+Auf Anweisung von Julia.
+
+- **Reduzierte Bewegung:** Ist am Gerät „Bewegung reduzieren“
+  eingestellt (`prefers-reduced-motion`), zeigt der Kopfbereich der
+  Startseite nur das Standbild `hero-still.jpg`. Das Video wird dann
+  weder abgespielt noch geladen (CLAUDE.md, Regel 3). Bisher blendete
+  die Einstellung nur den Splash aus.
+- **`preload="metadata"`** statt `preload="auto"` am Video. Solange
+  `autoplay` gesetzt ist, lädt der Browser trotzdem so viel, wie er zum
+  Abspielen braucht — die Ladezeit sinkt erst mit einer kleineren Datei.
+
+Offen: `hero-video.mp4` ist 17,3 MB groß und wird neu komprimiert.
+
+Nur Markup-Attribut und Skript in [index.html](../index.html), kein
+CSS, kein Wortlaut.
+
+---
+
 ## 45 — Auffindbarkeit: robots.txt, Seitentitel, Eckdaten im Kopf (02.10.2026)
 
 Auf Anweisung von Julia.

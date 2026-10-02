@@ -654,7 +654,19 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <div class="hero-inner">
     <div class="container">
       <div class="hero-media">
-        <video src="assets/images/stock/hero-video.mp4" poster="assets/images/stock/hero-still.jpg" autoplay="" muted="" loop="" playsinline="" preload="auto"></video>
+        <video src="assets/images/stock/hero-video.mp4" poster="assets/images/stock/hero-still.jpg" autoplay="" muted="" loop="" playsinline="" preload="metadata"></video>
+        <script>
+        // Reduzierte Bewegung: nur das Standbild. Ohne Quelle laedt der
+        // Browser das Video gar nicht erst und zeigt das Poster.
+        (function(){
+          var v = document.currentScript.previousElementSibling;
+          if(!v || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          v.removeAttribute('autoplay');
+          v.pause();
+          v.removeAttribute('src');
+          v.load();
+        })();
+        </script>
         <div class="hero-overlay">
           <h1><span class="h1-kicker">Nachfolge und Verkauf Ihrer Hausverwaltung in Österreich</span>Ihr Lebenswerk.<br>Unsere Verantwortung.</h1>
           <p class="lead">Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.</p>
