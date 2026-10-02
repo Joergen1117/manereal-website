@@ -11,6 +11,70 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 45 — Auffindbarkeit: robots.txt, Seitentitel, Eckdaten im Kopf (02.10.2026)
+
+Auf Anweisung von Julia.
+
+- **[robots.txt](../robots.txt)** neu: alles frei lesbar, nur `/api/`
+  gesperrt (ein Bot-Abruf von `/api/track` würde als Besuch gezählt).
+  `/auswertung` steht bewusst nicht darin — die Seite trägt `noindex` per
+  Header, und die robots.txt ist öffentlich.
+- **Seitentitel** (Wortlaut, Regel 6): „Manereal Hausverwaltung – Ihr
+  Lebenswerk. Unsere Verantwortung.“ wird zu „Hausverwaltung verkaufen –
+  Nachfolge in Österreich | Manereal“. Die Titel der übrigen Bereiche
+  enden auf „| Manereal“ statt „– Manereal Hausverwaltung“. In
+  [content/inhalte.md](../content/inhalte.md) nachgezogen.
+- **Im `<head>`**, unsichtbar: `canonical` auf `https://manereal.at/`,
+  Open-Graph-Angaben für die Link-Vorschau, strukturierte Daten
+  (`Organization`, `WebSite`). Die strukturierten Daten nennen bewusst
+  keine Gesellschaft, Anschrift, Firmenbuch- oder UID-Nummer — die
+  Gesellschaft wird noch geändert und ist dann nachzutragen.
+
+- **[sitemap.xml](../sitemap.xml)** neu, eine Adresse; in der robots.txt
+  eingetragen. Gedacht zum Einreichen in der Google Search Console.
+- **Beschreibung** (`description`, Wortlaut): neu „Sie möchten Ihre
+  Hausverwaltung verkaufen oder die Nachfolge regeln? Manereal übernimmt
+  Hausverwaltungen in Österreich – diskret, fair bewertet, mit
+  Kontinuität für Team und Kunden.“ Der sichtbare Lead-Satz im
+  Kopfbereich bleibt.
+- **Überschriften** (Wortlaut):
+  - Startseite: über dem Leitsatz die Sachzeile „Nachfolge und Verkauf
+    Ihrer Hausverwaltung in Österreich“, als Teil der `h1`
+    (`.h1-kicker`, einzige CSS-Änderung). Der Leitsatz selbst bleibt.
+  - Unser Ansatz: „Ihre Hausverwaltung in guten Händen“ wird zu
+    „Hausverwaltung verkaufen – in guten Händen“.
+  - FAQ: „Was Verkäufer uns am häufigsten fragen“ wird zu
+    „Hausverwaltung verkaufen: die häufigsten Fragen“.
+- **Logo-Alternativtext**: „Manereal“ statt „Manereal Hausverwaltung“ —
+  das Wort steht nicht mehr im Logo.
+
+Bewusst nicht gemacht: versteckter Text mit Suchbegriffen (verstößt
+gegen Googles Spam-Richtlinien) und eigene Adressen je Bereich.
+
+**Nachtrag am selben Tag:**
+
+- Die Seite wird unter `manereal.at` ausgeliefert, `www.manereal.at`
+  leitet dorthin weiter (307). `canonical`, Sitemap, robots.txt und
+  strukturierte Daten zeigen deshalb auf `https://manereal.at/`.
+- **Fließtext** (Wortlaut), je wenige Wörter ergänzt:
+  - „Wir suchen Unternehmer, …“ wird zu „Wir suchen Inhaber von
+    Hausverwaltungen, deren Lebenswerk wir weiterführen dürfen“
+    (Desktop- und Handy-Fassung).
+  - Unser Ansatz, Einleitung: „… Ihre Hausverwaltung verkaufen und in
+    guten Händen wissen?“
+  - FAQ: „Muss ich meine Hausverwaltung sofort ganz verkaufen?“, „Wie
+    lange dauert der Verkauf einer Hausverwaltung?“, „Was ist meine
+    Hausverwaltung wert, und wie wird der Kaufpreis ermittelt?“ Die
+    Antworten sind unverändert.
+- **Fünf neue FAQ** (jetzt 14): Ablauf des Verkaufs, kein Nachfolger,
+  welche Hausverwaltungen, Kunden nach dem Verkauf, wer hinter Manereal
+  steht. Die Antworten enthalten keine neuen Aussagen; sie sind aus
+  Sätzen zusammengesetzt, die an anderer Stelle der Seite stehen
+  (Kriterien, Ablauf, Versprechen, Über Manereal). Ändert sich dort
+  etwas, sind diese Antworten mitzuziehen.
+
+---
+
 ## 43 — Kontaktformular: Fehlertexte je Fehlerfall (02.10.2026)
 
 Auf Anweisung von Julia. Bisher gab es eine einzige Meldung für alles;

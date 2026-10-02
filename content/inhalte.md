@@ -19,13 +19,22 @@ Stand: 2026-09-17 · Quelle: `index.html` (gebündelter Erstentwurf)
 
 | Route | Titel |
 |---|---|
-| `start` | Manereal Hausverwaltung – Ihr Lebenswerk. Unsere Verantwortung. |
-| `nachfolge` | Unser Ansatz – Manereal Hausverwaltung |
-| `versprechen` | Unser Versprechen – Manereal Hausverwaltung |
-| `ueber-uns` | Über Manereal – Manereal Hausverwaltung |
-| `kontakt` | Kontakt – Manereal Hausverwaltung |
-| `impressum` | Impressum – Manereal Hausverwaltung |
-| `datenschutz` | Datenschutz – Manereal Hausverwaltung |
+| `start` | Hausverwaltung verkaufen – Nachfolge in Österreich \| Manereal |
+| `nachfolge` | Unser Ansatz \| Manereal |
+| `versprechen` | Unser Versprechen \| Manereal |
+| `ueber-uns` | Über Manereal |
+| `kontakt` | Kontakt \| Manereal |
+| `impressum` | Impressum \| Manereal |
+| `datenschutz` | Datenschutz \| Manereal |
+
+Geändert am 02.10.2026 auf Anweisung von Julia: Der Zusatz „Manereal
+Hausverwaltung“ entfällt, weil er eine Hausverwaltung für Mieter und
+Eigentümer erwarten lässt.
+
+**Beschreibung für Suchmaschinen** (`description`, seit 02.10.2026): Sie
+möchten Ihre Hausverwaltung verkaufen oder die Nachfolge regeln? Manereal
+übernimmt Hausverwaltungen in Österreich – diskret, fair bewertet, mit
+Kontinuität für Team und Kunden.
 
 **Navigation:** Start · Unser Ansatz · Unser Versprechen · Über Manereal · Kontakt
 
@@ -56,6 +65,7 @@ Kontakt: kontakt@manereal.at · Wien, Österreich
 ## Route `start`
 
 ### Hero
+- Sachzeile (Teil der H1, darüber): Nachfolge und Verkauf Ihrer Hausverwaltung in Österreich
 - H1: **Ihr Lebenswerk.** / **Unsere Verantwortung.** (zweizeilig)
 - Lead: Manereal übernimmt Hausverwaltungen in Österreich und führt sie verantwortungsvoll weiter.
 - Buttons: Vertrauliches Erstgespräch · So läuft die Übergabe →
@@ -73,7 +83,7 @@ Kontakt: kontakt@manereal.at · Wien, Österreich
 | Synergien & Skalen | Buchhaltung, Recht, Finanzen, Marketing: Geteiltes Know-how für mehr Schlagkraft am Markt. |
 
 ### Unser Anliegen
-- H2: Wir suchen Unternehmer, deren Lebenswerk wir weiterführen dürfen
+- H2: Wir suchen Inhaber von Hausverwaltungen, deren Lebenswerk wir weiterführen dürfen
 - Intro: Viele Hausverwaltungen in Österreich stehen vor der Nachfolgefrage. Wir bieten Ihrem Unternehmen, Ihrem Team und Ihren Kunden eine neue Heimat.
 
 **01 Größe & Portfolio**
@@ -119,8 +129,8 @@ Link: So läuft die Übergabe →
 
 ### Hero
 - Eyebrow: Unser Ansatz
-- H1: Ihre Hausverwaltung in guten Händen
-- Lead: Sie möchten Ihre Hausverwaltung in guten Händen wissen? Wir führen Ihr Unternehmen weiter: Fair, verlässlich und mit Respekt vor Ihrem Lebenswerk. Diskret und in Ihrem Tempo.
+- H1: Hausverwaltung verkaufen – in guten Händen
+- Lead: Sie möchten Ihre Hausverwaltung verkaufen und in guten Händen wissen? Wir führen Ihr Unternehmen weiter: Fair, verlässlich und mit Respekt vor Ihrem Lebenswerk. Diskret und in Ihrem Tempo.
 
 ### Herausforderungen & Lösungen
 - H2: Wir kennen die Herausforderungen Ihrer Branche
@@ -157,17 +167,27 @@ Link: So läuft die Übergabe →
 | Finanzen & Reporting | Klare Zahlen als Grundlage für gute Entscheidungen: Controlling und Auswertungen aus einer Hand. |
 
 ### Häufige Fragen
-- H2: Was Verkäufer uns am häufigsten fragen
+- H2: Hausverwaltung verkaufen: die häufigsten Fragen
 
 1. **Was passiert mit meinen Mitarbeitern?** — Ihr Team bleibt an Bord. Kontinuität für Mitarbeiter und Kunden ist der Kern unseres Modells. Im Übergabeplan legen wir gemeinsam fest, wie die Kommunikation an Ihr Team abläuft. Dazu kommen Vorteile aus dem Verbund wie gemeinsames Recruiting und Weiterbildung.
-2. **Muss ich sofort ganz verkaufen?** — Nein. Ob Voll-, Teilverkauf oder schrittweise Übergabe, unsere Struktur passt sich Ihrer Situation an. Sie entscheiden, wann und in welchem Umfang Sie Verantwortung abgeben.
-3. **Wie lange dauert der Prozess?** — Vom Erstgespräch bis zum Vertrag typischerweise rund sechs Wochen. Die eigentliche Übergabe gestalten wir danach in Ihrem Tempo, ob wenige Monate oder länger.
+2. **Muss ich meine Hausverwaltung sofort ganz verkaufen?** — Nein. Ob Voll-, Teilverkauf oder schrittweise Übergabe, unsere Struktur passt sich Ihrer Situation an. Sie entscheiden, wann und in welchem Umfang Sie Verantwortung abgeben.
+3. **Wie lange dauert der Verkauf einer Hausverwaltung?** — Vom Erstgespräch bis zum Vertrag typischerweise rund sechs Wochen. Die eigentliche Übergabe gestalten wir danach in Ihrem Tempo, ob wenige Monate oder länger.
 4. **Wer erfährt von unseren Gesprächen?** — Niemand ohne Ihre Zustimmung. Jedes Gespräch bleibt vertraulich, heute und in jedem weiteren Schritt. Ob und wann Mitarbeiter, Kunden oder Ihr Umfeld informiert werden, entscheiden Sie.
 5. **Was passiert mit der Identität meines Betriebs?** — Wir wollen bewahren, was Ihren Betrieb ausmacht: Die lokale Verankerung und die gewachsenen Beziehungen. Wie Name und Auftritt weitergeführt werden, besprechen wir offen und halten es im Übergabeplan fest.
 6. **Was kostet mich das Erstgespräch?** — Nichts. Das Erstgespräch ist kostenlos und unverbindlich. Es dient allein dem gegenseitigen Kennenlernen.
-7. **Wie wird der Kaufpreis ermittelt?** — Auf Basis nachvollziehbarer Kriterien: Bestand, Ertragslage und Struktur Ihrer Verwaltung. Wir legen unsere Bewertung offen und erklären jeden Schritt.
+7. **Was ist meine Hausverwaltung wert, und wie wird der Kaufpreis ermittelt?** — Auf Basis nachvollziehbarer Kriterien: Bestand, Ertragslage und Struktur Ihrer Verwaltung. Wir legen unsere Bewertung offen und erklären jeden Schritt.
 8. **Was passiert mit meinem Standort und Büro?** — Ihr Standort bleibt erhalten, denn die lokale Verankerung ist Teil des Werts Ihrer Verwaltung. Details halten wir gemeinsam im Übergabeplan fest.
 9. **Wie viele Hausverwaltungen gehören schon zur Gruppe?** — Wir stehen am Anfang des Aufbaus. Das heißt für Sie: Sie verhandeln direkt mit den Gründern und gestalten mit, wie die Gruppe arbeitet. Die Standards, die wir mit Ihnen setzen, prägen alles Weitere.
+
+Ergänzt am 02.10.2026 (Auffindbarkeit). Die Antworten sind aus Aussagen
+zusammengesetzt, die an anderer Stelle der Seite bereits stehen. Reihenfolge
+auf der Seite: 10, 11, 12 zuerst; 13 nach Frage 1; 14 am Ende.
+
+10. **Wie läuft der Verkauf einer Hausverwaltung ab?** — In fünf Schritten: vertrauliches Kennenlernen, Konzept und indikatives Angebot, Unternehmensprüfung, Vertrag und Übergabeplan, begleitete Umsetzung. Vom Erstgespräch bis zum Vertrag vergehen rund sechs Wochen. Sie wissen jederzeit, wo wir stehen.
+11. **Ich habe keinen Nachfolger für meine Hausverwaltung. Was kann ich tun?** — Kein interner oder familiärer Nachfolger in Sicht, der Betrieb hängt an einer Person: Das kennen viele Inhaber. Wir führen Ihre Hausverwaltung weiter, mit Übergabeplan, in Ihrem Tempo und ohne Bruch für Kunden und Team.
+12. **Welche Hausverwaltungen übernimmt Manereal?** — Hausverwaltungen mit über 50 Liegenschaften, Wohn- und/oder Gewerbeimmobilien, mit Sitz und Portfolio in Österreich. Wir sprechen mit Inhabern, deren Nachfolge nicht abschließend gesichert ist und die in den nächsten 12–24 Monaten ganz oder teilweise übergeben möchten.
+13. **Was passiert mit meinen Kunden nach dem Verkauf der Hausverwaltung?** — Ihre Eigentümer und Objekte werden mit der gewohnten Sorgfalt und Qualität nahtlos weiterbetreut. Ihre Kunden behalten ihre Ansprechpartner, der Betrieb läuft ohne Bruch weiter.
+14. **Wer steht hinter Manereal?** — Jörgen Oberkofler, Lorenz Ambrosius, Niklas Gruber und Julian Pils, dazu zwei erfahrene, gewerberechtlich zertifizierte Fachleute aus der Hausverwaltungsbranche mit jeweils mehr als 15 Jahren praktischer Erfahrung. Mehr dazu unter Über Manereal. (Link auf `#ueber-uns`)
 
 ---
 
