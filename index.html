@@ -209,6 +209,9 @@ section{padding:var(--s-section) 0}
 .field input,.field textarea,.field select{font-family:inherit;font-size:15.5px;color:var(--navy);background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;width:100%;transition:border-color .2s,box-shadow .2s}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(15,108,124,.12)}
 .field textarea{min-height:104px;resize:vertical}
+.field{align-content:start}
+.field [aria-invalid="true"],.field [aria-invalid="true"]:focus{border-color:#8A2B2B;box-shadow:0 0 0 3px rgba(138,43,43,.12)}
+.field-error{font-size:15px;line-height:1.45;color:#8A2B2B;margin:0}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-note{font-size:13.5px;color:var(--ink-soft);margin:8px 0 var(--s-card);line-height:1.55}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
@@ -1069,18 +1072,18 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   <h2>Blattlinie</h2>
   <p>Information über das Unternehmen und seine Leistungen.</p>
   <h2>Bildnachweise</h2>
-  <p>Die auf dieser Website verwendeten Fotografien stammen von iStock (Getty Images) und werden gemäß der jeweiligen Lizenz genutzt. Porträtfotos von Team und Beirat: eigenes Bildmaterial.</p>
+  <p>Die auf dieser Website verwendeten Fotografien stammen von iStock (Getty Images) und werden gemäß der jeweiligen Lizenz genutzt. Porträtfotos des Teams: eigenes Bildmaterial.</p>
   <div class="credits-wrap">
   <table class="credits">
     <thead>
       <tr><th>Seite / Platzierung</th><th>Urheber:in</th><th>Lizenz</th></tr>
     </thead>
     <tbody>
-      <tr><td>Startseite – Kopfbereich (Video)</td><td>iStock (Getty Images), Asset-Nr. 2172622017</td><td>iStock-Standardlizenz</td></tr>
-      <tr><td>Startseite – „Unser Angebot“ (Foto rechts)</td><td>iStock (Getty Images), Asset-Nr. 539457550</td><td>iStock-Standardlizenz</td></tr>
-      <tr><td>„Unser Ansatz“ – Kopfbereich</td><td>iStock (Getty Images), Asset-Nr. 2184295789</td><td>iStock-Standardlizenz</td></tr>
-      <tr><td>„Unser Ansatz“ – Bild neben dem Ablauf</td><td>iStock (Getty Images), Asset-Nr. 1436951314</td><td>iStock-Standardlizenz</td></tr>
-      <tr><td>Startseite und „Über Manereal“ – Porträts</td><td>Team und Beirat, eigenes Bildmaterial</td><td>—</td></tr>
+      <tr><td>Startseite – Kopfbereich (Video)</td><td>iStock.com/Dmytro Kosmenko, Asset-Nr. 2172622017</td><td>iStock-Standardlizenz</td></tr>
+      <tr><td>Startseite – „Unser Angebot“ (Foto rechts)</td><td>iStock.com/gradyreese, Asset-Nr. 539457550</td><td>iStock-Standardlizenz</td></tr>
+      <tr><td>„Unser Ansatz“ – Kopfbereich</td><td>iStock.com/skynesher, Asset-Nr. 2184295789</td><td>iStock-Standardlizenz</td></tr>
+      <tr><td>„Unser Ansatz“ – Bild neben dem Ablauf</td><td>iStock.com/jacoblund, Asset-Nr. 1436951314</td><td>iStock-Standardlizenz</td></tr>
+      <tr><td>Startseite und „Über Manereal“ – Porträts</td><td>Team, eigenes Bildmaterial</td><td>—</td></tr>
     </tbody>
   </table>
   </div>
@@ -1154,12 +1157,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
       <p class="modal-intro">30 Minuten, telefonisch oder persönlich. Ohne Unterlagen, ohne Verpflichtung. Ihre Nachricht landet direkt bei den Gründern.</p>
       <form id="contactForm" novalidate="">
         <div class="field-row">
-          <div class="field"><label for="cf-name">Name</label><input id="cf-name" name="name" type="text" autocomplete="name" required=""></div>
-          <div class="field"><label for="cf-company">Unternehmen</label><input id="cf-company" name="company" type="text" autocomplete="organization"></div>
+          <div class="field"><label for="cf-name">Name</label><input id="cf-name" name="name" type="text" autocomplete="name" required="" maxlength="120" aria-describedby="cf-name-error"><p class="field-error" id="cf-name-error" role="alert" hidden=""></p></div>
+          <div class="field"><label for="cf-company">Unternehmen</label><input id="cf-company" name="company" type="text" autocomplete="organization" maxlength="160"></div>
         </div>
         <div class="field-row">
-          <div class="field"><label for="cf-mail">E-Mail</label><input id="cf-mail" name="email" type="email" autocomplete="email" required=""></div>
-          <div class="field"><label for="cf-phone">Telefon</label><input id="cf-phone" name="phone" type="tel" autocomplete="tel"></div>
+          <div class="field"><label for="cf-mail">E-Mail</label><input id="cf-mail" name="email" type="email" autocomplete="email" required="" maxlength="200" aria-describedby="cf-mail-error"><p class="field-error" id="cf-mail-error" role="alert" hidden=""></p></div>
+          <div class="field"><label for="cf-phone">Telefon</label><input id="cf-phone" name="phone" type="tel" autocomplete="tel" maxlength="60"></div>
         </div>
         <div class="field">
           <label for="cf-units">Verwaltete Liegenschaften</label>
@@ -1171,7 +1174,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
             <option>über 400</option>
           </select>
         </div>
-        <div class="field"><label for="cf-msg">Ihre Nachricht</label><textarea id="cf-msg" name="message" placeholder="Worum geht es? Wann passt es Ihnen für ein Gespräch?"></textarea></div>
+        <div class="field"><label for="cf-msg">Ihre Nachricht</label><textarea id="cf-msg" name="message" maxlength="4000" placeholder="Worum geht es? Wann passt es Ihnen für ein Gespräch?"></textarea></div>
         <div class="hp" aria-hidden="true"><label for="cf-website">Website</label><input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
         <p class="form-note">Ihre Angaben behandeln wir streng vertraulich und geben sie nicht weiter. Details in unserer <a href="#datenschutz" data-close="">Datenschutzerklärung</a>.</p>
         <p class="form-error" id="contactError" role="alert" hidden="">Ihre Nachricht konnte nicht übermittelt werden. Bitte schreiben Sie uns direkt an <a href="mailto:kontakt@manereal.at">kontakt@manereal.at</a>.</p>
@@ -1343,13 +1346,40 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   var error = document.getElementById('contactError');
   var submitBtn = form.querySelector('button[type="submit"]');
 
+  var MSG = {
+    name:    'Bitte tragen Sie Ihren Namen ein.',
+    email:   'Bitte tragen Sie Ihre E-Mail-Adresse ein, damit wir Ihnen antworten können.',
+    invalid: 'Diese E-Mail-Adresse scheint nicht vollständig zu sein. Bitte prüfen Sie die Schreibweise.',
+    offline: 'Es besteht gerade keine Internetverbindung. Bitte versuchen Sie es in einem Moment erneut. Ihre Eingaben bleiben erhalten.',
+    rate:    'Bitte warten Sie eine Minute und senden Sie die Anfrage dann erneut.',
+    failed:  error.innerHTML
+  };
+  // Gleiche Pruefung wie in api/kontakt.js
+  var MAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
+
+  function setFieldError(input, text){
+    var note = document.getElementById(input.id + '-error');
+    if(text){
+      input.setAttribute('aria-invalid', 'true');
+      note.textContent = text; note.hidden = false;
+    } else {
+      input.removeAttribute('aria-invalid');
+      note.textContent = ''; note.hidden = true;
+    }
+  }
+  [form.name, form.email].forEach(function(input){
+    input.addEventListener('input', function(){ setFieldError(input, ''); });
+  });
+
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    if(!form.name.value.trim() || !form.email.value.trim()){
-      (form.name.value.trim() ? form.email : form.name).focus();
-      return;
-    }
+    var name = form.name.value.trim(), mail = form.email.value.trim();
+    setFieldError(form.name, name ? '' : MSG.name);
+    setFieldError(form.email, !mail ? MSG.email : MAIL_RE.test(mail) ? '' : MSG.invalid);
     error.hidden = true;
+    var firstInvalid = form.querySelector('[aria-invalid="true"]');
+    if(firstInvalid){ firstInvalid.focus(); return; }
+    var status = 0;
     submitBtn.setAttribute('aria-busy', 'true');
     submitBtn.textContent = 'Wird gesendet …';
 
@@ -1366,13 +1396,22 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
         website: form.website.value
       })
     }).then(function(res){
+      status = res.status;
       if(!res.ok) throw new Error('HTTP ' + res.status);
       formWrap.hidden = true; done.hidden = false;
       form.reset();
     }).catch(function(){
       // Nie «Danke» zeigen, wenn nichts angekommen ist.
+      if(status === 422){
+        // Der Name ist hier schon geprueft, es bleibt die Adresse.
+        setFieldError(form.email, MSG.invalid);
+        form.email.focus();
+        return;
+      }
+      if(status === 429) error.textContent = MSG.rate;
+      else if(!status && navigator.onLine === false) error.textContent = MSG.offline;
+      else error.innerHTML = MSG.failed;
       error.hidden = false;
-      error.focus && error.focus();
     }).then(function(){
       submitBtn.removeAttribute('aria-busy');
       submitBtn.textContent = 'Anfrage senden';

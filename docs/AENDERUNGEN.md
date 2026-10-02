@@ -11,6 +11,59 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 43 — Kontaktformular: Fehlertexte je Fehlerfall (02.10.2026)
+
+Auf Anweisung von Julia. Bisher gab es eine einzige Meldung für alles;
+bei leerem Name oder leerer E-Mail erschien gar kein Text.
+
+**Am Feld** (rot umrandet, Text darunter, Cursor im ersten Feld mit
+Fehler; die Meldung verschwindet beim Weitertippen):
+
+- Name fehlt: „Bitte tragen Sie Ihren Namen ein.“
+- E-Mail fehlt: „Bitte tragen Sie Ihre E-Mail-Adresse ein, damit wir
+  Ihnen antworten können.“
+- E-Mail unvollständig: „Diese E-Mail-Adresse scheint nicht vollständig
+  zu sein. Bitte prüfen Sie die Schreibweise.“ Geprüft wird mit
+  demselben Muster wie in `api/kontakt.js`; lehnt der Server trotzdem
+  ab (422), erscheint derselbe Text.
+
+**Im Kasten über der Schaltfläche:**
+
+- Keine Verbindung: „Es besteht gerade keine Internetverbindung. Bitte
+  versuchen Sie es in einem Moment erneut. Ihre Eingaben bleiben
+  erhalten.“
+- Zu viele Versuche (429): „Bitte warten Sie eine Minute und senden Sie
+  die Anfrage dann erneut.“
+- Alles Übrige: der bisherige Text mit der E-Mail-Adresse, unverändert.
+
+Dazu `maxlength` an allen Feldern in der Länge, auf die der Server
+ohnehin kürzt — es wird nichts mehr stillschweigend abgeschnitten.
+
+`api/kontakt.js` ist unverändert. Die Texte sind neuer Wortlaut und
+stehen nur in [index.html](../index.html).
+
+---
+
+## 42 — Impressum: Bildnachweise mit Urhebernamen (02.10.2026)
+
+Auf Anweisung von Julia, nach Abgleich mit den vier iStock-Produktseiten.
+Asset-Nummern, Motive, Platzierungen und Lizenztyp stimmten bereits.
+
+1. **Urheber** — die Spalte „Urheber:in“ nennt jetzt den Namen in der
+   Form „iStock.com/Name“ statt „iStock (Getty Images)“:
+   2172622017 Dmytro Kosmenko (Video), 539457550 gradyreese,
+   2184295789 skynesher, 1436951314 jacoblund.
+2. **Beirat** — „Team und Beirat“ wird zu „Team“, im Einleitungssatz und
+   in der Tabelle. Die Beirat-Sektion ist derzeit auskommentiert; kommt
+   sie zurück, gehört der Beirat hier wieder dazu.
+
+**Offen:** Die Produktseiten belegen das Lizenzangebot, nicht den Kauf.
+Rechnung oder Download-Verlauf aus dem iStock-Konto ablegen.
+
+An Gestaltung und Markup-Struktur wurde nichts geändert.
+
+---
+
 ## 41 — Impressum: Anschrift und Geschäftsführung korrigiert (01.10.2026)
 
 Zwei inhaltliche Korrekturen auf Anweisung von Niklas Gruber, beide im
