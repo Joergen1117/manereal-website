@@ -11,6 +11,48 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 48 — Outreach-Auswertung ausgebaut (02.10.2026)
+
+Auf Anweisung von Julia. Mit dem Outreach geht kein persönlicher Link
+mehr hinaus; damit gibt es nichts mehr, was das Dashboard einer Person
+zuordnen könnte. Der allgemeine Traffic soll künftig über Google
+Analytics gemessen werden — das ist **noch nicht eingebaut**. Bis dahin
+misst die Seite nichts.
+
+- **Ins Archiv verschoben**, nicht gelöscht:
+  [archive/outreach-tracking/](../archive/outreach-tracking/README.md).
+  Das sind `auswertung.html`, `api/track.js`, `api/auswertung.js`,
+  `api/instantly.js`, `api/_db.js`, `api/_token.js`, `db/schema.sql`,
+  `scripts/links-erzeugen.js` sowie aus `docs/` die Dateien
+  `TRACKING.md`, `INSTANTLY-ANBINDUNG.md`, `UMSTELLUNG-INSTANTLY.md`,
+  `testmail-instantly.md` und `test-kontakte.csv`. Die Ordner `db/` und
+  `scripts/` gibt es nicht mehr. In `api/` liegt nur noch `kontakt.js`.
+- **[index.html](../index.html):** das Skript im `<head>`, das den Code
+  `?m=` las und aus der Adresszeile nahm, und das Mess-Skript am Ende
+  sind entfernt. Beide liegen als `snippet-*.html` im Archivordner. Die
+  Seite schickt nichts mehr an `/api/track`.
+- **[vercel.json](../vercel.json):** die Functions `track`, `auswertung`
+  und `instantly`, die `noindex`-Header für `/auswertung` und der
+  tägliche Cron sind gestrichen. `/auswertung` und die drei
+  Schnittstellen antworten nach dem Deployment mit 404.
+- **`package.json`:** die Abhängigkeit `@neondatabase/serverless` ist
+  entfallen. Die Website hat wieder keine Abhängigkeit.
+- **Datenschutzerklärung, Abschnitt 4** (Wortlaut, Regel 6): vier
+  Absätze als ganze Blöcke entfallen, weil sie eine Messung beschrieben,
+  die es nicht mehr gibt. Der erste Absatz steht wörtlich weiter.
+  Einzelheiten und offene Punkte in
+  [content/inhalte.md](../content/inhalte.md), Hinweis 24.
+- **[robots.txt](../robots.txt)**, **`.vercelignore`:** nur Kommentare
+  nachgezogen. `/api/` bleibt gesperrt.
+
+Das Kontaktformular ist nicht berührt.
+
+Die Einträge 37 bis 40 und 45 nennen die Dateien an ihrem früheren Ort.
+
+Kein CSS, keine Gestaltung.
+
+---
+
 ## 47 — Video neu komprimiert: 3,2 MB statt 17,3 MB (02.10.2026)
 
 Auf Anweisung von Julia, nach Vergleich am Bildschirm.

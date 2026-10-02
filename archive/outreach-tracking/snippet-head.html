@@ -1,0 +1,16 @@
+<script>
+/* Zuordnung des Outreach-Links. Steht bewusst ganz vorn, direkt hinter der
+   Zeichensatzangabe: Der Code aus der E-Mail wird gelesen und sofort aus der
+   Adresszeile entfernt, damit er dort nie aufblitzt. Ersetzt auch den
+   Verlaufseintrag und legt nichts am Endgeraet ab. Wer die Adresse danach
+   kopiert und weitergibt, erzeugt keine Fehlzuordnung mehr. Preis dafuer:
+   Ein Neuladen verliert die Zuordnung. */
+window.__mr = (function () {
+  var code = null;
+  try { code = new URLSearchParams(location.search).get('m'); } catch (e) {}
+  if (code) {
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+  }
+  return { code: code };
+})();
+</script>

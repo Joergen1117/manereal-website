@@ -1,0 +1,197 @@
+<script>
+/* Messung des Outreach.
+
+   Erfasst Seitenaufrufe, Verweildauer je Route und die Wege zum Erstgespraech.
+   Legt nichts am Endgeraet ab: kein Cookie, kein localStorage, kein
+   sessionStorage. Die Zuordnung lebt nur in dieser Funktion, solange die Seite
+   offen ist - das Hash-Routing macht daraus eine einzige Sitzung.
+
+   Ein Aufruf wird immer gezaehlt, gilt aber erst als Mensch, wenn ein
+   Interaktionssignal eintrifft. Die Link-Scanner der Mail-Gateways rufen jeden
+   Link schon beim Zustellen auf; sie bewegen keine Maus, scrollen nicht und
+   wechseln keine Route. Ohne diese Trennung waeren die Klickraten um
+   zweistellige Prozentsaetze zu hoch. */
+(function(){
+  var PERSONENBEZUG  = true;   // false: der Code aus dem Mail-Link wird nie gesendet
+  var MENSCH_NACH_MS = 10000;  // so lange sichtbar ohne Eingabe gilt auch als Mensch
+  var PAKET_MS       = 1500;   // Sammelzeit, bevor ein Paket rausgeht
+  var ENDPUNKT       = '/api/track';
+
+  if(!navigator.sendBeacon) return;
+
+  var ROUTEN = ['start','nachfolge','ueber-uns','impressum','datenschutz'];
+
+  function uuid(){
+    if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+      var r = (Math.random()*16)|0;
+      return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+    });
+  }
+
+  var besuch = uuid();
+  var code = (PERSONENBEZUG && window.__mr) ? window.__mr.code : null;
+  var herkunft = 'direkt';
+  if(code){
+    herkunft = 'instantly';
+  } else if(document.referrer){
+    try {
+      var host = new URL(document.referrer).hostname;
+      if(host && host !== location.hostname) herkunft = host;
+    } catch(e){}
+  }
+
+  /* --- Paketversand --------------------------------------------------- */
+
+  var puffer = [];
+  var timer = null;
+
+  function melde(typ, route, dauer, extra){
+    puffer.push({ t:typ, r:route || undefined, d:dauer || undefined, x:extra || undefined });
+    if(!timer) timer = setTimeout(sende, PAKET_MS);
+  }
+
+  function sende(){
+    if(timer){ clearTimeout(timer); timer = null; }
+    if(!puffer.length) return;
+    var paket = JSON.stringify({ v:besuch, m:code, s:herkunft, e:puffer });
+    puffer = [];
+    try {
+      // sendBeacon feuert auch noch, wenn der Tab geschlossen wird - fetch nicht.
+      // text/plain, damit der Browser keine Vorab-Anfrage stellt.
+      navigator.sendBeacon(ENDPUNKT, new Blob([paket], {type:'text/plain;charset=UTF-8'}));
+    } catch(e){}
+  }
+
+  /* --- Zeit je Route --------------------------------------------------- */
+
+  function aktuelleRoute(){
+    var h = (location.hash || '#start').replace('#','');
+    if(h === 'versprechen') h = 'ueber-uns';          // alte Links, wie im Router oben
+    return ROUTEN.indexOf(h) < 0 ? 'start' : h;
+  }
+
+  var route = aktuelleRoute();
+  var sichtbar = document.visibilityState === 'visible';
+  var seit = Date.now();
+  var aufRoute = 0;   // sichtbare Zeit auf der laufenden Route
+  var gesamt = 0;     // sichtbare Zeit im ganzen Besuch
+
+  // Rechnet den Abschnitt seit dem letzten Aufruf ab. Zeit im Hintergrund
+  // zaehlt nicht mit - sonst misst man 45 Minuten, weil jemand den Tab offen
+  // liegen liess.
+  function abrechnen(){
+    var jetzt = Date.now();
+    if(sichtbar){ aufRoute += jetzt - seit; gesamt += jetzt - seit; }
+    seit = jetzt;
+  }
+
+  function routeVerlassen(){
+    abrechnen();
+    if(aufRoute > 0) melde('route_leave', route, aufRoute);
+    aufRoute = 0;
+  }
+
+  /* --- Mensch oder Maschine -------------------------------------------- */
+
+  var istMensch = false;
+
+  function mensch(signal){
+    if(istMensch) return;
+    istMensch = true;
+    melde('human', null, null, {signal:signal});
+    sende();
+  }
+
+  var mausX = null, mausY = null;
+  document.addEventListener('pointermove', function(e){
+    // Der erste Punkt dient nur als Bezug - erst echte Bewegung zaehlt.
+    if(mausX === null){ mausX = e.clientX; mausY = e.clientY; return; }
+    if(Math.abs(e.clientX - mausX) + Math.abs(e.clientY - mausY) > 12) mensch('pointer');
+  }, {passive:true});
+
+  document.addEventListener('touchstart', function(){ mensch('touch'); }, {passive:true});
+  document.addEventListener('keydown', function(){ mensch('key'); });
+  document.addEventListener('click', function(){ mensch('click'); });
+
+  var wache = setInterval(function(){
+    if(istMensch){ clearInterval(wache); return; }
+    abrechnen();
+    if(gesamt >= MENSCH_NACH_MS){ mensch('dwell'); clearInterval(wache); }
+  }, 1000);
+
+  /* --- Was gemessen wird ------------------------------------------------ */
+
+  var scroll50 = false, scroll90 = false;
+
+  window.addEventListener('scroll', function(){
+    if(window.scrollY <= 0) return;   // der Router springt beim Routenwechsel auf 0
+    mensch('scroll');
+    var hoehe = document.documentElement.scrollHeight - window.innerHeight;
+    if(hoehe <= 0) return;
+    var anteil = (window.scrollY / hoehe) * 100;
+    if(!scroll50 && anteil >= 50){ scroll50 = true; melde('scroll', route, null, {pct:50}); }
+    if(!scroll90 && anteil >= 90){ scroll90 = true; melde('scroll', route, null, {pct:90}); }
+  }, {passive:true});
+
+  window.addEventListener('hashchange', function(){
+    routeVerlassen();
+    route = aktuelleRoute();
+    scroll50 = scroll90 = false;
+    melde('route_enter', route);
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    abrechnen();
+    sichtbar = document.visibilityState === 'visible';
+    if(!sichtbar){ routeVerlassen(); sende(); }
+  });
+
+  window.addEventListener('pagehide', function(){ routeVerlassen(); sende(); });
+
+  function ctaName(a, i){
+    if(a.closest('header')) return 'kopfzeile';
+    var s = a.closest('section');
+    if(s) return s.id || (s.className || '').split(' ')[0] || ('cta' + i);
+    return 'cta' + i;
+  }
+
+  document.querySelectorAll('a[href*="subject=Vertrauliches"]').forEach(function(a, i){
+    var name = ctaName(a, i);
+    a.addEventListener('click', function(){ melde('cta_click', route, null, {cta:name}); sende(); });
+  });
+
+  document.querySelectorAll('a[href^="mailto:"]:not([href*="subject=Vertrauliches"])').forEach(function(a){
+    a.addEventListener('click', function(){ melde('mail_click', route); sende(); });
+  });
+
+  document.querySelectorAll('details').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if(!d.open) return;
+      var s = d.querySelector('summary');
+      melde('faq_open', route, null, {q: s ? s.textContent.trim().slice(0,150) : ''});
+    });
+  });
+
+  // Das bestehende Formular-Skript bleibt unberuehrt. Ob der Versand geklappt
+  // hat, verraet es dadurch, welcher der beiden Bloecke sichtbar wird.
+  function beobachte(el, typ){
+    if(!el || !window.MutationObserver) return;
+    var gemeldet = false;
+    new MutationObserver(function(){
+      if(el.hidden || gemeldet) return;
+      gemeldet = true;
+      melde(typ, route);
+      sende();
+    }).observe(el, {attributes:true, attributeFilter:['hidden']});
+  }
+  beobachte(document.getElementById('contactDone'), 'form_submit');
+  beobachte(document.getElementById('contactError'), 'form_error');
+
+  // Sofort raus, nicht erst nach der Sammelzeit: Damit ist der Aufruf auch
+  // dann erfasst, wenn die Seite gleich wieder geschlossen wird.
+  melde('visit');
+  melde('route_enter', route);
+  sende();
+})();
+</script>

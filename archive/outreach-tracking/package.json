@@ -1,0 +1,9 @@
+{
+  "name": "manereal-outreach-tracking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ausgemustert am 02.10.2026: Outreach-Auswertung samt Datenbank- und Instantly-Anbindung",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

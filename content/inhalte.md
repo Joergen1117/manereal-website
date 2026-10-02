@@ -492,10 +492,11 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     Person. Die drei übrigen Portraits sind ruhige Aufnahmen vor neutralem
     Grund. Im Kreis nebeneinander fällt der Unterschied auf. Ein Portrait
     im Stil der anderen wäre die bessere Wahl.
-23. **Datenschutzerklärung, Abschnitt 4 neu gefasst** (24.09.2026) — Die Seite
+23. **[Überholt 02.10.2026 — die Messung ist ausgebaut, siehe Punkt 24.]**
+    **Datenschutzerklärung, Abschnitt 4 neu gefasst** (24.09.2026) — Die Seite
     misst seit 24.09.2026 das Verhalten der Besucher und ordnet es bei
     Aufrufen über einen Outreach-Link der angeschriebenen Person zu (siehe
-    [docs/TRACKING.md](../docs/TRACKING.md)). Der bisherige Satz „Diese
+    [TRACKING.md](../archive/outreach-tracking/docs/TRACKING.md)). Der bisherige Satz „Diese
     Website verwendet keine Cookies zu Analyse- oder Marketingzwecken" wurde
     dadurch **sachlich falsch** und musste ersetzt werden — die einzige
     Änderung an einem Rechtstext, die im Zuge dieser Arbeit vorgenommen
@@ -516,3 +517,28 @@ aufgefallen. Gehört an die inhaltlich Verantwortlichen:
     Browserspeicher ab; ein Einwilligungsbanner ist deshalb nicht nötig, und
     die IP-Adresse wird nicht gespeichert. Diese drei Zusagen sind im Code
     umgesetzt und geprüft.
+24. **Datenschutzerklärung, Abschnitt 4 gekürzt — und vor Google Analytics
+    neu zu fassen** (02.10.2026) — Die eigene Messung samt Dashboard,
+    Datenbank und Instantly-Abgleich ist auf Julias Anweisung ausgebaut.
+    Vier Absätze in Abschnitt 4 wurden damit **sachlich falsch** und sind
+    als ganze Blöcke entfallen: was gemessen wird, die Zuordnung über den
+    persönlichen Link, Neon als Auftragsverarbeiter, die Löschfrist der
+    Messdaten. Es steht nur noch der erste Absatz, wörtlich unverändert:
+    keine Cookies, nichts im Browserspeicher, kein Einwilligungsbanner
+    nötig. Der frühere Wortlaut liegt in
+    [archive/outreach-tracking/](../archive/outreach-tracking/snippet-datenschutz-abschnitt-4.html).
+    Offen:
+    - **Google Analytics macht den verbliebenen Absatz falsch.** GA4 setzt
+      Cookies (`_ga`) und braucht in Österreich eine Einwilligung vor dem
+      Laden (§ 165 Abs. 3 TKG 2021). Der Abschnitt ist dann neu zu
+      schreiben: Google Ireland Ltd. als Auftragsverarbeiter, Übermittlung
+      in die USA, Speicherdauer, Widerruf der Einwilligung. Der Wortlaut
+      ist zu liefern und rechtlich zu prüfen, bevor GA eingebaut wird —
+      nicht danach.
+    - **Die Überschrift nennt weiter „Reichweitenmessung"**, obwohl bis
+      zum Einbau von GA keine stattfindet. Unverändert gelassen (Regel 6).
+    - **Bereits erhobene Daten** liegen noch in der Neon-Datenbank, bis sie
+      gelöscht wird. Die Datenschutzerklärung beschreibt sie nicht mehr;
+      mit dem Löschen der Datenbank erledigt sich das.
+    - **Verarbeitungsverzeichnis** — die Verarbeitung „Outreach-Messung"
+      ist dort als beendet zu führen, sofern sie eingetragen wurde.

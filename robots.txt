@@ -2,7 +2,7 @@
 #
 # Die Website ist für alle Suchmaschinen und Assistenten frei lesbar.
 # Ausgenommen sind nur die technischen Schnittstellen: Dort gibt es
-# nichts zu lesen, und ein Abruf durch einen Bot würde als Besuch gezählt.
+# nichts zu lesen.
 
 User-agent: *
 Disallow: /api/

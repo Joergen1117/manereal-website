@@ -13,6 +13,11 @@ weiterhin in der Git-Historie.
 Der gesamte übrige Wortlaut liegt in
 [../content/inhalte.md](../content/inhalte.md) und ist von dort verbindlich.
 
+`outreach-tracking/` enthält seit dem 02.10.2026 die ausgemusterte
+Outreach-Auswertung: Dashboard, Mess-Skript, Datenbank- und
+Instantly-Anbindung samt Dokumentation. Näheres in
+[outreach-tracking/README.md](outreach-tracking/README.md).
+
 `source-images/` enthält seit dem 24.09.2026 nur noch Rohmaterial, das
 tatsächlich auf der Website erscheint: die vier iStock-Dateien aus den
 Bildnachweisen im Impressum (2172622017, 539457550, 2184295789,

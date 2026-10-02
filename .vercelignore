@@ -10,12 +10,13 @@ PRODUCT.md
 content/
 docs/
 
-# Archiv: Erstentwurf, Rohmaterial, ausgemusterte Dateien (rund 80 MB)
+# Archiv: Erstentwurf, Rohmaterial, ausgemusterte Dateien (rund 80 MB).
+# Darin liegt seit 02.10.2026 auch die Outreach-Auswertung samt
+# Datenbankschema (archive/outreach-tracking/) -- ohne diese Zeile wäre
+# sie über die Domain abrufbar und ihre Functions würden wieder gebaut.
 archive/
 
-# Datenbankschema und Kommandozeilenwerkzeuge -- werden nicht ausgeliefert.
-# Ohne diese beiden Zeilen wäre /db/schema.sql über die Domain abrufbar.
-db/
+# Kommandozeilenwerkzeuge -- werden nicht ausgeliefert.
 scripts/
 
 # Werkzeuge und Sitzungsdateien
