@@ -11,6 +11,19 @@ Protokoll entfernt und stehen weiterhin in der Git-Historie.
 
 ---
 
+## 47 — Video neu komprimiert: 3,2 MB statt 17,3 MB (02.10.2026)
+
+Auf Anweisung von Julia, nach Vergleich am Bildschirm.
+`assets/images/stock/hero-video.mp4` neu kodiert: H.264, 1280×720,
+25 Bilder/s wie bisher, Bitrate 1,0 statt 5,3 Mbit/s (zwei Durchgänge,
+`-preset slow`), `faststart`, keine Tonspur. Ähnlichkeit zum Original:
+SSIM 0,970.
+
+Die bisherige Datei steht in der Git-Historie (bis Commit `b437855`).
+Kein Markup, kein CSS, kein Wortlaut.
+
+---
+
 ## 46 — Video: Standbild bei reduzierter Bewegung, `preload` (02.10.2026)
 
 Auf Anweisung von Julia.
